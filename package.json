@@ -1,0 +1,25 @@
+{
+  "name": "translations-cleaning",
+  "version": "0.0.1",
+  "description": "",
+  "main": "./src/check.command.ts",
+  "scripts": {
+    "check": "ts-node ./src/check.command.ts",
+    "clean": "ts-node ./src/clean.command.ts",
+    "test": "tap --no-coverage src/**/*.test.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/fs-extra": "^8.0.1",
+    "@types/glob": "^7.1.1",
+    "@types/node": "^12.12.11",
+    "fs-extra": "^8.1.0",
+    "glob": "^7.1.6",
+    "minimist": "^1.2.0",
+    "tap": "^14.10.1",
+    "ts-node": "^8.5.2",
+    "typescript": "^3.7.2"
+  }
+}
