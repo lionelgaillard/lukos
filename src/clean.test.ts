@@ -14,7 +14,7 @@ const translation = JSON.stringify({
 const dir = tap.testdir({
   'en.json': translation,
   'fr.json': translation,
-  'unused.txt': ['firstLevelUnused', 'firstLevelGroup.secondLevelUnused', ' ', 'notExists', ''].join('\n'),
+  'unused.txt': ['firstLevelUnused', 'firstLevelGroup.secondLevelUnused', ' ', 'notExists', 'notExists.neither', ''].join('\n'),
 });
 
 tap.test('clean function', t => {

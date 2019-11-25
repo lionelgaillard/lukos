@@ -32,6 +32,10 @@ function getKeys(path: string) {
 }
 
 function deleteKey(data: any, key: string): boolean {
+  if (!data) {
+    return false;
+  }
+
   if (!key.includes('.')) {
     if (data[key]) {
       delete data[key];
