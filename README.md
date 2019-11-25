@@ -55,25 +55,3 @@ Translation JSON files where to remove unused items. (e.g.: `"../project/src/ass
 #### Example
 
     $ npm run clean -- "../my-project/src/assets/i18n/*.json"
-
-### Improvements
-
-#### Clean empty groups
-
-If an unused key was alone in its parent group, it will be removed and the parent group will stay empty.
-
-##### Example
-
-###### Before
-
-    {
-      "aGroup": {
-        "anUnusedKey": "Lorem ipsum"
-      }
-    }
-
-###### After
-
-    {
-      "aGroup": {}
-    }
