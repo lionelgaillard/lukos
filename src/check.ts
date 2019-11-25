@@ -29,8 +29,16 @@ function getKeys(source: any, prefix: string = '') {
   }, []);
 }
 
-function isUsed(key: string, files: File[]) {
-  return !!files.find(file => file.content.match(new RegExp(key)));
+function isUsed(key: string, sources: File[]) {
+  const source = sources.find(file => file.content.match(new RegExp(key)));
+
+  if (source) {
+    checking.emit('used', { key, source });
+    return true;
+  }
+
+  checking.emit('unused', { key, sources });
+  return false;
 }
 
 function saveOutput(path: string, keys: string[]) {

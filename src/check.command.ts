@@ -13,6 +13,8 @@ interface Params {
 
     checking.on('checking', ({ keys, sources }) => console.log(`Checking ${keys.length} keys in ${sources.length} files...`));
     checking.on('checked', ({ unused, outputPath }) => console.log(`Found ${unused.length} unused keys: "${outputPath}"`));
+    // checking.on('used', ({ key, source }) => console.log(`${key} is used by ${source.path}`));
+    checking.on('unused', ({ key }) => console.log(`${key} is unused`));
     check(params.translation, params._, params.output);
     checking.removeAllListeners();
 

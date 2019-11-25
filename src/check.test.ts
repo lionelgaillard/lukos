@@ -21,6 +21,8 @@ const dir = tap.testdir({
 tap.test('check function', t => {
   t.emits(checking, 'checking', 'should emit checking event');
   t.emits(checking, 'checked', 'should emit checked event');
+  t.emits(checking, 'used', 'should emit used event');
+  t.emits(checking, 'unused', 'should emit unused event');
 
   t.doesNotThrow(
     () => check(`${dir}/en.json`, [`${dir}/**/*.ts`, `${dir}/**/*.html`], `${dir}/unused.txt`),
