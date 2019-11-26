@@ -4,8 +4,8 @@
   "description": "",
   "main": "./src/check.command.ts",
   "scripts": {
-    "check": "ts-node ./src/check.command.ts",
-    "clean": "ts-node ./src/clean.command.ts",
+    "check": "ts-node ./src/check/check.command.ts",
+    "clean": "ts-node ./src/clean/clean.command.ts",
     "test": "tap --no-coverage src/**/*.test.ts"
   },
   "keywords": [],

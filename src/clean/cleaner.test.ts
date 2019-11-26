@@ -1,6 +1,6 @@
 import { readJsonSync } from 'fs-extra';
 import * as tap from 'tap';
-import { clean, cleaning } from './clean';
+import { Cleaner } from './cleaner';
 
 const translation = JSON.stringify({
   firstLevelUsed: 'Lorem',
@@ -17,13 +17,15 @@ const dir = tap.testdir({
   'unused.txt': ['firstLevelUnused', 'firstLevelGroup.secondLevelUnused', ' ', 'notExists', 'notExists.neither', ''].join('\n'),
 });
 
-tap.test('clean function', t => {
-  t.emits(cleaning, 'cleaning', 'should emit cleaning event');
-  t.emits(cleaning, 'cleaned', 'should emit cleaned event');
-  t.emits(cleaning, 'removed', 'should emit removed event');
-  t.emits(cleaning, 'passed', 'should emit passed event');
+tap.test('cleaner', t => {
+  const cleaner = new Cleaner();
 
-  t.doesNotThrow(() => clean(`${dir}/unused.txt`, [`${dir}/*.json`]));
+  t.emits(cleaner, 'cleaning', 'should emit cleaning event');
+  t.emits(cleaner, 'cleaned', 'should emit cleaned event');
+  t.emits(cleaner, 'removed', 'should emit removed event');
+  t.emits(cleaner, 'passed', 'should emit passed event');
+
+  t.doesNotThrow(() => cleaner.clean(`${dir}/unused.txt`, `${dir}/??.json`));
 
   const data = readJsonSync(`${dir}/fr.json`);
 
