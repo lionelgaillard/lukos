@@ -44,7 +44,7 @@ tap.test('checker', t => {
 
   t.ok(existsSync(`${dir}/unused.txt`), 'should save output in given path');
 
-  const content = readFileSync(`${dir}/unused.txt`, 'utf-8');
+  const content = readFileSync(`${dir}/unused.txt`, 'utf8');
   t.ok(content, 'output file should not be empty');
 
   const unused = content.split('\n');

@@ -6,21 +6,21 @@ export interface File {
   content: string;
 }
 
-export function resolvePaths(pattern: string) {
+export function resolvePattern(pattern: string) {
   return glob.sync(pattern);
 }
 
 export function loadFile(path: string) {
   return {
     path,
-    content: readFileSync(path, 'utf-8'),
+    content: readFileSync(path, 'utf8'),
   };
 }
 
-export function loadFiles(paths: string[]): File[] {
-  return paths.map(path => loadFile(path));
+export function loadFiles(pattern: string): File[] {
+  return resolvePattern(pattern).map(path => loadFile(path));
 }
 
 export function saveFile(file: File) {
-  writeFileSync(file.path, file.content, 'utf-8');
+  writeFileSync(file.path, file.content, 'utf8');
 }
