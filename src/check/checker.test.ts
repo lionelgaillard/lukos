@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from 'fs-extra';
 import * as tap from 'tap';
+import { loadFiles } from '../common/files';
+import { loadTranslations } from '../common/translations';
 import { Checker } from './checker';
 
 const dir = tap.testdir({
@@ -40,14 +41,13 @@ tap.test('checker', t => {
   t.emits(checker, 'used', 'should emit used event');
   t.emits(checker, 'unused', 'should emit unused event');
 
-  t.doesNotThrow(() => checker.check(`${dir}/??.json`, `${dir}/**.@(ts|html)`, `${dir}/unused.txt`), 'should run without exception');
+  let unused: string[];
+  t.doesNotThrow(() => {
+    const translations = loadTranslations(`${dir}/??.json`);
+    const sources = loadFiles(`${dir}/**.@(ts|html)`);
+    unused = checker.check(translations, sources);
+  });
 
-  t.ok(existsSync(`${dir}/unused.txt`), 'should save output in given path');
-
-  const content = readFileSync(`${dir}/unused.txt`, 'utf8');
-  t.ok(content, 'output file should not be empty');
-
-  const unused = content.split('\n');
   t.equal(unused.length, 3, `should found 3 unused keys`);
   t.ok(unused.includes('firstLevelUnusedKey'), 'should found "firstLevelUnusedKey"');
   t.ok(unused.includes('firstLevelUsedGroup.secondLevelUnusedKey'), 'should found "firstLevelUsedGroup.secondLevelUnusedKey"');

@@ -1,12 +1,8 @@
 import { EventEmitter } from 'events';
-import { loadKeys } from '../common/keys';
-import { deleteTranslationKey, loadTranslations, saveTranslation } from '../common/translations';
+import { deleteTranslationKey, TranslationFile } from '../common/translations';
 
 export class Cleaner extends EventEmitter {
-  public clean(keysPath: string, translationsGlob: string) {
-    const keys = loadKeys(keysPath);
-    const translations = loadTranslations(translationsGlob);
-
+  public clean(keys: string[], translations: TranslationFile[]) {
     this.emit('cleaning', { keys, translations });
     translations.forEach(file => {
       keys.forEach(key => {
@@ -16,8 +12,8 @@ export class Cleaner extends EventEmitter {
           this.emit('passed', { key, file });
         }
       });
-      saveTranslation(file);
     });
     this.emit('cleaned', { keys, translations });
+    return translations;
   }
 }

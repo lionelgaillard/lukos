@@ -1,12 +1,11 @@
-import { readFileSync, writeFileSync } from 'fs-extra';
-
-export function saveKeys(path: string, keys: string[]) {
-  writeFileSync(path, keys.join('\n'), 'utf8');
+export function serializeKeys(keys: string[]) {
+  return keys.join('\n');
 }
 
-export function loadKeys(path: string) {
-  return readFileSync(path, 'utf8')
+export function deserializeKeys(content: string) {
+  return content
     .split('\n')
+    .filter(l => l[0] !== '#')
     .map(k => k.trim())
     .filter(Boolean);
 }

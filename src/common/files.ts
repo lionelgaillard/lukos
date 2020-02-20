@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs-extra';
+import { readFileSync } from 'fs-extra';
 import * as glob from 'glob';
 
 export interface File {
@@ -21,6 +21,6 @@ export function loadFiles(pattern: string): File[] {
   return resolvePattern(pattern).map(path => loadFile(path));
 }
 
-export function saveFile(file: File) {
-  writeFileSync(file.path, file.content, 'utf8');
-}
+// export function saveFile(file: File) {
+//   writeFileSync(file.path, file.content, 'utf8');
+// }

@@ -1,4 +1,4 @@
-import { closeSync, openSync, readFileSync, readJsonSync, writeJsonSync, writeSync } from 'fs-extra';
+import { readJsonSync, writeJsonSync } from 'fs-extra';
 import { resolvePattern } from './files';
 
 export interface TranslationFile {
@@ -43,28 +43,30 @@ export function loadTranslations(pattern: string): TranslationFile[] {
   return resolvePattern(pattern).map(path => loadTranslation(path));
 }
 
-export function saveComparedTranslation(path: string, files: ComparedTranslationFile[]) {
-  const output = openSync(path, 'w');
-  files.forEach(file => {
-    writeSync(output, `@@@ ${file.path}\n`);
+export async function serializeComparedTranslation(files: ComparedTranslationFile[]) {
+  return files.reduce((output, file) => {
+    output += `@@@ ${file.path}\n`;
     if (file.additions.length > 0) {
-      writeSync(output, file.additions.map(key => `+++ ${key}`).join('\n') + '\n');
+      output += file.additions.map(key => `+++ ${key}`).join('\n') + '\n';
     }
     if (file.substractions.length > 0) {
-      writeSync(output, file.substractions.map(key => `--- ${key}`).join('\n') + '\n');
+      output += file.substractions.map(key => `--- ${key}`).join('\n') + '\n';
     }
-  });
-  closeSync(output);
+    return output;
+  }, '');
 }
 
-export function loadComparedTranslations(path: string): ComparedTranslationFile[] {
-  const content = readFileSync(path, 'utf8');
-  return content
+export function deserializeComparedTranslations(input: string): ComparedTranslationFile[] {
+  return input
     .split('@@@ ')
     .map(c => c.trim())
     .filter(Boolean)
     .map(data => {
-      const lines = data.split('\n');
+      const lines = data.split('\n').filter(l => l[0] !== '#');
+      if (lines.length === 0) {
+        return null;
+      }
+
       const path = lines.shift();
       const file = loadTranslation(path);
       const additions = lines.filter(line => line.startsWith('+++ ')).map(line => line.substr(4));
@@ -74,7 +76,8 @@ export function loadComparedTranslations(path: string): ComparedTranslationFile[
         additions,
         substractions,
       };
-    });
+    })
+    .filter(Boolean);
 }
 
 export function compareTranslation(reference: TranslationFile, file: TranslationFile): ComparedTranslationFile {

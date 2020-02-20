@@ -1,12 +1,9 @@
 import { EventEmitter } from 'events';
-import { File, loadFiles } from '../common/files';
-import { saveKeys } from '../common/keys';
-import { loadTranslations, TranslationFile } from '../common/translations';
+import { File } from '../common/files';
+import { TranslationFile } from '../common/translations';
 
 export class Checker extends EventEmitter {
-  public check(translationsGlob: string, sourcesGlob: string, outputPath: string) {
-    const sources = loadFiles(sourcesGlob);
-    const translations = loadTranslations(translationsGlob);
+  public check(translations: TranslationFile[], sources: File[]) {
     const keys = getAllKeys(translations);
 
     this.emit('checking', { keys, sources, translations });
@@ -20,8 +17,8 @@ export class Checker extends EventEmitter {
       this.emit('unused', { key, sources });
       return true;
     });
-    saveKeys(outputPath, unused);
-    this.emit('checked', { unused, outputPath });
+
+    this.emit('checked', { unused });
 
     return unused;
   }

@@ -1,11 +1,8 @@
 import { EventEmitter } from 'events';
-import { addTranslationKey, getTranslationValue, loadComparedTranslations, loadTranslation, saveTranslation } from '../common/translations';
+import { addTranslationKey, ComparedTranslationFile, getTranslationValue, TranslationFile } from '../common/translations';
 
 export class Completer extends EventEmitter {
-  public complete(referencePath: string, diffPath: string) {
-    const reference = loadTranslation(referencePath);
-    const translations = loadComparedTranslations(diffPath);
-
+  public complete(translations: ComparedTranslationFile[], reference: TranslationFile) {
     this.emit('completing', { reference, translations });
     translations.forEach(file => {
       file.substractions.forEach(key => {
@@ -17,7 +14,6 @@ export class Completer extends EventEmitter {
           this.emit('passed', { file, key, value });
         }
       });
-      saveTranslation(file);
     });
     this.emit('completed', { reference, translations });
     return translations;
