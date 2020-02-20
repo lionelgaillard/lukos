@@ -15,10 +15,10 @@ interface Params {
   try {
     const params = getParams();
     const checker = new Checker();
-    checker.on('checking', ({ keys, sources }) => console.log(`# Checking ${keys.length} keys in ${sources.length} files...`));
-    checker.on('checked', ({ unused }) => console.log(`# Found ${unused.length} unused keys`));
-    // checker.on('used', ({ key, source }) => console.log(`# ${key} is used by ${source.path}`));
-    // checker.on('unused', ({ key }) => console.log(`# ${key} is unused`));
+    checker.on('checking', ({ keys, sources }) => console.log(`### Checking ${keys.length} keys in ${sources.length} files...`));
+    checker.on('checked', ({ unused }) => console.log(`### Found ${unused.length} unused keys`));
+    // checker.on('used', ({ key, source }) => console.log(`### ${key} is used by ${source.path}`));
+    // checker.on('unused', ({ key }) => console.log(`### ${key} is unused`));
     const sources = loadFiles(params.sources);
     const translations = loadTranslations(params.translations);
     const unused = checker.check(translations, sources);

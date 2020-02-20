@@ -14,9 +14,11 @@ interface Params {
   try {
     const params = getParams();
     const cleaner = new Cleaner();
-    cleaner.on('cleaning', ({ keys, translations }) => console.log(`# Removing ${keys.length} keys from ${translations.length} files...`));
-    cleaner.on('removed', ({ key, file }) => console.log(`# Removed "${key}" from "${file.path}".`));
-    cleaner.on('passed', ({ key, file }) => console.log(`# Passed "${key}" from "${file.path}".`));
+    cleaner.on('cleaning', ({ keys, translations }) =>
+      console.log(`### Removing ${keys.length} keys from ${translations.length} files...`)
+    );
+    cleaner.on('removed', ({ key, file }) => console.log(`### Removed "${key}" from "${file.path}".`));
+    cleaner.on('passed', ({ key, file }) => console.log(`### Passed "${key}" from "${file.path}".`));
     const keys = deserializeKeys(params.input);
     const translations = loadTranslations(params.translations);
     const cleaned = cleaner.clean(keys, translations);

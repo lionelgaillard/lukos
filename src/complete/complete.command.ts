@@ -13,10 +13,10 @@ interface Params {
     const params = getParams();
     const completer = new Completer();
     completer.on('completing', ({ reference, translations }) =>
-      console.log(`# Completing ${translations.length} files with values of ${reference.path}...`)
+      console.log(`### Completing ${translations.length} files with values of ${reference.path}...`)
     );
-    completer.on('added', ({ file, key }) => console.log(`# Added ${key} in ${file.path}`));
-    completer.on('passed', ({ file, key }) => console.log(`# Passed ${key} in ${file.path}`));
+    completer.on('added', ({ file, key }) => console.log(`### Added ${key} in ${file.path}`));
+    completer.on('passed', ({ file, key }) => console.log(`### Passed ${key} in ${file.path}`));
     const diff = deserializeComparedTranslations(params.input);
     const reference = loadTranslation(params.reference);
     const completed = completer.complete(diff, reference);

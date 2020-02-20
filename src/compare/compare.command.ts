@@ -14,9 +14,9 @@ interface Params {
     const params = getParams();
     const comparer = new Comparer();
     comparer.on('comparing', ({ reference, translations }) =>
-      console.log(`# Comparing ${reference.path} with ${translations.length} files...`)
+      console.log(`### Comparing ${reference.path} with ${translations.length} files...`)
     );
-    comparer.on('diff', ({ file }) => console.log(`# ${file.path} +${file.additions.length} -${file.substractions.length}`));
+    comparer.on('diff', ({ file }) => console.log(`### ${file.path} +${file.additions.length} -${file.substractions.length}`));
     const reference = loadTranslation(params.reference);
     const translations = loadTranslations(params.translations);
     const compared = comparer.compare(reference, translations);

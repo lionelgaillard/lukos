@@ -5,7 +5,7 @@ export function serializeKeys(keys: string[]) {
 export function deserializeKeys(content: string) {
   return content
     .split('\n')
-    .filter(l => l[0] !== '#')
+    .filter(l => l.startsWith('#'))
     .map(k => k.trim())
     .filter(Boolean);
 }

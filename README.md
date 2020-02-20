@@ -12,7 +12,7 @@ Utility commands to clean JSON translation files:
 
 The `check` command checks if translations are used and output unused translation keys.
 
-> Note that will only search for keys as is, and it's not able to resolve dynamically created keys.
+> Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.
 
 ### Usage
 
@@ -21,7 +21,7 @@ The `check` command checks if translations are used and output unused translatio
       --sources "../my-project/src/**/*.@(ts|html)" \
       > ./unused.txt
 
-#### Options
+#### Arguments
 
 ##### `--translations`
 
@@ -35,6 +35,10 @@ Glob of files where to find translations (e.g.: `"../my-project/src/**/*.@(ts|ht
 
 > Important: Use quotes !
 
+##### `<output>`
+
+Unused keys. One per line.
+
 ## `clean` command
 
 The `clean` command removes unused items from translation files.
@@ -45,17 +49,21 @@ The `clean` command removes unused items from translation files.
 
     $ cat unused.txt | bin/clean --translations "../my-project/src/assets/i18n/??.json"
 
-#### Options
+#### Arguments
+
+##### `<input>`
+
+Keys to remove. One per line.
 
 ##### `--translations`
 
-Glob of translation JSON files where to remove unused items. (e.g.: `"../my-project/src/assets/i18n/??.json"`)
+Glob of translation JSON files where to remove unused keys. (e.g.: `"../my-project/src/assets/i18n/??.json"`)
 
 > Important: Use quotes !
 
 ## `compare` command
 
-The `compare` command compare translation files with a reference file to find additional or missing keys and output differences.
+The `compare` command compares translation files with a reference file to find additional or missing keys and output differences.
 
 ### Usage
 
@@ -64,7 +72,7 @@ The `compare` command compare translation files with a reference file to find ad
       --translations "../my-project/src/assets/i18n/??.json" \
       > ./compared.txt
 
-#### Options
+#### Arguments
 
 ##### `--reference`
 
@@ -76,6 +84,15 @@ Glob of translation JSON files to compare. (e.g.: `"../my-project/src/assets/i18
 
 > Important: Use quotes !
 
+##### `<output>`
+
+Differences of files with the reference file where lines are formatted as the following:
+
+- `@@@ <file_path>`
+- `+++ <additional_key>`
+- `--- <missing_key>`
+- `### <comment>`
+
 ## `complete` command
 
 The `complete` command completes missing keys from a reference file.
@@ -84,19 +101,19 @@ The `complete` command completes missing keys from a reference file.
 
     $ cat compared.txt | bin/complete --reference ../my-project/src/assets/i18n/en.json
 
-#### Options
+#### Arguments
+
+##### `<input>`
+
+Differences as outputted by the `compare` command.
 
 ##### `--reference`
 
 Path of the reference translation file.
 
-##### `--diff`
-
-Path of the diff file. Usually the output of the `compare` command (default: `./compared.txt`).
-
 ## `pick` command
 
-The `pick` command find key values in all translation files.
+The `pick` command finds key values in all translation files.
 
 ### Usage
 
@@ -116,10 +133,14 @@ The `pick` command find key values in all translation files.
       }
     }
 
-#### Options
+#### Aguments
+
+##### `<input>`
+
+Keys to pick. One per line.
 
 ##### `--translations`
 
-Glob of translation JSON files where to find keys. (e.g.: `"../my-project/src/assets/i18n/??.json"`)
+Glob of translation JSON files where to find keys. (e.g.: `"../my-project/src/assets/i18n/*.json"`)
 
 > Important: Use quotes !

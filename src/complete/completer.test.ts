@@ -25,10 +25,10 @@ const dir = tap.testdir({
     },
   }),
   'compared.txt': [
-    '# Comparing en.json...',
+    '### Comparing en.json...',
     `@@@ ${tap.testdirName}/en.json`,
-    '# en.json +0 -0',
-    '# Comparing fr.json...',
+    '### en.json +0 -0',
+    '### Comparing fr.json...',
     `@@@ ${tap.testdirName}/fr.json`,
     '+++ d',
     '--- a',
