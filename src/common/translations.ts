@@ -139,5 +139,5 @@ export function deleteTranslationKey(data: any, key: string): boolean {
 }
 
 export function getTranslationValue(data: any, path: string) {
-  return path.split('.').reduce((data, key) => data[key] || null, data);
+  return path.split('.').reduce((data, key) => (data && data[key]) || null, data);
 }
