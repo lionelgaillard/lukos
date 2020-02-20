@@ -20,7 +20,7 @@ interface Params {
     checker.removeAllListeners();
     process.exit(0);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     process.exit(1);
   }
 })();

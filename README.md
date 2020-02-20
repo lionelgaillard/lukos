@@ -15,7 +15,7 @@ The `check` command checks if translations are used and put unused translation k
 
 ### Usage
 
-    npm run check -- \
+    check \
       --translations "../my-project/src/assets/i18n/??.json" \
       --sources "../my-project/src/**/*.@(ts|html)" \
       --output ./unused.txt
@@ -34,8 +34,6 @@ Path of output file (default: `./unused.txt`).
 
 Glob of files where to find translations (e.g.: `"../my-project/src/**/*.@(ts|html)"`)
 
-> Important: Use quotes !
-
 ## `clean` command
 
 The `clean` command removes unused items from translation files.
@@ -44,7 +42,7 @@ The `clean` command removes unused items from translation files.
 
 ### Usage
 
-    npm run clean -- \
+    clean \
       --translations "../my-project/src/assets/i18n/??.json" \
       --keys ./unused.txt
 
@@ -58,15 +56,13 @@ Path of the file containing one key to remove per line. Usually the output of th
 
 Glob of translation JSON files where to remove unused items. (e.g.: `"../my-project/src/assets/i18n/??.json"`)
 
-> Important: Use quotes !
-
 ## `compare` command
 
 The `compare` command compare translation files with a reference file to find additional or missing keys and save differences in a file.
 
 ### Usage
 
-    npm run compare -- \
+    compare \
       --reference ../my-project/src/assets/i18n/en.json \
       --translations "../my-project/src/assets/i18n/??.json" \
       --output ./compared.txt
@@ -93,11 +89,11 @@ The `complete` command completes missing keys from a reference file.
 
 ### Usage
 
-    npm run complete -- \
+    complete \
       --reference ../my-project/src/assets/i18n/en.json \
       --diff ./compared.txt
 
-#### Options
+#### Optionsv
 
 ##### `--reference`
 

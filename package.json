@@ -4,10 +4,6 @@
   "description": "",
   "main": "./src/check.command.ts",
   "scripts": {
-    "check": "ts-node ./src/check/check.command.ts",
-    "clean": "ts-node ./src/clean/clean.command.ts",
-    "compare": "ts-node ./src/compare/compare.command.ts",
-    "complete": "ts-node ./src/complete/complete.command.ts",
     "test": "tap --no-coverage src/**/*.test.ts"
   },
   "keywords": [],
