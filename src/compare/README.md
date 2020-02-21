@@ -28,4 +28,3 @@ Differences of files with the reference file where lines are formatted as follow
 - `@@@ <file_path>`
 - `+++ <additional_key>`
 - `--- <missing_key>`
-- `### <comment>`

@@ -1,7 +1,7 @@
 import * as minimist from 'minimist';
 import { loadFiles } from '../common/files';
 import { serializeKeys } from '../common/keys';
-import { output } from '../common/std';
+import { log, output } from '../common/standard';
 import { loadTranslations } from '../common/translations';
 import { Checker } from './checker';
 
@@ -14,18 +14,18 @@ interface Params {
   try {
     const params = getParams();
     const checker = new Checker();
-    checker.on('checking', ({ keys, sources }) => console.log(`### Checking ${keys.length} keys in ${sources.length} files...`));
-    checker.on('checked', ({ unused }) => console.log(`### Found ${unused.length} unused keys`));
-    // checker.on('used', ({ key, source }) => console.log(`### ${key} is used by ${source.path}`));
-    // checker.on('unused', ({ key }) => console.log(`### ${key} is unused`));
+    checker.on('checking', ({ keys, sources }) => log(`Checking ${keys.length} keys in ${sources.length} files...`));
+    checker.on('checked', ({ unused }) => log(`Found ${unused.length} unused keys`));
+    // checker.on('used', ({ key, source }) => log(`${key} is used by ${source.path}`));
+    // checker.on('unused', ({ key }) => log(`${key} is unused`));
     const sources = loadFiles(params.sources);
     const translations = loadTranslations(params.translations);
-    const unused = checker.check(translations, sources);
+    const unused = await checker.check(translations, sources);
     await output(serializeKeys(unused));
     checker.removeAllListeners();
     process.exit(0);
   } catch (error) {
-    console.error(error.message);
+    await log(error.message);
     process.exit(1);
   }
 })();

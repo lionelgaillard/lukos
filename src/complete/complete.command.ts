@@ -1,5 +1,5 @@
 import * as minimist from 'minimist';
-import { input } from '../common/std';
+import { input, log } from '../common/standard';
 import { deserializeComparedTranslations, loadTranslation, saveTranslation } from '../common/translations';
 import { Completer } from './completer';
 
@@ -12,18 +12,18 @@ interface Params {
     const params = getParams();
     const completer = new Completer();
     completer.on('completing', ({ reference, translations }) =>
-      console.log(`### Completing ${translations.length} files with values of ${reference.path}...`)
+      log(`Completing ${translations.length} files with values of ${reference.path}...`)
     );
-    completer.on('added', ({ file, key }) => console.log(`### Added ${key} in ${file.path}`));
-    completer.on('passed', ({ file, key }) => console.log(`### Passed ${key} in ${file.path}`));
+    completer.on('added', ({ file, key }) => log(`Added ${key} in ${file.path}`));
+    completer.on('passed', ({ file, key }) => log(`Passed ${key} in ${file.path}`));
     const diff = deserializeComparedTranslations(await input());
     const reference = loadTranslation(params.reference);
-    const completed = completer.complete(diff, reference);
+    const completed = await completer.complete(diff, reference);
     completed.forEach(file => saveTranslation(file));
     completer.removeAllListeners();
     process.exit(0);
   } catch (error) {
-    console.error(error.message);
+    await log(error.message);
     process.exit(1);
   }
 })();

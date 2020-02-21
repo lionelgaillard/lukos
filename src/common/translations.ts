@@ -62,7 +62,7 @@ export function deserializeComparedTranslations(input: string): ComparedTranslat
     .map(c => c.trim())
     .filter(Boolean)
     .map(data => {
-      const lines = data.split('\n').filter(l => l.startsWith('#'));
+      const lines = data.split('\n');
       if (lines.length === 0) {
         return null;
       }

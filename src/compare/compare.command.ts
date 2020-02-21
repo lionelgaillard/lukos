@@ -1,5 +1,5 @@
 import * as minimist from 'minimist';
-import { output } from '../common/std';
+import { log, output } from '../common/standard';
 import { loadTranslation, loadTranslations, serializeComparedTranslation } from '../common/translations';
 import { Comparer } from './comparer';
 
@@ -12,18 +12,16 @@ interface Params {
   try {
     const params = getParams();
     const comparer = new Comparer();
-    comparer.on('comparing', ({ reference, translations }) =>
-      console.log(`### Comparing ${reference.path} with ${translations.length} files...`)
-    );
-    comparer.on('diff', ({ file }) => console.log(`### ${file.path} +${file.additions.length} -${file.substractions.length}`));
+    comparer.on('comparing', ({ reference, translations }) => log(`Comparing ${reference.path} with ${translations.length} files...`));
+    comparer.on('diff', ({ file }) => log(`${file.path} +${file.additions.length} -${file.substractions.length}`));
     const reference = loadTranslation(params.reference);
     const translations = loadTranslations(params.translations);
-    const compared = comparer.compare(reference, translations);
+    const compared = await comparer.compare(reference, translations);
     await output(serializeComparedTranslation(compared));
     comparer.removeAllListeners();
     process.exit(0);
   } catch (error) {
-    console.error(error.message);
+    await log(error.message);
     process.exit(1);
   }
 })();

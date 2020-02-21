@@ -1,5 +1,5 @@
 import * as tap from 'tap';
-import { ComparedTranslationFile, loadTranslation, loadTranslations } from '../common/translations';
+import { loadTranslation, loadTranslations } from '../common/translations';
 import { Comparer } from './comparer';
 
 const dir = tap.testdir({
@@ -23,19 +23,16 @@ const dir = tap.testdir({
   }),
 });
 
-tap.test('comparer', t => {
+tap.test('comparer', async t => {
   const comparer = new Comparer();
 
   t.emits(comparer, 'comparing', 'should emit comparing event');
   t.emits(comparer, 'compared', 'should emit compared event');
   t.emits(comparer, 'diff', 'should emit diff event');
 
-  let compared: ComparedTranslationFile[];
-  t.doesNotThrow(() => {
-    const reference = loadTranslation(`${dir}/en.json`);
-    const translations = loadTranslations(`${dir}/??.json`);
-    compared = comparer.compare(reference, translations);
-  });
+  const reference = loadTranslation(`${dir}/en.json`);
+  const translations = loadTranslations(`${dir}/??.json`);
+  const compared = await comparer.compare(reference, translations);
 
   t.ok(compared, 'should return compared files');
   t.equal(compared.length, 2, 'should have 2 files');

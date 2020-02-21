@@ -25,7 +25,7 @@ const dir = tap.testdir({
   'test.html': "<div>{{ 'firstLevelUsedGroup.secondLevelUsedKey' | translate }}</div>",
 });
 
-tap.test('checker', t => {
+tap.test('checker', async t => {
   const checker = new Checker();
 
   t.emits(checker, 'checking', 'should emit checking event');
@@ -41,12 +41,9 @@ tap.test('checker', t => {
   t.emits(checker, 'used', 'should emit used event');
   t.emits(checker, 'unused', 'should emit unused event');
 
-  let unused: string[];
-  t.doesNotThrow(() => {
-    const translations = loadTranslations(`${dir}/??.json`);
-    const sources = loadFiles(`${dir}/**.@(ts|html)`);
-    unused = checker.check(translations, sources);
-  });
+  const translations = loadTranslations(`${dir}/??.json`);
+  const sources = loadFiles(`${dir}/**.@(ts|html)`);
+  const unused = await checker.check(translations, sources);
 
   t.equal(unused.length, 3, `should found 3 unused keys`);
   t.ok(unused.includes('firstLevelUnusedKey'), 'should found "firstLevelUnusedKey"');

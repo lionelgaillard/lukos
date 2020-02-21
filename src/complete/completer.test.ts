@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs-extra';
 import * as tap from 'tap';
-import { deserializeComparedTranslations, loadTranslation, TranslationFile } from '../common/translations';
+import { deserializeComparedTranslations, loadTranslation } from '../common/translations';
 import { Completer } from './completer';
 
 const dir = tap.testdir({
@@ -25,21 +25,17 @@ const dir = tap.testdir({
     },
   }),
   'compared.txt': [
-    '### Comparing en.json...',
     `@@@ ${tap.testdirName}/en.json`,
-    '### en.json +0 -0',
-    '### Comparing fr.json...',
     `@@@ ${tap.testdirName}/fr.json`,
     '+++ d',
     '--- a',
     '--- b',
     '--- groupA.a',
     '--- groupB.a',
-    '# fr.json +1 -4',
   ].join('\n'),
 });
 
-tap.test('completer', t => {
+tap.test('completer', async t => {
   const completer = new Completer();
 
   t.emits(completer, 'completing', 'should emit completing event');
@@ -47,12 +43,9 @@ tap.test('completer', t => {
   t.emits(completer, 'added', 'should emit added event');
   t.emits(completer, 'passed', 'should emit passed event');
 
-  let completed: TranslationFile[];
-  t.doesNotThrow(() => {
-    const diff = deserializeComparedTranslations(readFileSync(`${dir}/compared.txt`, 'utf8'));
-    const reference = loadTranslation(`${dir}/en.json`);
-    completed = completer.complete(diff, reference);
-  });
+  const diff = deserializeComparedTranslations(readFileSync(`${dir}/compared.txt`, 'utf8'));
+  const reference = loadTranslation(`${dir}/en.json`);
+  const completed = await completer.complete(diff, reference);
 
   const fr = completed.find(file => file.path.endsWith('fr.json')).data;
 

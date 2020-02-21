@@ -1,24 +1,30 @@
 import { EventEmitter } from 'events';
 import { File } from '../common/files';
+import { tick } from '../common/standard';
 import { TranslationFile } from '../common/translations';
 
 export class Checker extends EventEmitter {
-  public check(translations: TranslationFile[], sources: File[]) {
+  public async check(translations: TranslationFile[], sources: File[]) {
+    const unused: string[] = [];
     const keys = getAllKeys(translations);
 
     this.emit('checking', { keys, sources, translations });
-    const unused = keys.filter(key => {
+    await tick();
+
+    for (const key of keys) {
       const source = findUsage(key, sources);
       if (source) {
         this.emit('used', { key, source });
-        return false;
+        await tick();
+      } else {
+        unused.push(key);
+        this.emit('unused', { key, sources });
+        await tick();
       }
-
-      this.emit('unused', { key, sources });
-      return true;
-    });
+    }
 
     this.emit('checked', { unused });
+    await tick();
 
     return unused;
   }

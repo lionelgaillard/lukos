@@ -1,6 +1,6 @@
 import * as minimist from 'minimist';
 import { deserializeKeys } from '../common/keys';
-import { input, output } from '../common/std';
+import { input, log, output } from '../common/standard';
 import { loadTranslations } from '../common/translations';
 import { pick } from './pick';
 
@@ -17,7 +17,7 @@ interface Params {
     await output(JSON.stringify(picked, null, 2));
     process.exit(0);
   } catch (error) {
-    console.error(error.message);
+    await log(error.message);
     process.exit(1);
   }
 })();

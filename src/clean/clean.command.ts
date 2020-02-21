@@ -1,6 +1,6 @@
 import * as minimist from 'minimist';
 import { deserializeKeys } from '../common/keys';
-import { input } from '../common/std';
+import { input, log } from '../common/standard';
 import { loadTranslations, saveTranslation } from '../common/translations';
 import { Cleaner } from './cleaner';
 
@@ -13,19 +13,17 @@ interface Params {
   try {
     const params = getParams();
     const cleaner = new Cleaner();
-    cleaner.on('cleaning', ({ keys, translations }) =>
-      console.log(`### Removing ${keys.length} keys from ${translations.length} files...`)
-    );
-    cleaner.on('removed', ({ key, file }) => console.log(`### Removed "${key}" from "${file.path}".`));
-    cleaner.on('passed', ({ key, file }) => console.log(`### Passed "${key}" from "${file.path}".`));
+    cleaner.on('cleaning', ({ keys, translations }) => log(`Removing ${keys.length} keys from ${translations.length} files...`));
+    cleaner.on('removed', ({ key, file }) => log(`Removed "${key}" from "${file.path}".`));
+    cleaner.on('passed', ({ key, file }) => log(`Passed "${key}" from "${file.path}".`));
     const keys = deserializeKeys(await input());
     const translations = loadTranslations(params.translations);
-    const cleaned = cleaner.clean(keys, translations);
+    const cleaned = await cleaner.clean(keys, translations);
     cleaned.forEach(file => saveTranslation(file));
     cleaner.removeAllListeners();
     process.exit(0);
   } catch (error) {
-    console.error(error.message);
+    await log(error.message);
     process.exit(1);
   }
 })();

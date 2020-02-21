@@ -1,15 +1,24 @@
 import { EventEmitter } from 'events';
-import { compareTranslation, TranslationFile } from '../common/translations';
+import { tick } from '../common/standard';
+import { ComparedTranslationFile, compareTranslation, TranslationFile } from '../common/translations';
 
 export class Comparer extends EventEmitter {
-  public compare(reference: TranslationFile, translations: TranslationFile[]) {
+  public async compare(reference: TranslationFile, translations: TranslationFile[]) {
+    const compared: ComparedTranslationFile[] = [];
+
     this.emit('comparing', { reference, translations });
-    const compared = translations.map(file => {
+    await tick();
+
+    for (const file of translations) {
       const diffed = compareTranslation(reference, file);
+      compared.push(diffed);
       this.emit('diff', { file: diffed });
-      return diffed;
-    });
+      await tick();
+    }
+
     this.emit('compared', { reference, translations: compared });
+    await tick();
+
     return compared;
   }
 }
