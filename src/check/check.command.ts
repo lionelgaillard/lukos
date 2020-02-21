@@ -1,45 +1,56 @@
 import * as minimist from 'minimist';
 import { loadFiles } from '../common/files';
 import { serializeKeys } from '../common/keys';
-import { log, output } from '../common/standard';
+import { output, print, printFile } from '../common/standard';
 import { loadTranslations } from '../common/translations';
 import { Checker } from './checker';
 
-interface Params {
+interface Arguments {
+  help: boolean;
   sources: string;
   translations: string;
 }
 
 (async function main() {
   try {
-    const params = getParams();
+    const args = getArguments();
+
+    if (args.help) {
+      await printFile(`${__dirname}/README.md`);
+      process.exit(0);
+    }
+
     const checker = new Checker();
-    checker.on('checking', ({ keys, sources }) => log(`Checking ${keys.length} keys in ${sources.length} files...`));
-    checker.on('checked', ({ unused }) => log(`Found ${unused.length} unused keys`));
+    checker.on('checking', ({ keys, sources }) => print(`Checking ${keys.length} keys in ${sources.length} files...`));
+    checker.on('checked', ({ unused }) => print(`Found ${unused.length} unused keys`));
     // checker.on('used', ({ key, source }) => log(`${key} is used by ${source.path}`));
     // checker.on('unused', ({ key }) => log(`${key} is unused`));
-    const sources = await loadFiles(params.sources);
-    const translations = await loadTranslations(params.translations);
+    const sources = await loadFiles(args.sources);
+    const translations = await loadTranslations(args.translations);
     const unused = await checker.check(translations, sources);
     await output(serializeKeys(unused));
     checker.removeAllListeners();
     process.exit(0);
   } catch (error) {
-    await log(error.message);
+    await print(error.message);
     process.exit(1);
   }
 })();
 
-function getParams() {
-  const params = minimist(process.argv.slice(2)) as Params;
+function getArguments() {
+  const args = minimist(process.argv.slice(2)) as Arguments;
 
-  if (!params.sources) {
+  if (args.help) {
+    return args;
+  }
+
+  if (!args.sources) {
     throw new Error('--sources required');
   }
 
-  if (!params.translations) {
+  if (!args.translations) {
     throw new Error('--translations required');
   }
 
-  return params;
+  return args;
 }

@@ -11,6 +11,10 @@ The `compare` command compares translation files with a reference file to find a
 
 ### Arguments
 
+#### `--help`
+
+Print this file.
+
 #### `--reference`
 
 Path of the reference translation file (e.g.: `../my-project/src/assets/i18n/en.json`).

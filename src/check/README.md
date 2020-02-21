@@ -13,6 +13,10 @@ The `check` command checks if translations are used and output unused translatio
 
 ### Arguments
 
+#### `--help`
+
+Print this file.
+
 #### `--translations`
 
 Glob of JSON files (e.g.: `"../my-project/src/assets/i18n/??.json"`).

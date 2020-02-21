@@ -1,3 +1,4 @@
+import { readFile } from 'fs-extra';
 import { Readable, Writable } from 'stream';
 
 export function input() {
@@ -8,8 +9,12 @@ export function output(data: string) {
   return write(process.stdout, data);
 }
 
-export function log(data: string) {
+export function print(data: string) {
   return write(process.stderr, data + '\n');
+}
+
+export async function printFile(path: string) {
+  return print(await readFile(path, 'utf8'));
 }
 
 export async function read(stream: Readable) {

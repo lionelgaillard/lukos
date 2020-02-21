@@ -12,6 +12,10 @@ The `complete` command completes missing keys from a reference file.
 
 Differences as outputted by the `compare` command.
 
+#### `--help`
+
+Print this file.
+
 #### `--reference`
 
 Path of the reference translation file.

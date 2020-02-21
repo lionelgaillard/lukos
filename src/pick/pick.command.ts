@@ -1,33 +1,44 @@
 import * as minimist from 'minimist';
 import { deserializeKeys } from '../common/keys';
-import { input, log, output } from '../common/standard';
+import { input, output, print, printFile } from '../common/standard';
 import { loadTranslations } from '../common/translations';
 import { pick } from './pick';
 
-interface Params {
+interface Arguments {
+  help: boolean;
   translations: string;
 }
 
 (async function main() {
   try {
-    const params = getParams();
+    const args = getArguments();
+
+    if (args.help) {
+      await printFile(`${__dirname}/README.md`);
+      process.exit(0);
+    }
+
     const keys = deserializeKeys(await input());
-    const translations = await loadTranslations(params.translations);
+    const translations = await loadTranslations(args.translations);
     const picked = pick(keys, translations);
     await output(JSON.stringify(picked, null, 2));
     process.exit(0);
   } catch (error) {
-    await log(error.message);
+    await print(error.message);
     process.exit(1);
   }
 })();
 
-function getParams() {
-  const params = minimist(process.argv.slice(2)) as Params;
+function getArguments() {
+  const args = minimist(process.argv.slice(2)) as Arguments;
 
-  if (!params.translations) {
+  if (args.help) {
+    return args;
+  }
+
+  if (!args.translations) {
     throw new Error('--translations required');
   }
 
-  return params;
+  return args;
 }

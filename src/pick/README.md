@@ -26,6 +26,10 @@ The `pick` command finds key values in all translation files.
 
 Keys to pick. One per line.
 
+#### `--help`
+
+Print this file.
+
 #### `--translations`
 
 Glob of translation JSON files where to find keys. (e.g.: `"../my-project/src/assets/i18n/*.json"`)

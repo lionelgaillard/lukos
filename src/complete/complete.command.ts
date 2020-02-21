@@ -1,39 +1,50 @@
 import * as minimist from 'minimist';
-import { input, log } from '../common/standard';
+import { input, print, printFile } from '../common/standard';
 import { deserializeComparedTranslations, loadTranslation, saveTranslation } from '../common/translations';
 import { Completer } from './completer';
 
-interface Params {
+interface Arguments {
+  help: boolean;
   reference: string;
 }
 
 (async function main() {
   try {
-    const params = getParams();
+    const args = getArguments();
+
+    if (args.help) {
+      await printFile(`${__dirname}/README.md`);
+      process.exit(0);
+    }
+
     const completer = new Completer();
     completer.on('completing', ({ reference, translations }) =>
-      log(`Completing ${translations.length} files with values of ${reference.path}...`)
+      print(`Completing ${translations.length} files with values of ${reference.path}...`)
     );
-    completer.on('added', ({ file, key }) => log(`Added ${key} in ${file.path}`));
-    completer.on('passed', ({ file, key }) => log(`Passed ${key} in ${file.path}`));
+    completer.on('added', ({ file, key }) => print(`Added ${key} in ${file.path}`));
+    completer.on('passed', ({ file, key }) => print(`Passed ${key} in ${file.path}`));
     const diff = await deserializeComparedTranslations(await input());
-    const reference = await loadTranslation(params.reference);
+    const reference = await loadTranslation(args.reference);
     const completed = await completer.complete(diff, reference);
     await Promise.all(completed.map(file => saveTranslation(file)));
     completer.removeAllListeners();
     process.exit(0);
   } catch (error) {
-    await log(error.message);
+    await print(error.message);
     process.exit(1);
   }
 })();
 
-function getParams() {
-  const params = minimist(process.argv.slice(2)) as Params;
+function getArguments() {
+  const args = minimist(process.argv.slice(2)) as Arguments;
 
-  if (!params.reference) {
+  if (args.help) {
+    return args;
+  }
+
+  if (!args.reference) {
     throw new Error('--reference required');
   }
 
-  return params;
+  return args;
 }
