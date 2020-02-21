@@ -18,8 +18,8 @@ interface Params {
     checker.on('checked', ({ unused }) => log(`Found ${unused.length} unused keys`));
     // checker.on('used', ({ key, source }) => log(`${key} is used by ${source.path}`));
     // checker.on('unused', ({ key }) => log(`${key} is unused`));
-    const sources = loadFiles(params.sources);
-    const translations = loadTranslations(params.translations);
+    const sources = await loadFiles(params.sources);
+    const translations = await loadTranslations(params.translations);
     const unused = await checker.check(translations, sources);
     await output(serializeKeys(unused));
     checker.removeAllListeners();

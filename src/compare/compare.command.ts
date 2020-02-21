@@ -14,8 +14,8 @@ interface Params {
     const comparer = new Comparer();
     comparer.on('comparing', ({ reference, translations }) => log(`Comparing ${reference.path} with ${translations.length} files...`));
     comparer.on('diff', ({ file }) => log(`${file.path} +${file.additions.length} -${file.substractions.length}`));
-    const reference = loadTranslation(params.reference);
-    const translations = loadTranslations(params.translations);
+    const reference = await loadTranslation(params.reference);
+    const translations = await loadTranslations(params.translations);
     const compared = await comparer.compare(reference, translations);
     await output(serializeComparedTranslation(compared));
     comparer.removeAllListeners();

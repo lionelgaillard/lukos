@@ -12,7 +12,7 @@ interface Params {
   try {
     const params = getParams();
     const keys = deserializeKeys(await input());
-    const translations = loadTranslations(params.translations);
+    const translations = await loadTranslations(params.translations);
     const picked = pick(keys, translations);
     await output(JSON.stringify(picked, null, 2));
     process.exit(0);

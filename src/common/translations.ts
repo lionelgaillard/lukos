@@ -1,4 +1,4 @@
-import { readJsonSync, writeJsonSync } from 'fs-extra';
+import { readJson, writeJson } from 'fs-extra';
 import { resolvePattern } from './files';
 
 export interface TranslationFile {
@@ -12,11 +12,11 @@ export interface ComparedTranslationFile extends TranslationFile {
   substractions: string[];
 }
 
-export function saveTranslation(file: TranslationFile) {
-  writeJsonSync(file.path, sortTranslation(file.data), { spaces: 2 });
+export async function saveTranslation(file: TranslationFile): Promise<void> {
+  await writeJson(file.path, sortTranslation(file.data), { spaces: 2 });
 }
 
-function sortTranslation(data: any) {
+function sortTranslation(data: any): any {
   return Object.keys(data)
     .sort()
     .reduce((sorted, key) => {
@@ -29,8 +29,8 @@ function sortTranslation(data: any) {
     }, {});
 }
 
-export function loadTranslation(path: string): TranslationFile {
-  const data = readJsonSync(path);
+export async function loadTranslation(path: string): Promise<TranslationFile> {
+  const data = await readJson(path);
   const keys = getTranslationKeys(data);
   return {
     path,
@@ -39,11 +39,12 @@ export function loadTranslation(path: string): TranslationFile {
   };
 }
 
-export function loadTranslations(pattern: string): TranslationFile[] {
-  return resolvePattern(pattern).map(path => loadTranslation(path));
+export async function loadTranslations(pattern: string): Promise<TranslationFile[]> {
+  const paths = await resolvePattern(pattern);
+  return Promise.all(paths.map(path => loadTranslation(path)));
 }
 
-export function serializeComparedTranslation(files: ComparedTranslationFile[]) {
+export function serializeComparedTranslation(files: ComparedTranslationFile[]): string {
   return files.reduce((output, file) => {
     output += `@@@ ${file.path}\n`;
     if (file.additions.length > 0) {
@@ -56,28 +57,32 @@ export function serializeComparedTranslation(files: ComparedTranslationFile[]) {
   }, '');
 }
 
-export function deserializeComparedTranslations(input: string): ComparedTranslationFile[] {
-  return input
+export async function deserializeComparedTranslations(input: string): Promise<ComparedTranslationFile[]> {
+  const parts = input
     .split('@@@ ')
     .map(c => c.trim())
-    .filter(Boolean)
-    .map(data => {
-      const lines = data.split('\n');
-      if (lines.length === 0) {
-        return null;
-      }
-
-      const path = lines.shift();
-      const file = loadTranslation(path);
-      const additions = lines.filter(line => line.startsWith('+++ ')).map(line => line.substr(4));
-      const substractions = lines.filter(line => line.startsWith('--- ')).map(line => line.substr(4));
-      return {
-        ...file,
-        additions,
-        substractions,
-      };
-    })
     .filter(Boolean);
+
+  const compared: ComparedTranslationFile[] = [];
+
+  for (const part of parts) {
+    const lines = part.split('\n');
+    if (lines.length === 0) {
+      continue;
+    }
+
+    const path = lines.shift();
+    const file = await loadTranslation(path);
+    const additions = lines.filter(line => line.startsWith('+++ ')).map(line => line.substr(4));
+    const substractions = lines.filter(line => line.startsWith('--- ')).map(line => line.substr(4));
+    compared.push({
+      ...file,
+      additions,
+      substractions,
+    });
+  }
+
+  return compared;
 }
 
 export function compareTranslation(reference: TranslationFile, file: TranslationFile): ComparedTranslationFile {

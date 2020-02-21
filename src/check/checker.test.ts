@@ -41,8 +41,8 @@ tap.test('checker', async t => {
   t.emits(checker, 'used', 'should emit used event');
   t.emits(checker, 'unused', 'should emit unused event');
 
-  const translations = loadTranslations(`${dir}/??.json`);
-  const sources = loadFiles(`${dir}/**.@(ts|html)`);
+  const translations = await loadTranslations(`${dir}/??.json`);
+  const sources = await loadFiles(`${dir}/**.@(ts|html)`);
   const unused = await checker.check(translations, sources);
 
   t.equal(unused.length, 3, `should found 3 unused keys`);

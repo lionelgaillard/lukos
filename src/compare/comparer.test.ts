@@ -30,8 +30,8 @@ tap.test('comparer', async t => {
   t.emits(comparer, 'compared', 'should emit compared event');
   t.emits(comparer, 'diff', 'should emit diff event');
 
-  const reference = loadTranslation(`${dir}/en.json`);
-  const translations = loadTranslations(`${dir}/??.json`);
+  const reference = await loadTranslation(`${dir}/en.json`);
+  const translations = await loadTranslations(`${dir}/??.json`);
   const compared = await comparer.compare(reference, translations);
 
   t.ok(compared, 'should return compared files');

@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import * as tap from 'tap';
 import { deserializeKeys } from '../common/keys';
 import { loadTranslations } from '../common/translations';
@@ -35,8 +35,8 @@ tap.test('cleaner', async t => {
   t.emits(cleaner, 'removed', 'should emit removed event');
   t.emits(cleaner, 'passed', 'should emit passed event');
 
-  const unused = deserializeKeys(readFileSync(`${dir}/unused.txt`, 'utf8'));
-  const translations = loadTranslations(`${dir}/??.json`);
+  const unused = deserializeKeys(await readFile(`${dir}/unused.txt`, 'utf8'));
+  const translations = await loadTranslations(`${dir}/??.json`);
   const cleaned = await cleaner.clean(unused, translations);
 
   const fr = cleaned.find(file => file.path.endsWith('fr.json')).data;

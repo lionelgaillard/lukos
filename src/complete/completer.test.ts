@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import * as tap from 'tap';
 import { deserializeComparedTranslations, loadTranslation } from '../common/translations';
 import { Completer } from './completer';
@@ -43,8 +43,8 @@ tap.test('completer', async t => {
   t.emits(completer, 'added', 'should emit added event');
   t.emits(completer, 'passed', 'should emit passed event');
 
-  const diff = deserializeComparedTranslations(readFileSync(`${dir}/compared.txt`, 'utf8'));
-  const reference = loadTranslation(`${dir}/en.json`);
+  const diff = await deserializeComparedTranslations(await readFile(`${dir}/compared.txt`, 'utf8'));
+  const reference = await loadTranslation(`${dir}/en.json`);
   const completed = await completer.complete(diff, reference);
 
   const fr = completed.find(file => file.path.endsWith('fr.json')).data;

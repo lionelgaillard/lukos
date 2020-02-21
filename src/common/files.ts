@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import * as glob from 'glob';
 
 export interface File {
@@ -7,20 +7,17 @@ export interface File {
 }
 
 export function resolvePattern(pattern: string) {
-  return glob.sync(pattern);
+  return new Promise<string[]>((resolve, reject) => glob(pattern, (error, matches) => (error ? reject(error) : resolve(matches))));
 }
 
-export function loadFile(path: string) {
+export async function loadFile(path: string): Promise<File> {
   return {
     path,
-    content: readFileSync(path, 'utf8'),
+    content: await readFile(path, 'utf8'),
   };
 }
 
-export function loadFiles(pattern: string): File[] {
-  return resolvePattern(pattern).map(path => loadFile(path));
+export async function loadFiles(pattern: string): Promise<File[]> {
+  const paths = await resolvePattern(pattern);
+  return Promise.all(paths.map(path => loadFile(path)));
 }
-
-// export function saveFile(file: File) {
-//   writeFileSync(file.path, file.content, 'utf8');
-// }

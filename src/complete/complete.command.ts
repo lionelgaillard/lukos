@@ -16,10 +16,10 @@ interface Params {
     );
     completer.on('added', ({ file, key }) => log(`Added ${key} in ${file.path}`));
     completer.on('passed', ({ file, key }) => log(`Passed ${key} in ${file.path}`));
-    const diff = deserializeComparedTranslations(await input());
-    const reference = loadTranslation(params.reference);
+    const diff = await deserializeComparedTranslations(await input());
+    const reference = await loadTranslation(params.reference);
     const completed = await completer.complete(diff, reference);
-    completed.forEach(file => saveTranslation(file));
+    await Promise.all(completed.map(file => saveTranslation(file)));
     completer.removeAllListeners();
     process.exit(0);
   } catch (error) {

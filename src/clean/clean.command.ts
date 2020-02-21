@@ -17,9 +17,9 @@ interface Params {
     cleaner.on('removed', ({ key, file }) => log(`Removed "${key}" from "${file.path}".`));
     cleaner.on('passed', ({ key, file }) => log(`Passed "${key}" from "${file.path}".`));
     const keys = deserializeKeys(await input());
-    const translations = loadTranslations(params.translations);
+    const translations = await loadTranslations(params.translations);
     const cleaned = await cleaner.clean(keys, translations);
-    cleaned.forEach(file => saveTranslation(file));
+    await Promise.all(cleaned.map(file => saveTranslation(file)));
     cleaner.removeAllListeners();
     process.exit(0);
   } catch (error) {
