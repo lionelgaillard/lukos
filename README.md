@@ -1,4 +1,4 @@
-# Translations cleaning
+# Translations tools
 
 Utility commands to clean JSON translation files:
 
