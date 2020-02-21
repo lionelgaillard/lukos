@@ -1,17 +1,16 @@
 import * as minimist from 'minimist';
-import { Writable } from 'stream';
 import { loadFiles } from '../common/files';
 import { serializeKeys } from '../common/keys';
+import { output } from '../common/std';
 import { loadTranslations } from '../common/translations';
 import { Checker } from './checker';
 
 interface Params {
-  output: Writable;
   sources: string;
   translations: string;
 }
 
-(function main() {
+(async function main() {
   try {
     const params = getParams();
     const checker = new Checker();
@@ -22,7 +21,7 @@ interface Params {
     const sources = loadFiles(params.sources);
     const translations = loadTranslations(params.translations);
     const unused = checker.check(translations, sources);
-    params.output.write(serializeKeys(unused));
+    await output(serializeKeys(unused));
     checker.removeAllListeners();
     process.exit(0);
   } catch (error) {
@@ -33,8 +32,6 @@ interface Params {
 
 function getParams() {
   const params = minimist(process.argv.slice(2)) as Params;
-
-  params.output = process.stdout;
 
   if (!params.sources) {
     throw new Error('--sources required');

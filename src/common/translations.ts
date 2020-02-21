@@ -43,7 +43,7 @@ export function loadTranslations(pattern: string): TranslationFile[] {
   return resolvePattern(pattern).map(path => loadTranslation(path));
 }
 
-export async function serializeComparedTranslation(files: ComparedTranslationFile[]) {
+export function serializeComparedTranslation(files: ComparedTranslationFile[]) {
   return files.reduce((output, file) => {
     output += `@@@ ${file.path}\n`;
     if (file.additions.length > 0) {

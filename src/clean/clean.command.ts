@@ -1,16 +1,15 @@
-import { readFileSync } from 'fs-extra';
 import * as minimist from 'minimist';
 import { deserializeKeys } from '../common/keys';
+import { input } from '../common/std';
 import { loadTranslations, saveTranslation } from '../common/translations';
 import { Cleaner } from './cleaner';
 
 interface Params {
-  input: string;
   keys: string;
   translations: string;
 }
 
-(function main() {
+(async function main() {
   try {
     const params = getParams();
     const cleaner = new Cleaner();
@@ -19,7 +18,7 @@ interface Params {
     );
     cleaner.on('removed', ({ key, file }) => console.log(`### Removed "${key}" from "${file.path}".`));
     cleaner.on('passed', ({ key, file }) => console.log(`### Passed "${key}" from "${file.path}".`));
-    const keys = deserializeKeys(params.input);
+    const keys = deserializeKeys(await input());
     const translations = loadTranslations(params.translations);
     const cleaned = cleaner.clean(keys, translations);
     cleaned.forEach(file => saveTranslation(file));
@@ -33,8 +32,6 @@ interface Params {
 
 function getParams() {
   const params = minimist(process.argv.slice(2)) as Params;
-
-  params.input = readFileSync((process.stdin as any).fd, 'utf8');
 
   if (!params.translations) {
     throw new Error('--translations required');

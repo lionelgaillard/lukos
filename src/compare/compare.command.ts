@@ -1,15 +1,14 @@
 import * as minimist from 'minimist';
-import { Writable } from 'stream';
+import { output } from '../common/std';
 import { loadTranslation, loadTranslations, serializeComparedTranslation } from '../common/translations';
 import { Comparer } from './comparer';
 
 interface Params {
   reference: string;
   translations: string;
-  output: Writable;
 }
 
-(function main() {
+(async function main() {
   try {
     const params = getParams();
     const comparer = new Comparer();
@@ -20,7 +19,7 @@ interface Params {
     const reference = loadTranslation(params.reference);
     const translations = loadTranslations(params.translations);
     const compared = comparer.compare(reference, translations);
-    params.output.write(serializeComparedTranslation(compared));
+    await output(serializeComparedTranslation(compared));
     comparer.removeAllListeners();
     process.exit(0);
   } catch (error) {
@@ -31,8 +30,6 @@ interface Params {
 
 function getParams() {
   const params = minimist(process.argv.slice(2)) as Params;
-
-  params.output = process.stdout;
 
   if (!params.reference) {
     throw new Error('--reference required');

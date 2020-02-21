@@ -1,14 +1,13 @@
-import { readFileSync } from 'fs-extra';
 import * as minimist from 'minimist';
+import { input } from '../common/std';
 import { deserializeComparedTranslations, loadTranslation, saveTranslation } from '../common/translations';
 import { Completer } from './completer';
 
 interface Params {
-  input: string;
   reference: string;
 }
 
-(function main() {
+(async function main() {
   try {
     const params = getParams();
     const completer = new Completer();
@@ -17,7 +16,7 @@ interface Params {
     );
     completer.on('added', ({ file, key }) => console.log(`### Added ${key} in ${file.path}`));
     completer.on('passed', ({ file, key }) => console.log(`### Passed ${key} in ${file.path}`));
-    const diff = deserializeComparedTranslations(params.input);
+    const diff = deserializeComparedTranslations(await input());
     const reference = loadTranslation(params.reference);
     const completed = completer.complete(diff, reference);
     completed.forEach(file => saveTranslation(file));
@@ -31,8 +30,6 @@ interface Params {
 
 function getParams() {
   const params = minimist(process.argv.slice(2)) as Params;
-
-  params.input = readFileSync((process.stdin as any).fd, 'utf8');
 
   if (!params.reference) {
     throw new Error('--reference required');
