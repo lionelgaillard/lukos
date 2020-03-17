@@ -15,7 +15,7 @@
     "@types/node": "^12.12.11",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "tap": "^14.10.1",
     "ts-node": "^8.5.2",
     "typescript": "^3.7.2"
