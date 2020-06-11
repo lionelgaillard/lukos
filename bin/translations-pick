@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/translations-env node
 
 require('ts-node/register');
 require('../src/pick/pick.command');

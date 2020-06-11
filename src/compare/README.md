@@ -1,12 +1,12 @@
 # `compare` command
 
-The `compare` command compares translation files with a reference file to find additional or missing keys and output differences.
+The `translations-compare` command compares translation files with a reference file to find additional or missing keys and output differences.
 
 ## Usage
 
-    $ bin/compare \
-      --reference ../my-project/src/assets/i18n/en.json \
-      --translations "../my-project/src/assets/i18n/??.json" \
+    $ translations-compare \
+      --reference src/assets/i18n/en.json \
+      --translations "src/assets/i18n/??.json" \
       > ./compared.txt
 
 ### Arguments
@@ -17,11 +17,11 @@ Print this file.
 
 #### `--reference`
 
-Path of the reference translation file (e.g.: `../my-project/src/assets/i18n/en.json`).
+Path of the reference translation file (e.g.: `src/assets/i18n/en.json`).
 
 #### `--translations`
 
-Glob of translation JSON files to compare. (e.g.: `"../my-project/src/assets/i18n/??.json"`)
+Glob of translation JSON files to compare. (e.g.: `"src/assets/i18n/??.json"`)
 
 > Important: Use quotes !
 

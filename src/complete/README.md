@@ -1,16 +1,16 @@
 # `complete` command
 
-The `complete` command completes missing keys from a reference file.
+The `translations-complete` command completes missing keys from a reference file.
 
 ## Usage
 
-    $ cat compared.txt | bin/complete --reference ../my-project/src/assets/i18n/en.json
+    $ cat compared.txt | translations-complete --reference src/assets/i18n/en.json
 
 ### Arguments
 
 #### `<input>`
 
-Differences as outputted by the `compare` command.
+Differences as outputted by the `translations-compare` command.
 
 #### `--help`
 
