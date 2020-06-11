@@ -6,4 +6,5 @@ Utility commands to clean JSON translation files:
 - The [`clean`](./src/clean/README.md) command to delete unused keys.
 - The [`compare`](./src/compare/README.md) command to found differences between files.
 - The [`complete`](./src/complete/README.md) command to complete missing keys from a reference file.
+- The [`format`](./src/format/README.md) command to format files.
 - The [`pick`](./src/pick/README.md) command to find key values in all files.
