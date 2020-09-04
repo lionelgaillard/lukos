@@ -1,5 +1,5 @@
 import * as tap from 'tap';
-import { loadTranslation, loadTranslations } from '../common/translations';
+import { loadTranslation, loadTranslations } from '../translations';
 import { Comparer } from './comparer';
 
 const dir = tap.testdir({
@@ -21,6 +21,15 @@ const dir = tap.testdir({
     },
     firstLevelAnotherUnusedKey: 'Une autre clé inutilisée',
   }),
+  'de.json': JSON.stringify({
+    firstLevelUsedKey: 'Gebraucht',
+    firstLevelUnusedKey: 'Ungebraucht',
+    firstLevelUsedGroup: {
+      secondLevelUsedKey: 'Auch benutzt',
+      secondLevelUnusedKey: 'Wird auch nicht verwendet',
+    },
+    firstLevelAnotherUnusedKey: 'Ein weiterer unbenutzter Schlüssel',
+  }),
 });
 
 tap.test('comparer', async t => {
@@ -35,7 +44,7 @@ tap.test('comparer', async t => {
   const compared = await comparer.compare(reference, translations);
 
   t.ok(compared, 'should return compared files');
-  t.equal(compared.length, 2, 'should have 2 files');
+  t.equal(compared.length, 3, 'should have 3 files');
 
   const en = compared.find(f => f.path.endsWith('en.json'));
   t.ok(en, 'should have compared en.json');

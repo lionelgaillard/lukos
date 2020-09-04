@@ -1,4 +1,4 @@
-import { getTranslationValue, TranslationFile } from '../common/translations';
+import { getTranslationValue, TranslationFile } from '../translations';
 
 export function pick(keys: string[], translations: TranslationFile[]) {
   const picked = {};

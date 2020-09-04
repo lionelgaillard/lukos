@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { tick } from '../common/standard';
-import { ComparedTranslationFile, compareTranslation, TranslationFile } from '../common/translations';
+import { tick } from '../async';
+import { ComparedTranslationFile, compareTranslation, TranslationFile } from '../translations';
 
 export class Comparer extends EventEmitter {
   public async compare(reference: TranslationFile, translations: TranslationFile[]) {

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { tick } from '../common/standard';
-import { addTranslationKey, ComparedTranslationFile, getTranslationValue, TranslationFile } from '../common/translations';
+import { tick } from '../async';
+import { addTranslationKey, ComparedTranslationFile, getTranslationValue, TranslationFile } from '../translations';
 
 export class Completer extends EventEmitter {
   public async complete(translations: ComparedTranslationFile[], reference: TranslationFile) {

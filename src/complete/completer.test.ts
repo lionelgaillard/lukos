@@ -1,6 +1,6 @@
 import { readFile } from 'fs-extra';
 import * as tap from 'tap';
-import { deserializeComparedTranslations, loadTranslation } from '../common/translations';
+import { deserializeComparedTranslations, loadTranslation } from '../translations';
 import { Completer } from './completer';
 
 const dir = tap.testdir({

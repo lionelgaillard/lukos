@@ -1,10 +1,85 @@
-# Translations tools
+# JSONL
 
-Utility commands to clean JSON translation files:
+Utility commands to clean JSON translation files.
 
-- The [`translations-check`](src/check/README.md) command to detect unused keys.
-- The [`translations-clean`](src/clean/README.md) command to delete unused keys.
-- The [`translations-compare`](src/compare/README.md) command to found differences between files.
-- The [`translations-complete`](src/complete/README.md) command to complete missing keys from a reference file.
-- The [`translations-format`](src/format/README.md) command to format files.
-- The [`translations-pick`](src/pick/README.md) command to find key values in all files.
+## Usage
+
+    $ jsonl <command> [ARGUMENTS...] [OPTIONS...]
+
+## Commands
+
+You can get some help about a command by typing:
+
+    $ jsonl help <command>
+
+or
+
+    $ jsonl <command> --help
+
+### `check`
+
+Checks if translations are used and output unused translation keys.
+
+#### Arguments
+
+##### `<translations>`
+
+Glob of the translation files to compare (use quotes!)
+
+##### `<sources>`
+
+Glob of the files where to find translation keys (use quotes!)
+
+### `clean`
+
+Removes unused items from translation files
+
+#### Arguments
+
+##### `<translations>`
+
+Glob of the translation files to compare (use quotes!)
+
+### `compare`
+
+Compare files with a reference file
+
+#### Arguments
+
+##### `<reference>`
+
+Path to the reference file
+
+##### `<translations>`
+
+Glob of the translation files to compare (use quotes!)
+
+### `complete`
+
+Completes missing keys from a reference file
+
+#### Arguments
+
+##### `<reference>`
+
+Path to the reference file
+
+### `format`
+
+Sort keys and format of your JSON translation files
+
+#### Arguments
+
+##### `<translations>`
+
+Glob of the translation files to compare (use quotes!)
+
+### `pick`
+
+Finds key values in all translation files
+
+#### Arguments
+
+##### `<translations>`
+
+Glob of the translation files to compare (use quotes!)

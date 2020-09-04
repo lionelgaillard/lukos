@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { tick } from '../common/standard';
-import { deleteTranslationKey, TranslationFile } from '../common/translations';
+import { tick } from '../async';
+import { deleteTranslationKey, TranslationFile } from '../translations';
 
 export class Cleaner extends EventEmitter {
   public async clean(keys: string[], translations: TranslationFile[]) {

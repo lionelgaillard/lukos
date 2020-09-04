@@ -1,7 +1,7 @@
 import { readFile } from 'fs-extra';
 import * as tap from 'tap';
-import { deserializeKeys } from '../common/keys';
-import { loadTranslations } from '../common/translations';
+import { deserializeKeys } from '../keys';
+import { loadTranslations } from '../translations';
 import { Cleaner } from './cleaner';
 
 const translation = JSON.stringify({

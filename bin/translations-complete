@@ -1,4 +1,0 @@
-#!/usr/translations-env node
-
-require('ts-node/register');
-require('../src/complete/complete.command');

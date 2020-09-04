@@ -16,6 +16,10 @@ export async function saveTranslation(file: TranslationFile): Promise<void> {
   await writeJson(file.path, sortTranslation(file.data), { spaces: 2 });
 }
 
+export async function saveTranslations(files: TranslationFile[]): Promise<void> {
+  await Promise.all(files.map(t => saveTranslation(t)));
+}
+
 function sortTranslation(data: any): any {
   return Object.keys(data)
     .sort()

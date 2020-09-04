@@ -1,6 +1,6 @@
 import * as tap from 'tap';
-import { loadFiles } from '../common/files';
-import { loadTranslations } from '../common/translations';
+import { loadFiles } from '../files';
+import { loadTranslations } from '../translations';
 import { Checker } from './checker';
 
 const dir = tap.testdir({

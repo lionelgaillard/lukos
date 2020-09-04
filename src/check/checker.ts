@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { File } from '../common/files';
-import { tick } from '../common/standard';
-import { TranslationFile } from '../common/translations';
+import { tick } from '../async';
+import { File } from '../files';
+import { TranslationFile } from '../translations';
 
 export class Checker extends EventEmitter {
   public async check(translations: TranslationFile[], sources: File[]) {

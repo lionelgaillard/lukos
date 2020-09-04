@@ -1,6 +1,6 @@
 {
-  "name": "translations-cleaning",
-  "version": "1.0.0",
+  "name": "jsonl",
+  "version": "2.0.0",
   "description": "",
   "main": "./src/check.command.ts",
   "scripts": {
@@ -10,12 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@caporal/core": "^2.0.2",
     "@types/fs-extra": "^8.0.1",
     "@types/glob": "^7.1.1",
     "@types/node": "^12.12.11",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
-    "minimist": "^1.2.0",
     "tap": "^14.10.1",
     "ts-node": "^8.5.2",
     "typescript": "^3.7.2"
