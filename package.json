@@ -2,7 +2,7 @@
   "name": "jsonl",
   "version": "2.0.0",
   "description": "",
-  "main": "./src/check.command.ts",
+  "main": "./jsonl",
   "scripts": {
     "test": "tap --no-coverage src/**/*.test.ts"
   },
