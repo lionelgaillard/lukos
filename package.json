@@ -4,6 +4,7 @@
   "description": "",
   "main": "./jsonl",
   "scripts": {
+    "build": "webpack -c webpack.config.js",
     "test": "tap --no-coverage src/**/*.test.ts"
   },
   "keywords": [],
@@ -11,13 +12,18 @@
   "license": "ISC",
   "dependencies": {
     "@caporal/core": "^2.0.2",
+    "fs-extra": "^8.1.0",
+    "glob": "^7.1.6"
+  },
+  "devDependencies": {
     "@types/fs-extra": "^8.1.1",
     "@types/glob": "^7.1.1",
     "@types/node": "^12.12.11",
-    "fs-extra": "^8.1.0",
-    "glob": "^7.1.6",
     "tap": "^14.10.8",
-    "ts-node": "^8.5.2",
-    "typescript": "^3.9.7"
+    "ts-loader": "^8.0.3",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-node-externals": "^2.5.2"
   }
 }
