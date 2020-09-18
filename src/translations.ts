@@ -1,16 +1,22 @@
 import { readJson, writeJson } from 'fs-extra';
 import { resolvePattern } from './files';
 
-export interface TranslationFile {
-  path: string;
-  data: any;
-  keys: string[];
+export class TranslationFile {
+  constructor(public readonly path: string, public data: any) {}
+
+  private _keys: string[] = null;
+  public get keys() {
+    if (this._keys === null) {
+      this._keys = getTranslationKeys(this.data);
+    }
+    return this._keys;
+  }
 }
 
-export interface ComparedTranslationFile extends TranslationFile {
+export class ComparedTranslationFile extends TranslationFile {
   reference: TranslationFile;
-  additions: string[];
-  substractions: string[];
+  additions: string[] = [];
+  substractions: string[] = [];
 }
 
 export async function saveTranslation(file: TranslationFile): Promise<void> {
@@ -21,27 +27,9 @@ export async function saveTranslations(files: TranslationFile[]): Promise<void> 
   await Promise.all(files.map(t => saveTranslation(t)));
 }
 
-function sortTranslation(data: any): any {
-  return Object.keys(data)
-    .sort()
-    .reduce((sorted, key) => {
-      if (typeof data[key] === 'string') {
-        sorted[key] = data[key];
-      } else {
-        sorted[key] = sortTranslation(data[key]);
-      }
-      return sorted;
-    }, {});
-}
-
 export async function loadTranslation(path: string): Promise<TranslationFile> {
   const data = await readJson(path);
-  const keys = getTranslationKeys(data);
-  return {
-    path,
-    data,
-    keys,
-  };
+  return new TranslationFile(path, data);
 }
 
 export async function loadTranslations(pattern: string): Promise<TranslationFile[]> {
@@ -83,12 +71,9 @@ export async function deserializeComparedTranslations(input: string): Promise<Co
         reference = await loadTranslation(value);
         break;
       case '@@@':
-        current = {
-          ...(await loadTranslation(value)),
-          reference,
-          additions: [],
-          substractions: [],
-        };
+        const data = await readJson(value);
+        current = new ComparedTranslationFile(value, data);
+        current.reference = reference;
         compared.push(current);
         break;
       case '+++':
@@ -104,23 +89,11 @@ export async function deserializeComparedTranslations(input: string): Promise<Co
 }
 
 export function compareTranslation(reference: TranslationFile, file: TranslationFile): ComparedTranslationFile {
-  return {
-    ...file,
-    reference,
-    additions: file.keys.filter(key => !reference.keys.includes(key)),
-    substractions: reference.keys.filter(key => !file.keys.includes(key)),
-  };
-}
-
-function getTranslationKeys(data: any, prefix: string = '') {
-  return Object.keys(data).reduce((keys, key) => {
-    if (typeof data[key] === 'string') {
-      keys.push(prefix + key);
-    } else {
-      keys = [...keys, ...getTranslationKeys(data[key], prefix + key + '.')];
-    }
-    return keys;
-  }, []);
+  const compared = new ComparedTranslationFile(file.path, file.data);
+  compared.reference = reference;
+  compared.additions = file.keys.filter(key => !reference.keys.includes(key));
+  compared.substractions = reference.keys.filter(key => !file.keys.includes(key));
+  return compared;
 }
 
 export function addTranslationKey(data: any, key: string, value: string) {
@@ -164,4 +137,28 @@ export function deleteTranslationKey(data: any, key: string): boolean {
 
 export function getTranslationValue(data: any, path: string) {
   return path.split('.').reduce((data, key) => (data && data[key]) || null, data);
+}
+
+function sortTranslation(data: any): any {
+  return Object.keys(data)
+    .sort()
+    .reduce((sorted, key) => {
+      if (typeof data[key] === 'string') {
+        sorted[key] = data[key];
+      } else {
+        sorted[key] = sortTranslation(data[key]);
+      }
+      return sorted;
+    }, {});
+}
+
+function getTranslationKeys(data: any, prefix: string = '') {
+  return Object.keys(data).reduce((keys, key) => {
+    if (typeof data[key] === 'string') {
+      keys.push(prefix + key);
+    } else {
+      keys = [...keys, ...getTranslationKeys(data[key], prefix + key + '.')];
+    }
+    return keys;
+  }, []);
 }
