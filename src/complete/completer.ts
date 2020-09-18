@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { addTranslationKey, ComparedTranslationFile, getTranslationValue } from '../translations';
+import { ComparedTranslationFile } from '../translations';
 
 export class Completer extends EventEmitter {
   public async complete(translations: ComparedTranslationFile[]) {
@@ -11,8 +11,8 @@ export class Completer extends EventEmitter {
 
     for (const file of translations) {
       for (const key of file.substractions) {
-        const value = getTranslationValue(file.reference.data, key);
-        if (addTranslationKey(file.data, key, value)) {
+        const value = file.reference.get(key);
+        if (file.add(key, value)) {
           file.keys.push(key);
           this.emit('added', { file, key, value });
         } else {

@@ -101,9 +101,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTranslationValue = exports.deleteTranslationKey = exports.addTranslationKey = exports.compareTranslation = exports.deserializeComparedTranslations = exports.serializeComparedTranslation = exports.loadTranslations = exports.loadTranslation = exports.saveTranslations = exports.saveTranslation = void 0;
+exports.compareTranslation = exports.deserializeComparedTranslations = exports.serializeComparedTranslation = exports.loadTranslations = exports.loadTranslation = exports.saveTranslations = exports.saveTranslation = exports.ComparedTranslationFile = exports.TranslationFile = void 0;
 const fs_extra_1 = __webpack_require__(5);
 const files_1 = __webpack_require__(4);
+class TranslationFile {
+    constructor(path, data) {
+        this.path = path;
+        this.data = data;
+        this._keys = null;
+    }
+    get keys() {
+        if (this._keys === null) {
+            this._keys = getTranslationKeys(this.data);
+        }
+        return this._keys;
+    }
+    get(key) {
+        return getTranslationValue(this.data, key);
+    }
+    add(key, value) {
+        return addTranslationKey(this.data, key, value);
+    }
+    delete(key) {
+        return deleteTranslationKey(this.data, key);
+    }
+}
+exports.TranslationFile = TranslationFile;
+class ComparedTranslationFile extends TranslationFile {
+    constructor() {
+        super(...arguments);
+        this.additions = [];
+        this.substractions = [];
+    }
+}
+exports.ComparedTranslationFile = ComparedTranslationFile;
 function saveTranslation(file) {
     return __awaiter(this, void 0, void 0, function* () {
         yield fs_extra_1.writeJson(file.path, sortTranslation(file.data), { spaces: 2 });
@@ -116,28 +147,10 @@ function saveTranslations(files) {
     });
 }
 exports.saveTranslations = saveTranslations;
-function sortTranslation(data) {
-    return Object.keys(data)
-        .sort()
-        .reduce((sorted, key) => {
-        if (typeof data[key] === 'string') {
-            sorted[key] = data[key];
-        }
-        else {
-            sorted[key] = sortTranslation(data[key]);
-        }
-        return sorted;
-    }, {});
-}
 function loadTranslation(path) {
     return __awaiter(this, void 0, void 0, function* () {
         const data = yield fs_extra_1.readJson(path);
-        const keys = getTranslationKeys(data);
-        return {
-            path,
-            data,
-            keys,
-        };
+        return new TranslationFile(path, data);
     });
 }
 exports.loadTranslation = loadTranslation;
@@ -178,7 +191,9 @@ function deserializeComparedTranslations(input) {
                     reference = yield loadTranslation(value);
                     break;
                 case '@@@':
-                    current = Object.assign(Object.assign({}, (yield loadTranslation(value))), { reference, additions: [], substractions: [] });
+                    const data = yield fs_extra_1.readJson(value);
+                    current = new ComparedTranslationFile(value, data);
+                    current.reference = reference;
                     compared.push(current);
                     break;
                 case '+++':
@@ -194,20 +209,13 @@ function deserializeComparedTranslations(input) {
 }
 exports.deserializeComparedTranslations = deserializeComparedTranslations;
 function compareTranslation(reference, file) {
-    return Object.assign(Object.assign({}, file), { reference, additions: file.keys.filter(key => !reference.keys.includes(key)), substractions: reference.keys.filter(key => !file.keys.includes(key)) });
+    const compared = new ComparedTranslationFile(file.path, file.data);
+    compared.reference = reference;
+    compared.additions = file.keys.filter(key => !reference.keys.includes(key));
+    compared.substractions = reference.keys.filter(key => !file.keys.includes(key));
+    return compared;
 }
 exports.compareTranslation = compareTranslation;
-function getTranslationKeys(data, prefix = '') {
-    return Object.keys(data).reduce((keys, key) => {
-        if (typeof data[key] === 'string') {
-            keys.push(prefix + key);
-        }
-        else {
-            keys = [...keys, ...getTranslationKeys(data[key], prefix + key + '.')];
-        }
-        return keys;
-    }, []);
-}
 function addTranslationKey(data, key, value) {
     if (!data) {
         return false;
@@ -225,7 +233,6 @@ function addTranslationKey(data, key, value) {
     }
     return addTranslationKey(data[firstkey], otherKeys.join('.'), value);
 }
-exports.addTranslationKey = addTranslationKey;
 function deleteTranslationKey(data, key) {
     if (!data) {
         return false;
@@ -240,11 +247,33 @@ function deleteTranslationKey(data, key) {
     const [firstkey, ...otherKeys] = key.split('.');
     return deleteTranslationKey(data[firstkey], otherKeys.join('.'));
 }
-exports.deleteTranslationKey = deleteTranslationKey;
 function getTranslationValue(data, path) {
     return path.split('.').reduce((data, key) => (data && data[key]) || null, data);
 }
-exports.getTranslationValue = getTranslationValue;
+function sortTranslation(data) {
+    return Object.keys(data)
+        .sort()
+        .reduce((sorted, key) => {
+        if (typeof data[key] === 'string') {
+            sorted[key] = data[key];
+        }
+        else {
+            sorted[key] = sortTranslation(data[key]);
+        }
+        return sorted;
+    }, {});
+}
+function getTranslationKeys(data, prefix = '') {
+    return Object.keys(data).reduce((keys, key) => {
+        if (typeof data[key] === 'string') {
+            keys.push(prefix + key);
+        }
+        else {
+            keys = [...keys, ...getTranslationKeys(data[key], prefix + key + '.')];
+        }
+        return keys;
+    }, []);
+}
 
 
 /***/ }),
@@ -613,14 +642,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cleaner = void 0;
 const events_1 = __webpack_require__(2);
-const translations_1 = __webpack_require__(0);
 class Cleaner extends events_1.EventEmitter {
     clean(keys, translations) {
         return __awaiter(this, void 0, void 0, function* () {
             this.emit('cleaning', { keys, translations });
             for (const file of translations) {
                 for (const key of keys) {
-                    if (translations_1.deleteTranslationKey(file.data, key)) {
+                    if (file.delete(key)) {
                         this.emit('removed', { key, file });
                     }
                     else {
@@ -760,7 +788,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Completer = void 0;
 const events_1 = __webpack_require__(2);
-const translations_1 = __webpack_require__(0);
 class Completer extends events_1.EventEmitter {
     complete(translations) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -770,8 +797,8 @@ class Completer extends events_1.EventEmitter {
             this.emit('completing', { reference: translations[0].reference, translations });
             for (const file of translations) {
                 for (const key of file.substractions) {
-                    const value = translations_1.getTranslationValue(file.reference.data, key);
-                    if (translations_1.addTranslationKey(file.data, key, value)) {
+                    const value = file.reference.get(key);
+                    if (file.add(key, value)) {
                         file.keys.push(key);
                         this.emit('added', { file, key, value });
                     }
@@ -858,13 +885,12 @@ exports.PickCommand = PickCommand;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pick = void 0;
-const translations_1 = __webpack_require__(0);
 function pick(keys, translations) {
     const picked = {};
     keys.forEach(key => {
         picked[key] = {};
         translations.forEach(translation => {
-            picked[key][translation.path] = translations_1.getTranslationValue(translation.data, key);
+            picked[key][translation.path] = translation.get(key);
         });
     });
     return picked;

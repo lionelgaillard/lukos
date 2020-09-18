@@ -11,6 +11,18 @@ export class TranslationFile {
     }
     return this._keys;
   }
+
+  public get(key: string) {
+    return getTranslationValue(this.data, key);
+  }
+
+  public add(key: string, value: string) {
+    return addTranslationKey(this.data, key, value);
+  }
+
+  public delete(key: string) {
+    return deleteTranslationKey(this.data, key);
+  }
 }
 
 export class ComparedTranslationFile extends TranslationFile {
@@ -96,7 +108,7 @@ export function compareTranslation(reference: TranslationFile, file: Translation
   return compared;
 }
 
-export function addTranslationKey(data: any, key: string, value: string) {
+function addTranslationKey(data: any, key: string, value: string): boolean {
   if (!data) {
     return false;
   }
@@ -118,7 +130,7 @@ export function addTranslationKey(data: any, key: string, value: string) {
   return addTranslationKey(data[firstkey], otherKeys.join('.'), value);
 }
 
-export function deleteTranslationKey(data: any, key: string): boolean {
+function deleteTranslationKey(data: any, key: string): boolean {
   if (!data) {
     return false;
   }
@@ -135,7 +147,7 @@ export function deleteTranslationKey(data: any, key: string): boolean {
   return deleteTranslationKey(data[firstkey], otherKeys.join('.'));
 }
 
-export function getTranslationValue(data: any, path: string) {
+function getTranslationValue(data: any, path: string) {
   return path.split('.').reduce((data, key) => (data && data[key]) || null, data);
 }
 

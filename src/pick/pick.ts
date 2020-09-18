@@ -1,11 +1,11 @@
-import { getTranslationValue, TranslationFile } from '../translations';
+import { TranslationFile } from '../translations';
 
 export function pick(keys: string[], translations: TranslationFile[]) {
   const picked = {};
   keys.forEach(key => {
     picked[key] = {};
     translations.forEach(translation => {
-      picked[key][translation.path] = getTranslationValue(translation.data, key);
+      picked[key][translation.path] = translation.get(key);
     });
   });
   return picked;
