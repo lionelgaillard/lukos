@@ -8,6 +8,7 @@ export interface TranslationFile {
 }
 
 export interface ComparedTranslationFile extends TranslationFile {
+  reference: TranslationFile;
   additions: string[];
   substractions: string[];
 }
@@ -49,41 +50,54 @@ export async function loadTranslations(pattern: string): Promise<TranslationFile
 }
 
 export function serializeComparedTranslation(files: ComparedTranslationFile[]): string {
-  return files.reduce((output, file) => {
+  if (files.length === 0) {
+    return '';
+  }
+
+  let output = `### ${files[0].reference.path}\n`;
+
+  for (const file of files) {
     output += `@@@ ${file.path}\n`;
-    if (file.additions.length > 0) {
-      output += file.additions.map(key => `+++ ${key}`).join('\n') + '\n';
+    for (const key of file.additions) {
+      output += `+++ ${key}\n`;
     }
-    if (file.substractions.length > 0) {
-      output += file.substractions.map(key => `--- ${key}`).join('\n') + '\n';
+    for (const key of file.substractions) {
+      output += `--- ${key}\n`;
     }
-    return output;
-  }, '');
+  }
+
+  return output;
 }
 
 export async function deserializeComparedTranslations(input: string): Promise<ComparedTranslationFile[]> {
-  const parts = input
-    .split('@@@ ')
-    .map(c => c.trim())
-    .filter(Boolean);
-
   const compared: ComparedTranslationFile[] = [];
+  let reference: TranslationFile = null;
+  let current: ComparedTranslationFile = null;
 
-  for (const part of parts) {
-    const lines = part.split('\n');
-    if (lines.length === 0) {
-      continue;
+  for (const line of input.split('\n')) {
+    const prefix = line.substr(0, 3);
+    const value = line.substr(4);
+
+    switch (prefix) {
+      case '###':
+        reference = await loadTranslation(value);
+        break;
+      case '@@@':
+        current = {
+          ...(await loadTranslation(value)),
+          reference,
+          additions: [],
+          substractions: [],
+        };
+        compared.push(current);
+        break;
+      case '+++':
+        current.additions.push(value);
+        break;
+      case '---':
+        current.substractions.push(value);
+        break;
     }
-
-    const path = lines.shift();
-    const file = await loadTranslation(path);
-    const additions = lines.filter(line => line.startsWith('+++ ')).map(line => line.substr(4));
-    const substractions = lines.filter(line => line.startsWith('--- ')).map(line => line.substr(4));
-    compared.push({
-      ...file,
-      additions,
-      substractions,
-    });
   }
 
   return compared;
@@ -92,6 +106,7 @@ export async function deserializeComparedTranslations(input: string): Promise<Co
 export function compareTranslation(reference: TranslationFile, file: TranslationFile): ComparedTranslationFile {
   return {
     ...file,
+    reference,
     additions: file.keys.filter(key => !reference.keys.includes(key)),
     substractions: reference.keys.filter(key => !file.keys.includes(key)),
   };

@@ -82,7 +82,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -102,8 +102,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTranslationValue = exports.deleteTranslationKey = exports.addTranslationKey = exports.compareTranslation = exports.deserializeComparedTranslations = exports.serializeComparedTranslation = exports.loadTranslations = exports.loadTranslation = exports.saveTranslations = exports.saveTranslation = void 0;
-const fs_extra_1 = __webpack_require__(6);
-const files_1 = __webpack_require__(5);
+const fs_extra_1 = __webpack_require__(5);
+const files_1 = __webpack_require__(4);
 function saveTranslation(file) {
     return __awaiter(this, void 0, void 0, function* () {
         yield fs_extra_1.writeJson(file.path, sortTranslation(file.data), { spaces: 2 });
@@ -149,43 +149,52 @@ function loadTranslations(pattern) {
 }
 exports.loadTranslations = loadTranslations;
 function serializeComparedTranslation(files) {
-    return files.reduce((output, file) => {
+    if (files.length === 0) {
+        return '';
+    }
+    let output = `### ${files[0].reference.path}\n`;
+    for (const file of files) {
         output += `@@@ ${file.path}\n`;
-        if (file.additions.length > 0) {
-            output += file.additions.map(key => `+++ ${key}`).join('\n') + '\n';
+        for (const key of file.additions) {
+            output += `+++ ${key}\n`;
         }
-        if (file.substractions.length > 0) {
-            output += file.substractions.map(key => `--- ${key}`).join('\n') + '\n';
+        for (const key of file.substractions) {
+            output += `--- ${key}\n`;
         }
-        return output;
-    }, '');
+    }
+    return output;
 }
 exports.serializeComparedTranslation = serializeComparedTranslation;
 function deserializeComparedTranslations(input) {
     return __awaiter(this, void 0, void 0, function* () {
-        const parts = input
-            .split('@@@ ')
-            .map(c => c.trim())
-            .filter(Boolean);
         const compared = [];
-        for (const part of parts) {
-            const lines = part.split('\n');
-            if (lines.length === 0) {
-                continue;
+        let reference = null;
+        let current = null;
+        for (const line of input.split('\n')) {
+            const prefix = line.substr(0, 3);
+            const value = line.substr(4);
+            switch (prefix) {
+                case '###':
+                    reference = yield loadTranslation(value);
+                    break;
+                case '@@@':
+                    current = Object.assign(Object.assign({}, (yield loadTranslation(value))), { reference, additions: [], substractions: [] });
+                    compared.push(current);
+                    break;
+                case '+++':
+                    current.additions.push(value);
+                    break;
+                case '---':
+                    current.substractions.push(value);
+                    break;
             }
-            const path = lines.shift();
-            const file = yield loadTranslation(path);
-            const additions = lines.filter(line => line.startsWith('+++ ')).map(line => line.substr(4));
-            const substractions = lines.filter(line => line.startsWith('--- ')).map(line => line.substr(4));
-            compared.push(Object.assign(Object.assign({}, file), { additions,
-                substractions }));
         }
         return compared;
     });
 }
 exports.deserializeComparedTranslations = deserializeComparedTranslations;
 function compareTranslation(reference, file) {
-    return Object.assign(Object.assign({}, file), { additions: file.keys.filter(key => !reference.keys.includes(key)), substractions: reference.keys.filter(key => !file.keys.includes(key)) });
+    return Object.assign(Object.assign({}, file), { reference, additions: file.keys.filter(key => !reference.keys.includes(key)), substractions: reference.keys.filter(key => !file.keys.includes(key)) });
 }
 exports.compareTranslation = compareTranslation;
 function getTranslationKeys(data, prefix = '') {
@@ -323,20 +332,6 @@ exports.deserializeKeys = deserializeKeys;
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.tick = void 0;
-function tick() {
-    return new Promise(resolve => setImmediate(resolve));
-}
-exports.tick = tick;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -348,8 +343,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadFiles = exports.loadFile = exports.resolvePattern = void 0;
-const fs_extra_1 = __webpack_require__(6);
-const glob = __webpack_require__(10);
+const fs_extra_1 = __webpack_require__(5);
+const glob = __webpack_require__(9);
 function resolvePattern(pattern) {
     return new Promise((resolve, reject) => glob(pattern, (error, matches) => (error ? reject(error) : resolve(matches))));
 }
@@ -373,13 +368,13 @@ exports.loadFiles = loadFiles;
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs-extra");
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -394,17 +389,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(8);
-const check_command_1 = __webpack_require__(9);
-const checker_1 = __webpack_require__(11);
-const clean_command_1 = __webpack_require__(12);
-const cleaner_1 = __webpack_require__(13);
-const compare_command_1 = __webpack_require__(14);
-const comparer_1 = __webpack_require__(15);
-const complete_command_1 = __webpack_require__(16);
-const completer_1 = __webpack_require__(17);
-const format_command_1 = __webpack_require__(18);
-const pick_command_1 = __webpack_require__(19);
+const core_1 = __webpack_require__(7);
+const check_command_1 = __webpack_require__(8);
+const checker_1 = __webpack_require__(10);
+const clean_command_1 = __webpack_require__(11);
+const cleaner_1 = __webpack_require__(12);
+const compare_command_1 = __webpack_require__(13);
+const comparer_1 = __webpack_require__(14);
+const complete_command_1 = __webpack_require__(15);
+const completer_1 = __webpack_require__(16);
+const format_command_1 = __webpack_require__(17);
+const pick_command_1 = __webpack_require__(18);
 core_1.program
     .command('check', 'Checks if translations are used and output unused translation keys.')
     .help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
@@ -442,16 +437,13 @@ core_1.program
     const command = new compare_command_1.CompareCommand(comparer);
     yield command.run(process.stdout, args.reference, args.translations);
 }));
-core_1.program
-    .command('complete', 'Completes missing keys from a reference file')
-    .argument('<reference>', 'Path of the reference translation file')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
+core_1.program.command('complete', 'Completes missing keys from a reference file').action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
     const completer = new completer_1.Completer()
         .on('completing', ({ reference, translations }) => console.error(`Completing ${translations.length} files with values of ${reference.path}...`))
         .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
         .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
     const command = new complete_command_1.CompleteCommand(completer);
-    yield command.run(process.stdin, args.reference);
+    yield command.run(process.stdin);
 }));
 core_1.program
     .command('format', 'Sort keys and format of your JSON translation files')
@@ -471,13 +463,13 @@ core_1.program.run();
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports) {
 
 module.exports = require("@caporal/core");
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -493,7 +485,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CheckCommand = void 0;
-const files_1 = __webpack_require__(5);
+const files_1 = __webpack_require__(4);
 const keys_1 = __webpack_require__(3);
 const stream_1 = __webpack_require__(1);
 const translations_1 = __webpack_require__(0);
@@ -514,13 +506,13 @@ exports.CheckCommand = CheckCommand;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = require("glob");
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -568,7 +560,7 @@ function findUsage(key, sources) {
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -604,7 +596,7 @@ exports.CleanCommand = CleanCommand;
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -621,27 +613,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cleaner = void 0;
 const events_1 = __webpack_require__(2);
-const async_1 = __webpack_require__(4);
 const translations_1 = __webpack_require__(0);
 class Cleaner extends events_1.EventEmitter {
     clean(keys, translations) {
         return __awaiter(this, void 0, void 0, function* () {
             this.emit('cleaning', { keys, translations });
-            yield async_1.tick();
             for (const file of translations) {
                 for (const key of keys) {
                     if (translations_1.deleteTranslationKey(file.data, key)) {
                         this.emit('removed', { key, file });
-                        yield async_1.tick();
                     }
                     else {
                         this.emit('passed', { key, file });
-                        yield async_1.tick();
                     }
                 }
             }
             this.emit('cleaned', { keys, translations });
-            yield async_1.tick();
             return translations;
         });
     }
@@ -650,7 +637,7 @@ exports.Cleaner = Cleaner;
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -685,7 +672,7 @@ exports.CompareCommand = CompareCommand;
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -702,22 +689,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Comparer = void 0;
 const events_1 = __webpack_require__(2);
-const async_1 = __webpack_require__(4);
 const translations_1 = __webpack_require__(0);
 class Comparer extends events_1.EventEmitter {
     compare(reference, translations) {
         return __awaiter(this, void 0, void 0, function* () {
             const compared = [];
             this.emit('comparing', { reference, translations });
-            yield async_1.tick();
             for (const file of translations) {
                 const diffed = translations_1.compareTranslation(reference, file);
                 compared.push(diffed);
                 this.emit('diff', { file: diffed });
-                yield async_1.tick();
             }
             this.emit('compared', { reference, translations: compared });
-            yield async_1.tick();
             return compared;
         });
     }
@@ -726,7 +709,7 @@ exports.Comparer = Comparer;
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -748,11 +731,10 @@ class CompleteCommand {
     constructor(completer) {
         this.completer = completer;
     }
-    run(input, referencePath) {
+    run(input) {
         return __awaiter(this, void 0, void 0, function* () {
             const diff = yield translations_1.deserializeComparedTranslations(yield stream_1.read(input));
-            const reference = yield translations_1.loadTranslation(referencePath);
-            const completed = yield this.completer.complete(diff, reference);
+            const completed = yield this.completer.complete(diff);
             yield Promise.all(completed.map(file => translations_1.saveTranslation(file)));
         });
     }
@@ -761,7 +743,7 @@ exports.CompleteCommand = CompleteCommand;
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -778,29 +760,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Completer = void 0;
 const events_1 = __webpack_require__(2);
-const async_1 = __webpack_require__(4);
 const translations_1 = __webpack_require__(0);
 class Completer extends events_1.EventEmitter {
-    complete(translations, reference) {
+    complete(translations) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.emit('completing', { reference, translations });
-            yield async_1.tick();
+            if (translations.length === 0) {
+                return translations;
+            }
+            this.emit('completing', { reference: translations[0].reference, translations });
             for (const file of translations) {
                 for (const key of file.substractions) {
-                    const value = translations_1.getTranslationValue(reference.data, key);
+                    const value = translations_1.getTranslationValue(file.reference.data, key);
                     if (translations_1.addTranslationKey(file.data, key, value)) {
                         file.keys.push(key);
                         this.emit('added', { file, key, value });
-                        yield async_1.tick();
                     }
                     else {
                         this.emit('passed', { file, key, value });
-                        yield async_1.tick();
                     }
                 }
             }
-            this.emit('completed', { reference, translations });
-            yield async_1.tick();
+            this.emit('completed', { reference: translations[0].reference, translations });
             return translations;
         });
     }
@@ -809,7 +789,7 @@ exports.Completer = Completer;
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -837,7 +817,7 @@ exports.FormatCommand = FormatCommand;
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -856,7 +836,7 @@ exports.PickCommand = void 0;
 const keys_1 = __webpack_require__(3);
 const stream_1 = __webpack_require__(1);
 const translations_1 = __webpack_require__(0);
-const pick_1 = __webpack_require__(20);
+const pick_1 = __webpack_require__(19);
 class PickCommand {
     run(input, output, translationsGlob) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -871,7 +851,7 @@ exports.PickCommand = PickCommand;
 
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

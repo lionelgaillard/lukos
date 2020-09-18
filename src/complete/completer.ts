@@ -1,28 +1,27 @@
 import { EventEmitter } from 'events';
-import { tick } from '../async';
-import { addTranslationKey, ComparedTranslationFile, getTranslationValue, TranslationFile } from '../translations';
+import { addTranslationKey, ComparedTranslationFile, getTranslationValue } from '../translations';
 
 export class Completer extends EventEmitter {
-  public async complete(translations: ComparedTranslationFile[], reference: TranslationFile) {
-    this.emit('completing', { reference, translations });
-    await tick();
+  public async complete(translations: ComparedTranslationFile[]) {
+    if (translations.length === 0) {
+      return translations;
+    }
+
+    this.emit('completing', { reference: translations[0].reference, translations });
 
     for (const file of translations) {
       for (const key of file.substractions) {
-        const value = getTranslationValue(reference.data, key);
+        const value = getTranslationValue(file.reference.data, key);
         if (addTranslationKey(file.data, key, value)) {
           file.keys.push(key);
           this.emit('added', { file, key, value });
-          await tick();
         } else {
           this.emit('passed', { file, key, value });
-          await tick();
         }
       }
     }
 
-    this.emit('completed', { reference, translations });
-    await tick();
+    this.emit('completed', { reference: translations[0].reference, translations });
 
     return translations;
   }

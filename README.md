@@ -58,12 +58,6 @@ Glob of the translation files to compare (use quotes!)
 
 Completes missing keys from a reference file
 
-#### Arguments
-
-##### `<reference>`
-
-Path to the reference file
-
 ### `format`
 
 Sort keys and format of your JSON translation files

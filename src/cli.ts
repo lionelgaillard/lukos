@@ -50,19 +50,16 @@ program
     await command.run(process.stdout, args.reference as string, args.translations as string);
   });
 
-program
-  .command('complete', 'Completes missing keys from a reference file')
-  .argument('<reference>', 'Path of the reference translation file')
-  .action(async ({ args }) => {
-    const completer = new Completer()
-      .on('completing', ({ reference, translations }) =>
-        console.error(`Completing ${translations.length} files with values of ${reference.path}...`)
-      )
-      .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
-      .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
-    const command = new CompleteCommand(completer);
-    await command.run(process.stdin, args.reference as string);
-  });
+program.command('complete', 'Completes missing keys from a reference file').action(async ({ args }) => {
+  const completer = new Completer()
+    .on('completing', ({ reference, translations }) =>
+      console.error(`Completing ${translations.length} files with values of ${reference.path}...`)
+    )
+    .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
+    .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
+  const command = new CompleteCommand(completer);
+  await command.run(process.stdin);
+});
 
 program
   .command('format', 'Sort keys and format of your JSON translation files')
