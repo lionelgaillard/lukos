@@ -3,6 +3,9 @@
   "version": "2.1.0",
   "description": "",
   "main": "./lukos",
+  "repository": {
+    "url": "https://github.com/lionelgaillard/lukos"
+  },
   "scripts": {
     "build": "webpack -c webpack.config.js",
     "test": "tap --no-coverage src/**/*.test.ts"
