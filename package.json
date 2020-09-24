@@ -3,6 +3,7 @@
   "version": "2.1.0",
   "description": "",
   "main": "./lukos",
+  "bin": "./lukos",
   "repository": {
     "url": "https://github.com/lionelgaillard/lukos"
   },
