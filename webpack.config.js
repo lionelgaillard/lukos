@@ -8,7 +8,7 @@ module.exports = {
   entry: './src/cli.ts',
   output: {
     path: __dirname,
-    filename: 'jsonl',
+    filename: 'lukos',
   },
   resolve: {
     extensions: ['.ts', '.js'],

@@ -11,7 +11,7 @@ interface Config {
 }
 
 const HOME_DIR = process.platform === 'win32' ? process.env.USERPROFILE : process.env.HOME;
-const CONFIG_DIR = join(HOME_DIR, '.jsonl');
+const CONFIG_DIR = join(HOME_DIR, '.lukos');
 const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
 const DEFAULTS: Config = {
   translate: {

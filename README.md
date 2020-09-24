@@ -1,20 +1,20 @@
-# jsonl
+# lukos
 
 Utility commands to clean JSON translation files.
 
 ## Usage
 
-    $ jsonl <command> [ARGUMENTS...] [OPTIONS...]
+    $ lukos <command> [ARGUMENTS...] [OPTIONS...]
 
 ## Commands
 
 You can get some help about a command by typing:
 
-    $ jsonl help <command>
+    $ lukos help <command>
 
 or
 
-    $ jsonl <command> --help
+    $ lukos <command> --help
 
 ### `check`
 
