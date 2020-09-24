@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { read } from '../stream';
-import { deserializeComparedTranslations, saveTranslation } from '../translations';
+import { deserializeComparedTranslations } from '../translations';
 import { Completer } from './completer';
 
 export class CompleteCommand {
@@ -9,6 +9,5 @@ export class CompleteCommand {
   public async run(input: Readable) {
     const diff = await deserializeComparedTranslations(await read(input));
     const completed = await this.completer.complete(diff);
-    await Promise.all(completed.map(file => saveTranslation(file)));
   }
 }

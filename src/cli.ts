@@ -9,6 +9,7 @@ import { CompleteCommand } from './complete/complete.command';
 import { Completer } from './complete/completer';
 import { FormatCommand } from './format/format.command';
 import { PickCommand } from './pick/pick.command';
+import { createTranslator } from './translate/translator.factory';
 
 program
   .command('check', 'Checks if translations are used and output unused translation keys.')
@@ -51,7 +52,7 @@ program
   });
 
 program.command('complete', 'Completes missing keys from a reference file').action(async ({ args }) => {
-  const completer = new Completer()
+  const completer = new Completer(createTranslator())
     .on('completing', ({ reference, translations }) =>
       console.error(`Completing ${translations.length} files with values of ${reference.path}...`)
     )

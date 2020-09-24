@@ -1,7 +1,12 @@
 import { EventEmitter } from 'events';
+import { Translator } from '../translate/translator';
 import { ComparedTranslationFile } from '../translations';
 
 export class Completer extends EventEmitter {
+  constructor(private translator: Translator) {
+    super();
+  }
+
   public async complete(translations: ComparedTranslationFile[]) {
     if (translations.length === 0) {
       return translations;
@@ -10,16 +15,26 @@ export class Completer extends EventEmitter {
     this.emit('completing', { reference: translations[0].reference, translations });
 
     for (const file of translations) {
-      for (const key of file.substractions) {
-        const value = file.reference.get(key);
-        if (file.add(key, value)) {
+      if (file.reference.path === file.path) {
+        continue;
+      }
+
+      const originals = file.substractions.map(key => file.reference.get(key));
+      const translations = await this.translator.translate(file.reference.locale, file.locale, originals);
+      for (const i in file.substractions) {
+        const key = file.substractions[i];
+        const original = originals[i];
+        const translated = translations[i];
+        if (file.add(key, translated)) {
           file.keys.push(key);
-          this.emit('added', { file, key, value });
+          this.emit('added', { file, key, original, translated });
         } else {
-          this.emit('passed', { file, key, value });
+          this.emit('passed', { file, key, original, translated });
         }
       }
     }
+
+    await Promise.all(translations.map(file => file.save()));
 
     this.emit('completed', { reference: translations[0].reference, translations });
 

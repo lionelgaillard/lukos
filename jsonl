@@ -82,7 +82,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -102,13 +102,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compareTranslation = exports.deserializeComparedTranslations = exports.serializeComparedTranslation = exports.loadTranslations = exports.loadTranslation = exports.saveTranslations = exports.saveTranslation = exports.ComparedTranslationFile = exports.TranslationFile = void 0;
-const fs_extra_1 = __webpack_require__(5);
-const files_1 = __webpack_require__(4);
+const fs_extra_1 = __webpack_require__(3);
+const path_1 = __webpack_require__(6);
+const files_1 = __webpack_require__(5);
 class TranslationFile {
     constructor(path, data) {
         this.path = path;
         this.data = data;
         this._keys = null;
+    }
+    get locale() {
+        return getLocale(this.path);
     }
     get keys() {
         if (this._keys === null) {
@@ -124,6 +128,9 @@ class TranslationFile {
     }
     delete(key) {
         return deleteTranslationKey(this.data, key);
+    }
+    save() {
+        return saveTranslation(this);
     }
 }
 exports.TranslationFile = TranslationFile;
@@ -274,6 +281,9 @@ function getTranslationKeys(data, prefix = '') {
         return keys;
     }, []);
 }
+function getLocale(path) {
+    return path_1.basename(path, '.json');
+}
 
 
 /***/ }),
@@ -336,6 +346,12 @@ module.exports = require("events");
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("fs-extra");
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -356,7 +372,7 @@ exports.deserializeKeys = deserializeKeys;
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -372,8 +388,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadFiles = exports.loadFile = exports.resolvePattern = void 0;
-const fs_extra_1 = __webpack_require__(5);
-const glob = __webpack_require__(9);
+const fs_extra_1 = __webpack_require__(3);
+const glob = __webpack_require__(10);
 function resolvePattern(pattern) {
     return new Promise((resolve, reject) => glob(pattern, (error, matches) => (error ? reject(error) : resolve(matches))));
 }
@@ -397,13 +413,13 @@ exports.loadFiles = loadFiles;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports) {
 
-module.exports = require("fs-extra");
+module.exports = require("path");
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -418,17 +434,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(7);
-const check_command_1 = __webpack_require__(8);
-const checker_1 = __webpack_require__(10);
-const clean_command_1 = __webpack_require__(11);
-const cleaner_1 = __webpack_require__(12);
-const compare_command_1 = __webpack_require__(13);
-const comparer_1 = __webpack_require__(14);
-const complete_command_1 = __webpack_require__(15);
-const completer_1 = __webpack_require__(16);
-const format_command_1 = __webpack_require__(17);
-const pick_command_1 = __webpack_require__(18);
+const core_1 = __webpack_require__(8);
+const check_command_1 = __webpack_require__(9);
+const checker_1 = __webpack_require__(11);
+const clean_command_1 = __webpack_require__(12);
+const cleaner_1 = __webpack_require__(13);
+const compare_command_1 = __webpack_require__(14);
+const comparer_1 = __webpack_require__(15);
+const complete_command_1 = __webpack_require__(16);
+const completer_1 = __webpack_require__(17);
+const format_command_1 = __webpack_require__(18);
+const pick_command_1 = __webpack_require__(19);
+const translator_factory_1 = __webpack_require__(21);
 core_1.program
     .command('check', 'Checks if translations are used and output unused translation keys.')
     .help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
@@ -467,7 +484,7 @@ core_1.program
     yield command.run(process.stdout, args.reference, args.translations);
 }));
 core_1.program.command('complete', 'Completes missing keys from a reference file').action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const completer = new completer_1.Completer()
+    const completer = new completer_1.Completer(translator_factory_1.createTranslator())
         .on('completing', ({ reference, translations }) => console.error(`Completing ${translations.length} files with values of ${reference.path}...`))
         .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
         .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
@@ -492,13 +509,13 @@ core_1.program.run();
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = require("@caporal/core");
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -514,8 +531,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CheckCommand = void 0;
-const files_1 = __webpack_require__(4);
-const keys_1 = __webpack_require__(3);
+const files_1 = __webpack_require__(5);
+const keys_1 = __webpack_require__(4);
 const stream_1 = __webpack_require__(1);
 const translations_1 = __webpack_require__(0);
 class CheckCommand {
@@ -535,13 +552,13 @@ exports.CheckCommand = CheckCommand;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("glob");
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -589,7 +606,7 @@ function findUsage(key, sources) {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -605,7 +622,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CleanCommand = void 0;
-const keys_1 = __webpack_require__(3);
+const keys_1 = __webpack_require__(4);
 const stream_1 = __webpack_require__(1);
 const translations_1 = __webpack_require__(0);
 class CleanCommand {
@@ -625,7 +642,7 @@ exports.CleanCommand = CleanCommand;
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -665,7 +682,7 @@ exports.Cleaner = Cleaner;
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -700,7 +717,7 @@ exports.CompareCommand = CompareCommand;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -737,7 +754,7 @@ exports.Comparer = Comparer;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -763,7 +780,6 @@ class CompleteCommand {
         return __awaiter(this, void 0, void 0, function* () {
             const diff = yield translations_1.deserializeComparedTranslations(yield stream_1.read(input));
             const completed = yield this.completer.complete(diff);
-            yield Promise.all(completed.map(file => translations_1.saveTranslation(file)));
         });
     }
 }
@@ -771,7 +787,7 @@ exports.CompleteCommand = CompleteCommand;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -789,6 +805,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Completer = void 0;
 const events_1 = __webpack_require__(2);
 class Completer extends events_1.EventEmitter {
+    constructor(translator) {
+        super();
+        this.translator = translator;
+    }
     complete(translations) {
         return __awaiter(this, void 0, void 0, function* () {
             if (translations.length === 0) {
@@ -796,17 +816,25 @@ class Completer extends events_1.EventEmitter {
             }
             this.emit('completing', { reference: translations[0].reference, translations });
             for (const file of translations) {
-                for (const key of file.substractions) {
-                    const value = file.reference.get(key);
-                    if (file.add(key, value)) {
+                if (file.reference.path === file.path) {
+                    continue;
+                }
+                const originals = file.substractions.map(key => file.reference.get(key));
+                const translations = yield this.translator.translate(file.reference.locale, file.locale, originals);
+                for (const i in file.substractions) {
+                    const key = file.substractions[i];
+                    const original = originals[i];
+                    const translated = translations[i];
+                    if (file.add(key, translated)) {
                         file.keys.push(key);
-                        this.emit('added', { file, key, value });
+                        this.emit('added', { file, key, original, translated });
                     }
                     else {
-                        this.emit('passed', { file, key, value });
+                        this.emit('passed', { file, key, original, translated });
                     }
                 }
             }
+            yield Promise.all(translations.map(file => file.save()));
             this.emit('completed', { reference: translations[0].reference, translations });
             return translations;
         });
@@ -816,7 +844,7 @@ exports.Completer = Completer;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -844,7 +872,7 @@ exports.FormatCommand = FormatCommand;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -860,10 +888,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PickCommand = void 0;
-const keys_1 = __webpack_require__(3);
+const keys_1 = __webpack_require__(4);
 const stream_1 = __webpack_require__(1);
 const translations_1 = __webpack_require__(0);
-const pick_1 = __webpack_require__(19);
+const pick_1 = __webpack_require__(20);
 class PickCommand {
     run(input, output, translationsGlob) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -878,7 +906,7 @@ exports.PickCommand = PickCommand;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -896,6 +924,133 @@ function pick(keys, translations) {
     return picked;
 }
 exports.pick = pick;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createTranslator = void 0;
+const config_1 = __webpack_require__(22);
+const google_translator_1 = __webpack_require__(24);
+const noop_translator_1 = __webpack_require__(26);
+function createTranslator() {
+    if (config_1.config.translate.google.projectId) {
+        return new google_translator_1.GoogleTranslator(config_1.config.translate.google.projectId);
+    }
+    return new noop_translator_1.NoopTranslator();
+}
+exports.createTranslator = createTranslator;
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.config = exports.saveConfig = void 0;
+const fs_extra_1 = __webpack_require__(3);
+const merge = __webpack_require__(23);
+const path_1 = __webpack_require__(6);
+const HOME_DIR = process.platform === 'win32' ? process.env.USERPROFILE : process.env.HOME;
+const CONFIG_DIR = path_1.join(HOME_DIR, '.jsonl');
+const CONFIG_PATH = path_1.join(CONFIG_DIR, 'config.json');
+const DEFAULTS = {
+    translate: {
+        google: {
+            projectId: null,
+        },
+    },
+};
+function loadConfig() {
+    if (!fs_extra_1.existsSync(CONFIG_PATH)) {
+        return DEFAULTS;
+    }
+    return merge({}, DEFAULTS, fs_extra_1.readJsonSync(CONFIG_PATH));
+}
+function saveConfig() {
+    fs_extra_1.ensureDirSync(CONFIG_DIR);
+    fs_extra_1.writeJsonSync(CONFIG_PATH, exports.config, { spaces: 2 });
+}
+exports.saveConfig = saveConfig;
+exports.config = loadConfig();
+saveConfig();
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports) {
+
+module.exports = require("lodash.merge");
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GoogleTranslator = void 0;
+const v3_1 = __webpack_require__(25);
+class GoogleTranslator {
+    constructor(projectId) {
+        this.projectId = projectId;
+        this.client = new v3_1.TranslationServiceClient();
+    }
+    translate(source, target, contents) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (source === target) {
+                return contents;
+            }
+            const request = {
+                contents,
+                sourceLanguageCode: source,
+                targetLanguageCode: target,
+                parent: `projects/${this.projectId}`,
+                mimeType: 'text/plain',
+            };
+            const [response] = yield this.client.translateText(request);
+            return response.translations.map(t => t.translatedText);
+        });
+    }
+}
+exports.GoogleTranslator = GoogleTranslator;
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports) {
+
+module.exports = require("@google-cloud/translate/build/src/v3");
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NoopTranslator = void 0;
+class NoopTranslator {
+    translate(source, target, contents) {
+        return Promise.resolve(contents);
+    }
+}
+exports.NoopTranslator = NoopTranslator;
 
 
 /***/ })

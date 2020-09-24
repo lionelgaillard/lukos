@@ -1,8 +1,13 @@
 import { readJson, writeJson } from 'fs-extra';
+import { basename } from 'path';
 import { resolvePattern } from './files';
 
 export class TranslationFile {
   constructor(public readonly path: string, public data: any) {}
+
+  public get locale() {
+    return getLocale(this.path);
+  }
 
   private _keys: string[] = null;
   public get keys() {
@@ -22,6 +27,10 @@ export class TranslationFile {
 
   public delete(key: string) {
     return deleteTranslationKey(this.data, key);
+  }
+
+  public save() {
+    return saveTranslation(this);
   }
 }
 
@@ -173,4 +182,8 @@ function getTranslationKeys(data: any, prefix: string = '') {
     }
     return keys;
   }, []);
+}
+
+function getLocale(path: string) {
+  return basename(path, '.json');
 }

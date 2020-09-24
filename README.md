@@ -1,4 +1,4 @@
-# JSONL
+# jsonl
 
 Utility commands to clean JSON translation files.
 

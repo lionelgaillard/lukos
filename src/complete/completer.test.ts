@@ -1,5 +1,6 @@
 import { readFile } from 'fs-extra';
 import * as tap from 'tap';
+import { NoopTranslator } from '../translate/noop.translator';
 import { deserializeComparedTranslations } from '../translations';
 import { Completer } from './completer';
 
@@ -37,7 +38,7 @@ const dir = tap.testdir({
 });
 
 tap.test('completer', async t => {
-  const completer = new Completer();
+  const completer = new Completer(new NoopTranslator());
 
   t.emits(completer, 'completing', 'should emit completing event');
   t.emits(completer, 'completed', 'should emit completed event');
