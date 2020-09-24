@@ -82,7 +82,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 8);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -103,8 +103,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compareTranslation = exports.deserializeComparedTranslations = exports.serializeComparedTranslation = exports.loadTranslations = exports.loadTranslation = exports.saveTranslations = exports.saveTranslation = exports.ComparedTranslationFile = exports.TranslationFile = void 0;
 const fs_extra_1 = __webpack_require__(3);
-const path_1 = __webpack_require__(6);
-const files_1 = __webpack_require__(5);
+const path_1 = __webpack_require__(5);
+const files_1 = __webpack_require__(6);
 class TranslationFile {
     constructor(path, data) {
         this.path = path;
@@ -373,6 +373,12 @@ exports.deserializeKeys = deserializeKeys;
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -389,7 +395,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadFiles = exports.loadFile = exports.resolvePattern = void 0;
 const fs_extra_1 = __webpack_require__(3);
-const glob = __webpack_require__(10);
+const glob = __webpack_require__(11);
 function resolvePattern(pattern) {
     return new Promise((resolve, reject) => glob(pattern, (error, matches) => (error ? reject(error) : resolve(matches))));
 }
@@ -413,13 +419,23 @@ exports.loadFiles = loadFiles;
 
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports) {
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = require("path");
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NoopTranslator = void 0;
+class NoopTranslator {
+    translate(source, target, contents) {
+        return Promise.resolve(contents);
+    }
+}
+exports.NoopTranslator = NoopTranslator;
+
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -434,18 +450,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(8);
-const check_command_1 = __webpack_require__(9);
-const checker_1 = __webpack_require__(11);
-const clean_command_1 = __webpack_require__(12);
-const cleaner_1 = __webpack_require__(13);
-const compare_command_1 = __webpack_require__(14);
-const comparer_1 = __webpack_require__(15);
-const complete_command_1 = __webpack_require__(16);
-const completer_1 = __webpack_require__(17);
-const format_command_1 = __webpack_require__(18);
-const pick_command_1 = __webpack_require__(19);
-const translator_factory_1 = __webpack_require__(21);
+const core_1 = __webpack_require__(9);
+const check_command_1 = __webpack_require__(10);
+const checker_1 = __webpack_require__(12);
+const clean_command_1 = __webpack_require__(13);
+const cleaner_1 = __webpack_require__(14);
+const compare_command_1 = __webpack_require__(15);
+const comparer_1 = __webpack_require__(16);
+const complete_command_1 = __webpack_require__(17);
+const completer_1 = __webpack_require__(18);
+const format_command_1 = __webpack_require__(19);
+const pick_command_1 = __webpack_require__(20);
+const translate_command_1 = __webpack_require__(22);
+const translator_factory_1 = __webpack_require__(23);
 core_1.program
     .command('check', 'Checks if translations are used and output unused translation keys.')
     .help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
@@ -505,17 +522,25 @@ core_1.program
     const command = new pick_command_1.PickCommand();
     yield command.run(process.stdin, process.stdout, args.translations);
 }));
+core_1.program
+    .command('translate', 'Translate a source file into a new language')
+    .argument('<source>', 'Path to the source file')
+    .argument('<locale>', 'Locale of the target language')
+    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
+    const command = new translate_command_1.TranslateCommand(translator_factory_1.createTranslator());
+    yield command.run(args.source, args.locale);
+}));
 core_1.program.run();
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = require("@caporal/core");
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -531,7 +556,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CheckCommand = void 0;
-const files_1 = __webpack_require__(5);
+const files_1 = __webpack_require__(6);
 const keys_1 = __webpack_require__(4);
 const stream_1 = __webpack_require__(1);
 const translations_1 = __webpack_require__(0);
@@ -552,13 +577,13 @@ exports.CheckCommand = CheckCommand;
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = require("glob");
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -606,7 +631,7 @@ function findUsage(key, sources) {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -642,7 +667,7 @@ exports.CleanCommand = CleanCommand;
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -682,7 +707,7 @@ exports.Cleaner = Cleaner;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -717,7 +742,7 @@ exports.CompareCommand = CompareCommand;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -754,7 +779,7 @@ exports.Comparer = Comparer;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -787,7 +812,7 @@ exports.CompleteCommand = CompleteCommand;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -844,7 +869,7 @@ exports.Completer = Completer;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -872,7 +897,7 @@ exports.FormatCommand = FormatCommand;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -891,7 +916,7 @@ exports.PickCommand = void 0;
 const keys_1 = __webpack_require__(4);
 const stream_1 = __webpack_require__(1);
 const translations_1 = __webpack_require__(0);
-const pick_1 = __webpack_require__(20);
+const pick_1 = __webpack_require__(21);
 class PickCommand {
     run(input, output, translationsGlob) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -906,7 +931,7 @@ exports.PickCommand = PickCommand;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -927,16 +952,66 @@ exports.pick = pick;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TranslateCommand = void 0;
+const path_1 = __webpack_require__(5);
+const translations_1 = __webpack_require__(0);
+const noop_translator_1 = __webpack_require__(7);
+class TranslateCommand {
+    constructor(translator) {
+        this.translator = translator;
+    }
+    run(sourcePath, targetLocale) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.translator instanceof noop_translator_1.NoopTranslator) {
+                throw new Error(`The translate command requires a configured translation API.`);
+            }
+            const source = yield translations_1.loadTranslation(sourcePath);
+            if (source.locale === targetLocale) {
+                throw new Error('The source and target locales are the same.');
+            }
+            const keys = source.keys;
+            const originals = keys.map(key => source.get(key));
+            const translations = yield this.translator.translate(source.locale, targetLocale, originals);
+            const targetPath = path_1.join(path_1.dirname(sourcePath), `${targetLocale}.json`);
+            const targetFile = new translations_1.TranslationFile(targetPath, {});
+            for (const i in keys) {
+                const key = keys[i];
+                const value = translations[i];
+                targetFile.add(key, value);
+            }
+            targetFile.save();
+        });
+    }
+}
+exports.TranslateCommand = TranslateCommand;
+
+
+/***/ }),
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTranslator = void 0;
-const config_1 = __webpack_require__(22);
-const google_translator_1 = __webpack_require__(24);
-const noop_translator_1 = __webpack_require__(26);
+const config_1 = __webpack_require__(24);
+const google_translator_1 = __webpack_require__(26);
+const noop_translator_1 = __webpack_require__(7);
 function createTranslator() {
     if (config_1.config.translate.google.projectId) {
         return new google_translator_1.GoogleTranslator(config_1.config.translate.google.projectId);
@@ -947,7 +1022,7 @@ exports.createTranslator = createTranslator;
 
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -955,8 +1030,8 @@ exports.createTranslator = createTranslator;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = exports.saveConfig = void 0;
 const fs_extra_1 = __webpack_require__(3);
-const merge = __webpack_require__(23);
-const path_1 = __webpack_require__(6);
+const merge = __webpack_require__(25);
+const path_1 = __webpack_require__(5);
 const HOME_DIR = process.platform === 'win32' ? process.env.USERPROFILE : process.env.HOME;
 const CONFIG_DIR = path_1.join(HOME_DIR, '.lukos');
 const CONFIG_PATH = path_1.join(CONFIG_DIR, 'config.json');
@@ -974,8 +1049,7 @@ function loadConfig() {
     return merge({}, DEFAULTS, fs_extra_1.readJsonSync(CONFIG_PATH));
 }
 function saveConfig() {
-    fs_extra_1.ensureDirSync(CONFIG_DIR);
-    fs_extra_1.writeJsonSync(CONFIG_PATH, exports.config, { spaces: 2 });
+    fs_extra_1.outputJsonSync(CONFIG_PATH, exports.config, { spaces: 2 });
 }
 exports.saveConfig = saveConfig;
 exports.config = loadConfig();
@@ -983,13 +1057,13 @@ saveConfig();
 
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports) {
 
 module.exports = require("lodash.merge");
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1005,7 +1079,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GoogleTranslator = void 0;
-const v3_1 = __webpack_require__(25);
+const v3_1 = __webpack_require__(27);
 class GoogleTranslator {
     constructor(projectId) {
         this.projectId = projectId;
@@ -1032,26 +1106,10 @@ exports.GoogleTranslator = GoogleTranslator;
 
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports) {
 
 module.exports = require("@google-cloud/translate/build/src/v3");
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NoopTranslator = void 0;
-class NoopTranslator {
-    translate(source, target, contents) {
-        return Promise.resolve(contents);
-    }
-}
-exports.NoopTranslator = NoopTranslator;
-
 
 /***/ })
 /******/ ]);

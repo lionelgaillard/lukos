@@ -9,6 +9,7 @@ import { CompleteCommand } from './complete/complete.command';
 import { Completer } from './complete/completer';
 import { FormatCommand } from './format/format.command';
 import { PickCommand } from './pick/pick.command';
+import { TranslateCommand } from './translate/translate.command';
 import { createTranslator } from './translate/translator.factory';
 
 program
@@ -76,6 +77,15 @@ program
   .action(async ({ args }) => {
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, args.translations as string);
+  });
+
+program
+  .command('translate', 'Translate a source file into a new language')
+  .argument('<source>', 'Path to the source file')
+  .argument('<locale>', 'Locale of the target language')
+  .action(async ({ args }) => {
+    const command = new TranslateCommand(createTranslator());
+    await command.run(args.source as string, args.locale as string);
   });
 
 program.run();

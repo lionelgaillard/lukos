@@ -1,4 +1,4 @@
-import { ensureDirSync, existsSync, readJsonSync, writeJsonSync } from 'fs-extra';
+import { existsSync, outputJsonSync, readJsonSync } from 'fs-extra';
 import * as merge from 'lodash.merge';
 import { join } from 'path';
 
@@ -30,8 +30,7 @@ function loadConfig() {
 }
 
 export function saveConfig() {
-  ensureDirSync(CONFIG_DIR);
-  writeJsonSync(CONFIG_PATH, config, { spaces: 2 });
+  outputJsonSync(CONFIG_PATH, config, { spaces: 2 });
 }
 
 export const config = loadConfig();

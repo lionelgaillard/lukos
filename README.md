@@ -110,7 +110,7 @@ Sort keys and format of your JSON translation files.
 
 #### Usage
 
-    $ lukos clean "assets/i18n/??.json"
+    $ lukos format "assets/i18n/??.json"
 
 #### Arguments
 
@@ -135,3 +135,21 @@ A list of keys (one key per line).
 ##### `<translations>`
 
 Glob of the translation files from which extract values (use quotes!).
+
+### `translate`
+
+Translate a source file into a new language.
+
+#### Usage
+
+    $ lukos translate assets/i18n/en.json fr
+
+#### Arguments
+
+##### `<source>`
+
+Path to the source file.
+
+##### `<locale>`
+
+Locale of the target language.
