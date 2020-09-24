@@ -2,8 +2,8 @@
   "name": "lukos",
   "version": "2.1.1",
   "description": "",
-  "main": "./lukos",
-  "bin": "./lukos",
+  "main": "./bin/lukos",
+  "bin": "./bin/lukos",
   "repository": {
     "url": "https://github.com/lionelgaillard/lukos"
   },

@@ -1,3 +1,4 @@
+const { join } = require('path');
 const { BannerPlugin } = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 
@@ -7,7 +8,7 @@ module.exports = {
   externals: [nodeExternals()],
   entry: './src/cli.ts',
   output: {
-    path: __dirname,
+    path: join(__dirname, 'bin'),
     filename: 'lukos',
   },
   resolve: {
