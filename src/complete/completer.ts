@@ -26,7 +26,6 @@ export class Completer extends EventEmitter {
         const original = originals[i];
         const translated = translations[i];
         if (file.add(key, translated)) {
-          file.keys.push(key);
           this.emit('added', { file, key, original, translated });
         } else {
           this.emit('passed', { file, key, original, translated });

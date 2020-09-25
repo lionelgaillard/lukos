@@ -1,3 +1,4 @@
+import { existsSync } from 'fs-extra';
 import { dirname, join } from 'path';
 import { loadTranslation, TranslationFile } from '../translations';
 import { NoopTranslator } from './noop.translator';
@@ -17,13 +18,17 @@ export class TranslateCommand {
       throw new Error('The source and target locales are the same.');
     }
 
-    const keys = source.keys;
-    const originals = keys.map(key => source.get(key));
-    const translations = await this.translator.translate(source.locale, targetLocale, originals);
     const targetPath = join(dirname(sourcePath), `${targetLocale}.json`);
+
+    if (existsSync(targetPath)) {
+      throw new Error(`The target file "${targetPath}" already exists.`);
+    }
+
     const targetFile = new TranslationFile(targetPath, {});
-    for (const i in keys) {
-      const key = keys[i];
+    const originals = source.keys.map(key => source.get(key));
+    const translations = await this.translator.translate(source.locale, targetLocale, originals);
+    for (const i in source.keys) {
+      const key = source.keys[i];
       const value = translations[i];
       targetFile.add(key, value);
     }

@@ -22,10 +22,16 @@ export class TranslationFile {
   }
 
   public add(key: string, value: string) {
+    if (this._keys) {
+      this._keys.push(key);
+    }
     return addTranslationKey(this.data, key, value);
   }
 
   public delete(key: string) {
+    if (this._keys) {
+      this._keys = this._keys.filter(k => k !== key);
+    }
     return deleteTranslationKey(this.data, key);
   }
 
