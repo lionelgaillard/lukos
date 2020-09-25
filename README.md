@@ -1,6 +1,6 @@
 # lukos
 
-Utility commands to clean JSON translation files.
+A command line utility program to manage translation files.
 
 ## Installation
 
