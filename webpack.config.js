@@ -7,6 +7,9 @@ module.exports = {
   target: 'node',
   externals: [nodeExternals()],
   entry: './src/cli.ts',
+  node: {
+    __dirname: true,
+  },
   output: {
     path: join(__dirname, 'bin'),
     filename: 'lukos',

@@ -1,4 +1,6 @@
 import { program } from '@caporal/core';
+import { readJsonSync } from 'fs-extra';
+import { join } from 'path';
 import { CheckCommand } from './check/check.command';
 import { Checker } from './check/checker';
 import { CleanCommand } from './clean/clean.command';
@@ -11,6 +13,8 @@ import { FormatCommand } from './format/format.command';
 import { PickCommand } from './pick/pick.command';
 import { TranslateCommand } from './translate/translate.command';
 import { createTranslator } from './translate/translator.factory';
+
+program.version(readJsonSync(join(__dirname, '..', 'package.json')).version);
 
 program
   .command('check', 'Checks if translations are used and output unused translation keys.')

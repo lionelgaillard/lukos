@@ -102,8 +102,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compareTranslation = exports.deserializeComparedTranslations = exports.serializeComparedTranslation = exports.loadTranslations = exports.loadTranslation = exports.saveTranslations = exports.saveTranslation = exports.ComparedTranslationFile = exports.TranslationFile = void 0;
-const fs_extra_1 = __webpack_require__(3);
-const path_1 = __webpack_require__(5);
+const fs_extra_1 = __webpack_require__(1);
+const path_1 = __webpack_require__(3);
 const files_1 = __webpack_require__(6);
 class TranslationFile {
     constructor(path, data) {
@@ -124,9 +124,15 @@ class TranslationFile {
         return getTranslationValue(this.data, key);
     }
     add(key, value) {
+        if (this._keys) {
+            this._keys.push(key);
+        }
         return addTranslationKey(this.data, key, value);
     }
     delete(key) {
+        if (this._keys) {
+            this._keys = this._keys.filter(k => k !== key);
+        }
         return deleteTranslationKey(this.data, key);
     }
     save() {
@@ -288,6 +294,12 @@ function getLocale(path) {
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+module.exports = require("fs-extra");
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -339,19 +351,19 @@ exports.write = write;
 
 
 /***/ }),
-/* 2 */
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = require("events");
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-module.exports = require("fs-extra");
-
-/***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -372,12 +384,6 @@ exports.deserializeKeys = deserializeKeys;
 
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-module.exports = require("path");
-
-/***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -394,7 +400,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadFiles = exports.loadFile = exports.resolvePattern = void 0;
-const fs_extra_1 = __webpack_require__(3);
+const fs_extra_1 = __webpack_require__(1);
 const glob = __webpack_require__(11);
 function resolvePattern(pattern) {
     return new Promise((resolve, reject) => glob(pattern, (error, matches) => (error ? reject(error) : resolve(matches))));
@@ -439,7 +445,7 @@ exports.NoopTranslator = NoopTranslator;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(__dirname) {
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -451,6 +457,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = __webpack_require__(9);
+const fs_extra_1 = __webpack_require__(1);
+const path_1 = __webpack_require__(3);
 const check_command_1 = __webpack_require__(10);
 const checker_1 = __webpack_require__(12);
 const clean_command_1 = __webpack_require__(13);
@@ -463,6 +471,7 @@ const format_command_1 = __webpack_require__(19);
 const pick_command_1 = __webpack_require__(20);
 const translate_command_1 = __webpack_require__(22);
 const translator_factory_1 = __webpack_require__(23);
+core_1.program.version(fs_extra_1.readJsonSync(path_1.join(__dirname, '..', 'package.json')).version);
 core_1.program
     .command('check', 'Checks if translations are used and output unused translation keys.')
     .help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
@@ -532,6 +541,7 @@ core_1.program
 }));
 core_1.program.run();
 
+/* WEBPACK VAR INJECTION */}.call(this, "src"))
 
 /***/ }),
 /* 9 */
@@ -557,8 +567,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CheckCommand = void 0;
 const files_1 = __webpack_require__(6);
-const keys_1 = __webpack_require__(4);
-const stream_1 = __webpack_require__(1);
+const keys_1 = __webpack_require__(5);
+const stream_1 = __webpack_require__(2);
 const translations_1 = __webpack_require__(0);
 class CheckCommand {
     constructor(checker) {
@@ -599,7 +609,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Checker = void 0;
-const events_1 = __webpack_require__(2);
+const events_1 = __webpack_require__(4);
 class Checker extends events_1.EventEmitter {
     check(translations, sources) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -647,8 +657,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CleanCommand = void 0;
-const keys_1 = __webpack_require__(4);
-const stream_1 = __webpack_require__(1);
+const keys_1 = __webpack_require__(5);
+const stream_1 = __webpack_require__(2);
 const translations_1 = __webpack_require__(0);
 class CleanCommand {
     constructor(cleaner) {
@@ -683,7 +693,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cleaner = void 0;
-const events_1 = __webpack_require__(2);
+const events_1 = __webpack_require__(4);
 class Cleaner extends events_1.EventEmitter {
     clean(keys, translations) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -723,7 +733,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CompareCommand = void 0;
-const stream_1 = __webpack_require__(1);
+const stream_1 = __webpack_require__(2);
 const translations_1 = __webpack_require__(0);
 class CompareCommand {
     constructor(comparer) {
@@ -758,7 +768,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Comparer = void 0;
-const events_1 = __webpack_require__(2);
+const events_1 = __webpack_require__(4);
 const translations_1 = __webpack_require__(0);
 class Comparer extends events_1.EventEmitter {
     compare(reference, translations) {
@@ -795,7 +805,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CompleteCommand = void 0;
-const stream_1 = __webpack_require__(1);
+const stream_1 = __webpack_require__(2);
 const translations_1 = __webpack_require__(0);
 class CompleteCommand {
     constructor(completer) {
@@ -828,7 +838,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Completer = void 0;
-const events_1 = __webpack_require__(2);
+const events_1 = __webpack_require__(4);
 class Completer extends events_1.EventEmitter {
     constructor(translator) {
         super();
@@ -851,7 +861,6 @@ class Completer extends events_1.EventEmitter {
                     const original = originals[i];
                     const translated = translations[i];
                     if (file.add(key, translated)) {
-                        file.keys.push(key);
                         this.emit('added', { file, key, original, translated });
                     }
                     else {
@@ -913,8 +922,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PickCommand = void 0;
-const keys_1 = __webpack_require__(4);
-const stream_1 = __webpack_require__(1);
+const keys_1 = __webpack_require__(5);
+const stream_1 = __webpack_require__(2);
 const translations_1 = __webpack_require__(0);
 const pick_1 = __webpack_require__(21);
 class PickCommand {
@@ -968,7 +977,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TranslateCommand = void 0;
-const path_1 = __webpack_require__(5);
+const fs_extra_1 = __webpack_require__(1);
+const path_1 = __webpack_require__(3);
 const translations_1 = __webpack_require__(0);
 const noop_translator_1 = __webpack_require__(7);
 class TranslateCommand {
@@ -984,13 +994,15 @@ class TranslateCommand {
             if (source.locale === targetLocale) {
                 throw new Error('The source and target locales are the same.');
             }
-            const keys = source.keys;
-            const originals = keys.map(key => source.get(key));
-            const translations = yield this.translator.translate(source.locale, targetLocale, originals);
             const targetPath = path_1.join(path_1.dirname(sourcePath), `${targetLocale}.json`);
+            if (fs_extra_1.existsSync(targetPath)) {
+                throw new Error(`The target file "${targetPath}" already exists.`);
+            }
             const targetFile = new translations_1.TranslationFile(targetPath, {});
-            for (const i in keys) {
-                const key = keys[i];
+            const originals = source.keys.map(key => source.get(key));
+            const translations = yield this.translator.translate(source.locale, targetLocale, originals);
+            for (const i in source.keys) {
+                const key = source.keys[i];
                 const value = translations[i];
                 targetFile.add(key, value);
             }
@@ -1029,9 +1041,9 @@ exports.createTranslator = createTranslator;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = exports.saveConfig = void 0;
-const fs_extra_1 = __webpack_require__(3);
+const fs_extra_1 = __webpack_require__(1);
 const merge = __webpack_require__(25);
-const path_1 = __webpack_require__(5);
+const path_1 = __webpack_require__(3);
 const HOME_DIR = process.platform === 'win32' ? process.env.USERPROFILE : process.env.HOME;
 const CONFIG_DIR = path_1.join(HOME_DIR, '.lukos');
 const CONFIG_PATH = path_1.join(CONFIG_DIR, 'config.json');
