@@ -8,7 +8,8 @@ module.exports = {
   externals: [nodeExternals()],
   entry: './src/cli.ts',
   node: {
-    __dirname: true,
+    __dirname: false,
+    __filename: false,
   },
   output: {
     path: join(__dirname, 'bin'),

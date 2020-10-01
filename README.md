@@ -15,8 +15,10 @@ Optional.
 To enable automatic translation you need:
 
 - A Google Cloud project with the [Cloud Translation API](https://console.cloud.google.com/apis/library/translate.googleapis.com) activated.
-- The project id provided under `translate.google.projectId` in `~/.lukos/config.json`.
-- The `GOOGLE_APPLICATION_CREDENTIALS` environment variable [set to the path of your service account](https://cloud.google.com/docs/authentication/getting-started#setting_the_environment_variable).
+- A service account with the role `roles/cloudtranslate.user` (Cloud Translation > User).
+- To provide it to lukos by running:
+
+      $ lukos config translate.google.serviceAccount <path-to-your-service-account-keys-as-json>
 
 > Please, feel free to propose or implement alternative APIs.
 

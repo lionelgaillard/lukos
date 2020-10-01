@@ -1,6 +1,7 @@
 import { readJson, writeJson } from 'fs-extra';
 import { basename } from 'path';
 import { resolvePattern } from './files';
+import { getKeys } from './objects';
 
 export class TranslationFile {
   constructor(public readonly path: string, public data: any) {}
@@ -179,15 +180,8 @@ function sortTranslation(data: any): any {
     }, {});
 }
 
-function getTranslationKeys(data: any, prefix: string = '') {
-  return Object.keys(data).reduce((keys, key) => {
-    if (typeof data[key] === 'string') {
-      keys.push(prefix + key);
-    } else {
-      keys = [...keys, ...getTranslationKeys(data[key], prefix + key + '.')];
-    }
-    return keys;
-  }, []);
+function getTranslationKeys(data: any) {
+  return getKeys(data);
 }
 
 function getLocale(path: string) {

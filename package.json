@@ -18,9 +18,9 @@
     "@caporal/core": "^2.0.2",
     "@google-cloud/translate": "^6.0.3",
     "axios": "^0.20.0",
+    "deepmerge": "^4.2.2",
     "fs-extra": "^8.1.0",
-    "glob": "^7.1.6",
-    "lodash.merge": "^4.6.2"
+    "glob": "^7.1.6"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.1.1",

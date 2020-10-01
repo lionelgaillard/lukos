@@ -9,6 +9,7 @@ import { CompareCommand } from './compare/compare.command';
 import { Comparer } from './compare/comparer';
 import { CompleteCommand } from './complete/complete.command';
 import { Completer } from './complete/completer';
+import { ConfigCommand } from './config/config.command';
 import { FormatCommand } from './format/format.command';
 import { PickCommand } from './pick/pick.command';
 import { TranslateCommand } from './translate/translate.command';
@@ -66,6 +67,18 @@ program.command('complete', 'Completes missing keys from a reference file').acti
   const command = new CompleteCommand(completer);
   await command.run(process.stdin);
 });
+
+program
+  .command('config', 'Get or set a config value')
+  .argument('<key>', 'The config key to get or set')
+  .argument('[value]', 'The config value to set')
+  .action(async ({ args }) => {
+    try {
+      await new ConfigCommand().run(process.stdout, args.key as string, args.value as string);
+    } catch (error) {
+      console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
+    }
+  });
 
 program
   .command('format', 'Sort keys and format of your JSON translation files')

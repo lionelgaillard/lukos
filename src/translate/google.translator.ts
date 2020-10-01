@@ -1,10 +1,12 @@
 import { TranslationServiceClient } from '@google-cloud/translate/build/src/v3';
+import { readJson } from 'fs-extra';
 import { Translator } from './translator';
 
 export class GoogleTranslator implements Translator {
   private client: TranslationServiceClient;
 
-  constructor(private readonly projectId: string) {
+  constructor(serviceAccount: string) {
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount;
     this.client = new TranslationServiceClient();
   }
 
@@ -13,11 +15,13 @@ export class GoogleTranslator implements Translator {
       return contents;
     }
 
+    const credentials = await readJson(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
     const request = {
       contents,
       sourceLanguageCode: source,
       targetLanguageCode: target,
-      parent: `projects/${this.projectId}`,
+      parent: `projects/${credentials.project_id}`,
       mimeType: 'text/plain',
     };
 
