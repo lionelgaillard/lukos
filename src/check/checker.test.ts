@@ -1,4 +1,4 @@
-import * as tap from 'tap';
+import tap from 'tap';
 import { loadFiles } from '../files';
 import { loadTranslations } from '../translations';
 import { Checker } from './checker';

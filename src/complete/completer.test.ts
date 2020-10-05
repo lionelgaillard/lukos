@@ -1,5 +1,5 @@
 import { readFile } from 'fs-extra';
-import * as tap from 'tap';
+import tap from 'tap';
 import { NoopTranslator } from '../translate/noop.translator';
 import { deserializeComparedTranslations } from '../translations';
 import { Completer } from './completer';

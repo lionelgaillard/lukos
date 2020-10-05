@@ -1,5 +1,5 @@
 import { readFile } from 'fs-extra';
-import * as tap from 'tap';
+import tap from 'tap';
 import { deserializeKeys } from '../keys';
 import { loadTranslations } from '../translations';
 import { Cleaner } from './cleaner';

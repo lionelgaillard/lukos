@@ -1,5 +1,5 @@
 import { readFile } from 'fs-extra';
-import * as glob from 'glob';
+import glob from 'glob';
 
 export interface File {
   path: string;

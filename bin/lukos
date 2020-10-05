@@ -1,1240 +1,614 @@
 #!/usr/bin/env node
-/******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+(() => {
+  var __defineProperty = Object.defineProperty;
+  var __hasOwnProperty = Object.prototype.hasOwnProperty;
+  var __markAsModule = (target) => {
+    return __defineProperty(target, "__esModule", {value: true});
+  };
+  var __exportStar = (target, module) => {
+    __markAsModule(target);
+    if (typeof module === "object" || typeof module === "function") {
+      for (let key in module)
+        if (!__hasOwnProperty.call(target, key) && key !== "default")
+          __defineProperty(target, key, {get: () => module[key], enumerable: true});
+    }
+    return target;
+  };
+  var __toModule = (module) => {
+    if (module && module.__esModule)
+      return module;
+    return __exportStar(__defineProperty({}, "default", {value: module, enumerable: true}), module);
+  };
 
-"use strict";
+  // src/cli.ts
+  const core = __toModule(require("@caporal/core"));
+  const fs_extra6 = __toModule(require("fs-extra"));
+  const path4 = __toModule(require("path"));
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.compareTranslation = exports.deserializeComparedTranslations = exports.serializeComparedTranslation = exports.loadTranslations = exports.loadTranslation = exports.saveTranslations = exports.saveTranslation = exports.ComparedTranslationFile = exports.TranslationFile = void 0;
-const fs_extra_1 = __webpack_require__(1);
-const path_1 = __webpack_require__(3);
-const files_1 = __webpack_require__(6);
-const objects_1 = __webpack_require__(7);
-class TranslationFile {
-    constructor(path, data) {
-        this.path = path;
-        this.data = data;
-        this._keys = null;
+  // src/files.ts
+  const fs_extra = __toModule(require("fs-extra"));
+  const glob = __toModule(require("glob"));
+  function resolvePattern(pattern) {
+    return new Promise((resolve, reject) => glob.default(pattern, (error, matches) => error ? reject(error) : resolve(matches)));
+  }
+  async function loadFile(path5) {
+    return {
+      path: path5,
+      content: await fs_extra.readFile(path5, "utf8")
+    };
+  }
+  async function loadFiles(pattern) {
+    const paths = await resolvePattern(pattern);
+    return Promise.all(paths.map((path5) => loadFile(path5)));
+  }
+
+  // src/keys.ts
+  function serializeKeys(keys4) {
+    return keys4.join("\n") + "\n";
+  }
+  function deserializeKeys(content) {
+    return content.split("\n").map((k) => k.trim()).filter(Boolean);
+  }
+
+  // src/stream.ts
+  async function read(stream7) {
+    const chunks = [];
+    for await (const chunk of stream7) {
+      chunks.push(chunk);
+    }
+    return Buffer.concat(chunks).toString("utf8");
+  }
+  function write(stream7, data) {
+    return new Promise((resolve) => stream7.write(data, "utf8", () => resolve()));
+  }
+
+  // src/translations.ts
+  const fs_extra2 = __toModule(require("fs-extra"));
+  const path = __toModule(require("path"));
+
+  // src/objects.ts
+  function getKeys(data, prefix = "") {
+    return Object.keys(data).reduce((keys4, key) => {
+      if (!data[key] || typeof data[key] === "string") {
+        keys4.push(prefix + key);
+      } else {
+        keys4 = [...keys4, ...getKeys(data[key], prefix + key + ".")];
+      }
+      return keys4;
+    }, []);
+  }
+
+  // src/translations.ts
+  class TranslationFile {
+    constructor(path5, data) {
+      this.path = path5;
+      this.data = data;
+      this._keys = null;
     }
     get locale() {
-        return getLocale(this.path);
+      return getLocale(this.path);
     }
     get keys() {
-        if (this._keys === null) {
-            this._keys = getTranslationKeys(this.data);
-        }
-        return this._keys;
+      if (this._keys === null) {
+        this._keys = getTranslationKeys(this.data);
+      }
+      return this._keys;
     }
     get(key) {
-        return getTranslationValue(this.data, key);
+      return getTranslationValue(this.data, key);
     }
     add(key, value) {
-        if (this._keys) {
-            this._keys.push(key);
-        }
-        return addTranslationKey(this.data, key, value);
+      if (this._keys) {
+        this._keys.push(key);
+      }
+      return addTranslationKey(this.data, key, value);
     }
     delete(key) {
-        if (this._keys) {
-            this._keys = this._keys.filter(k => k !== key);
-        }
-        return deleteTranslationKey(this.data, key);
+      if (this._keys) {
+        this._keys = this._keys.filter((k) => k !== key);
+      }
+      return deleteTranslationKey(this.data, key);
     }
     save() {
-        return saveTranslation(this);
+      return saveTranslation(this);
     }
-}
-exports.TranslationFile = TranslationFile;
-class ComparedTranslationFile extends TranslationFile {
+  }
+  class ComparedTranslationFile extends TranslationFile {
     constructor() {
-        super(...arguments);
-        this.additions = [];
-        this.substractions = [];
+      super(...arguments);
+      this.additions = [];
+      this.substractions = [];
     }
-}
-exports.ComparedTranslationFile = ComparedTranslationFile;
-function saveTranslation(file) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield fs_extra_1.writeJson(file.path, sortTranslation(file.data), { spaces: 2 });
-    });
-}
-exports.saveTranslation = saveTranslation;
-function saveTranslations(files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield Promise.all(files.map(t => saveTranslation(t)));
-    });
-}
-exports.saveTranslations = saveTranslations;
-function loadTranslation(path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const data = yield fs_extra_1.readJson(path);
-        return new TranslationFile(path, data);
-    });
-}
-exports.loadTranslation = loadTranslation;
-function loadTranslations(pattern) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const paths = yield files_1.resolvePattern(pattern);
-        return Promise.all(paths.map(path => loadTranslation(path)));
-    });
-}
-exports.loadTranslations = loadTranslations;
-function serializeComparedTranslation(files) {
-    if (files.length === 0) {
-        return '';
+  }
+  async function saveTranslation(file) {
+    await fs_extra2.writeJson(file.path, sortTranslation(file.data), {spaces: 2});
+  }
+  async function saveTranslations(files3) {
+    await Promise.all(files3.map((t) => saveTranslation(t)));
+  }
+  async function loadTranslation(path5) {
+    const data = await fs_extra2.readJson(path5);
+    return new TranslationFile(path5, data);
+  }
+  async function loadTranslations(pattern) {
+    const paths = await resolvePattern(pattern);
+    return Promise.all(paths.map((path5) => loadTranslation(path5)));
+  }
+  function serializeComparedTranslation(files3) {
+    if (files3.length === 0) {
+      return "";
     }
-    let output = `### ${files[0].reference.path}\n`;
-    for (const file of files) {
-        output += `@@@ ${file.path}\n`;
-        for (const key of file.additions) {
-            output += `+++ ${key}\n`;
-        }
-        for (const key of file.substractions) {
-            output += `--- ${key}\n`;
-        }
+    let output = `### ${files3[0].reference.path}
+`;
+    for (const file of files3) {
+      output += `@@@ ${file.path}
+`;
+      for (const key of file.additions) {
+        output += `+++ ${key}
+`;
+      }
+      for (const key of file.substractions) {
+        output += `--- ${key}
+`;
+      }
     }
     return output;
-}
-exports.serializeComparedTranslation = serializeComparedTranslation;
-function deserializeComparedTranslations(input) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const compared = [];
-        let reference = null;
-        let current = null;
-        for (const line of input.split('\n')) {
-            const prefix = line.substr(0, 3);
-            const value = line.substr(4);
-            switch (prefix) {
-                case '###':
-                    reference = yield loadTranslation(value);
-                    break;
-                case '@@@':
-                    const data = yield fs_extra_1.readJson(value);
-                    current = new ComparedTranslationFile(value, data);
-                    current.reference = reference;
-                    compared.push(current);
-                    break;
-                case '+++':
-                    current.additions.push(value);
-                    break;
-                case '---':
-                    current.substractions.push(value);
-                    break;
-            }
-        }
-        return compared;
-    });
-}
-exports.deserializeComparedTranslations = deserializeComparedTranslations;
-function compareTranslation(reference, file) {
+  }
+  async function deserializeComparedTranslations(input) {
+    const compared = [];
+    let reference = null;
+    let current = null;
+    for (const line of input.split("\n")) {
+      const prefix = line.substr(0, 3);
+      const value = line.substr(4);
+      switch (prefix) {
+        case "###":
+          reference = await loadTranslation(value);
+          break;
+        case "@@@":
+          const data = await fs_extra2.readJson(value);
+          current = new ComparedTranslationFile(value, data);
+          current.reference = reference;
+          compared.push(current);
+          break;
+        case "+++":
+          current.additions.push(value);
+          break;
+        case "---":
+          current.substractions.push(value);
+          break;
+      }
+    }
+    return compared;
+  }
+  function compareTranslation(reference, file) {
     const compared = new ComparedTranslationFile(file.path, file.data);
     compared.reference = reference;
-    compared.additions = file.keys.filter(key => !reference.keys.includes(key));
-    compared.substractions = reference.keys.filter(key => !file.keys.includes(key));
+    compared.additions = file.keys.filter((key) => !reference.keys.includes(key));
+    compared.substractions = reference.keys.filter((key) => !file.keys.includes(key));
     return compared;
-}
-exports.compareTranslation = compareTranslation;
-function addTranslationKey(data, key, value) {
+  }
+  function addTranslationKey(data, key, value) {
     if (!data) {
-        return false;
+      return false;
     }
-    if (!key.includes('.')) {
-        if (!data[key]) {
-            data[key] = value;
-            return true;
-        }
-        return false;
+    if (!key.includes(".")) {
+      if (!data[key]) {
+        data[key] = value;
+        return true;
+      }
+      return false;
     }
-    const [firstkey, ...otherKeys] = key.split('.');
+    const [firstkey, ...otherKeys] = key.split(".");
     if (!data[firstkey]) {
-        data[firstkey] = {};
+      data[firstkey] = {};
     }
-    return addTranslationKey(data[firstkey], otherKeys.join('.'), value);
-}
-function deleteTranslationKey(data, key) {
+    return addTranslationKey(data[firstkey], otherKeys.join("."), value);
+  }
+  function deleteTranslationKey(data, key) {
     if (!data) {
-        return false;
+      return false;
     }
-    if (!key.includes('.')) {
-        if (data[key]) {
-            delete data[key];
-            return true;
-        }
-        return false;
+    if (!key.includes(".")) {
+      if (data[key]) {
+        delete data[key];
+        return true;
+      }
+      return false;
     }
-    const [firstkey, ...otherKeys] = key.split('.');
-    return deleteTranslationKey(data[firstkey], otherKeys.join('.'));
-}
-function getTranslationValue(data, path) {
-    return path.split('.').reduce((data, key) => (data && data[key]) || null, data);
-}
-function sortTranslation(data) {
-    return Object.keys(data)
-        .sort()
-        .reduce((sorted, key) => {
-        if (typeof data[key] === 'string') {
-            sorted[key] = data[key];
-        }
-        else {
-            sorted[key] = sortTranslation(data[key]);
-        }
-        return sorted;
+    const [firstkey, ...otherKeys] = key.split(".");
+    return deleteTranslationKey(data[firstkey], otherKeys.join("."));
+  }
+  function getTranslationValue(data, path5) {
+    return path5.split(".").reduce((data2, key) => data2 && data2[key] || null, data);
+  }
+  function sortTranslation(data) {
+    return Object.keys(data).sort().reduce((sorted, key) => {
+      if (typeof data[key] === "string") {
+        sorted[key] = data[key];
+      } else {
+        sorted[key] = sortTranslation(data[key]);
+      }
+      return sorted;
     }, {});
-}
-function getTranslationKeys(data) {
-    return objects_1.getKeys(data);
-}
-function getLocale(path) {
-    return path_1.basename(path, '.json');
-}
+  }
+  function getTranslationKeys(data) {
+    return getKeys(data);
+  }
+  function getLocale(path5) {
+    return path.basename(path5, ".json");
+  }
 
+  // src/check/check.command.ts
+  class CheckCommand {
+    constructor(checker2) {
+      this.checker = checker2;
+    }
+    async run(output, sourcesGlob, translationsGlob) {
+      const sources = await loadFiles(sourcesGlob);
+      const translations9 = await loadTranslations(translationsGlob);
+      const unused = await this.checker.check(translations9, sources);
+      await write(output, serializeKeys(unused));
+    }
+  }
 
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-module.exports = require("fs-extra");
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.write = exports.read = void 0;
-function read(stream) {
-    var stream_1, stream_1_1;
-    var e_1, _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const chunks = [];
-        try {
-            for (stream_1 = __asyncValues(stream); stream_1_1 = yield stream_1.next(), !stream_1_1.done;) {
-                const chunk = stream_1_1.value;
-                chunks.push(chunk);
-            }
+  // src/check/checker.ts
+  const events = __toModule(require("events"));
+  class Checker extends events.EventEmitter {
+    async check(translations9, sources) {
+      const unused = [];
+      const keys4 = getAllKeys(translations9);
+      this.emit("checking", {keys: keys4, sources, translations: translations9});
+      for (const key of keys4) {
+        const source = findUsage(key, sources);
+        if (source) {
+          this.emit("used", {key, source});
+        } else {
+          unused.push(key);
+          this.emit("unused", {key, sources});
         }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (stream_1_1 && !stream_1_1.done && (_a = stream_1.return)) yield _a.call(stream_1);
-            }
-            finally { if (e_1) throw e_1.error; }
+      }
+      this.emit("checked", {unused});
+      return unused;
+    }
+  }
+  function getAllKeys(translations9) {
+    return [...new Set(translations9.map((t) => t.keys).flat(1))];
+  }
+  function findUsage(key, sources) {
+    return sources.find((file) => file.content.match(new RegExp(key)));
+  }
+
+  // src/clean/clean.command.ts
+  class CleanCommand {
+    constructor(cleaner2) {
+      this.cleaner = cleaner2;
+    }
+    async run(input, translationsGlob) {
+      const keys4 = deserializeKeys(await read(input));
+      const translations9 = await loadTranslations(translationsGlob);
+      const cleaned = await this.cleaner.clean(keys4, translations9);
+      await Promise.all(cleaned.map((file) => saveTranslation(file)));
+    }
+  }
+
+  // src/clean/cleaner.ts
+  const events2 = __toModule(require("events"));
+  class Cleaner extends events2.EventEmitter {
+    async clean(keys4, translations9) {
+      this.emit("cleaning", {keys: keys4, translations: translations9});
+      for (const file of translations9) {
+        for (const key of keys4) {
+          if (file.delete(key)) {
+            this.emit("removed", {key, file});
+          } else {
+            this.emit("passed", {key, file});
+          }
         }
-        return Buffer.concat(chunks).toString('utf8');
-    });
-}
-exports.read = read;
-function write(stream, data) {
-    return new Promise(resolve => stream.write(data, 'utf8', () => resolve()));
-}
-exports.write = write;
+      }
+      this.emit("cleaned", {keys: keys4, translations: translations9});
+      return translations9;
+    }
+  }
 
+  // src/compare/compare.command.ts
+  class CompareCommand {
+    constructor(comparer2) {
+      this.comparer = comparer2;
+    }
+    async run(output, referencePath, translationsGlob) {
+      const reference = await loadTranslation(referencePath);
+      const translations9 = await loadTranslations(translationsGlob);
+      const compared = await this.comparer.compare(reference, translations9);
+      await write(output, serializeComparedTranslation(compared));
+    }
+  }
 
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
+  // src/compare/comparer.ts
+  const events3 = __toModule(require("events"));
+  class Comparer extends events3.EventEmitter {
+    async compare(reference, translations9) {
+      const compared = [];
+      this.emit("comparing", {reference, translations: translations9});
+      for (const file of translations9) {
+        const diffed = compareTranslation(reference, file);
+        compared.push(diffed);
+        this.emit("diff", {file: diffed});
+      }
+      this.emit("compared", {reference, translations: compared});
+      return compared;
+    }
+  }
 
-module.exports = require("path");
+  // src/complete/complete.command.ts
+  class CompleteCommand {
+    constructor(completer2) {
+      this.completer = completer2;
+    }
+    async run(input) {
+      const diff = await deserializeComparedTranslations(await read(input));
+      const completed = await this.completer.complete(diff);
+    }
+  }
 
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-module.exports = require("events");
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.deserializeKeys = exports.serializeKeys = void 0;
-function serializeKeys(keys) {
-    return keys.join('\n') + '\n';
-}
-exports.serializeKeys = serializeKeys;
-function deserializeKeys(content) {
-    return content
-        .split('\n')
-        .map(k => k.trim())
-        .filter(Boolean);
-}
-exports.deserializeKeys = deserializeKeys;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadFiles = exports.loadFile = exports.resolvePattern = void 0;
-const fs_extra_1 = __webpack_require__(1);
-const glob = __webpack_require__(13);
-function resolvePattern(pattern) {
-    return new Promise((resolve, reject) => glob(pattern, (error, matches) => (error ? reject(error) : resolve(matches))));
-}
-exports.resolvePattern = resolvePattern;
-function loadFile(path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return {
-            path,
-            content: yield fs_extra_1.readFile(path, 'utf8'),
-        };
-    });
-}
-exports.loadFile = loadFile;
-function loadFiles(pattern) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const paths = yield resolvePattern(pattern);
-        return Promise.all(paths.map(path => loadFile(path)));
-    });
-}
-exports.loadFiles = loadFiles;
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKeys = void 0;
-function getKeys(data, prefix = '') {
-    return Object.keys(data).reduce((keys, key) => {
-        if (!data[key] || typeof data[key] === 'string') {
-            keys.push(prefix + key);
+  // src/complete/completer.ts
+  const events4 = __toModule(require("events"));
+  class Completer extends events4.EventEmitter {
+    constructor(translator2) {
+      super();
+      this.translator = translator2;
+    }
+    async complete(translations9) {
+      if (translations9.length === 0) {
+        return translations9;
+      }
+      this.emit("completing", {reference: translations9[0].reference, translations: translations9});
+      for (const file of translations9) {
+        if (file.reference.path === file.path) {
+          continue;
         }
-        else {
-            keys = [...keys, ...getKeys(data[key], prefix + key + '.')];
+        const originals = file.substractions.map((key) => file.reference.get(key));
+        const translations10 = await this.translator.translate(file.reference.locale, file.locale, originals);
+        for (const i in file.substractions) {
+          const key = file.substractions[i];
+          const original = originals[i];
+          const translated = translations10[i];
+          if (file.add(key, translated)) {
+            this.emit("added", {file, key, original, translated});
+          } else {
+            this.emit("passed", {file, key, original, translated});
+          }
         }
-        return keys;
-    }, []);
-}
-exports.getKeys = getKeys;
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.config = void 0;
-const path_1 = __webpack_require__(3);
-const config_1 = __webpack_require__(22);
-const HOME_DIR = process.platform === 'win32' ? process.env.USERPROFILE : process.env.HOME;
-const PATH = path_1.join(HOME_DIR, '.lukos', 'config.json');
-const DEFAULTS = {
-    translate: {
-        google: {
-            serviceAccount: null,
-        },
-    },
-};
-exports.config = new config_1.Config(PATH, DEFAULTS);
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NoopTranslator = void 0;
-class NoopTranslator {
-    translate(source, target, contents) {
-        return Promise.resolve(contents);
+      }
+      await Promise.all(translations9.map((file) => file.save()));
+      this.emit("completed", {reference: translations9[0].reference, translations: translations9});
+      return translations9;
     }
-}
-exports.NoopTranslator = NoopTranslator;
+  }
 
+  // src/config/index.ts
+  const path2 = __toModule(require("path"));
 
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __webpack_require__(11);
-const fs_extra_1 = __webpack_require__(1);
-const path_1 = __webpack_require__(3);
-const check_command_1 = __webpack_require__(12);
-const checker_1 = __webpack_require__(14);
-const clean_command_1 = __webpack_require__(15);
-const cleaner_1 = __webpack_require__(16);
-const compare_command_1 = __webpack_require__(17);
-const comparer_1 = __webpack_require__(18);
-const complete_command_1 = __webpack_require__(19);
-const completer_1 = __webpack_require__(20);
-const config_command_1 = __webpack_require__(21);
-const format_command_1 = __webpack_require__(24);
-const pick_command_1 = __webpack_require__(25);
-const translate_command_1 = __webpack_require__(27);
-const translator_factory_1 = __webpack_require__(28);
-core_1.program.version(fs_extra_1.readJsonSync(path_1.join(__dirname, '..', 'package.json')).version);
-core_1.program
-    .command('check', 'Checks if translations are used and output unused translation keys.')
-    .help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
-    .argument('<translations>', 'Glob of the translation files (use quotes!)')
-    .argument('<sources>', 'Glob of the files where to find translation keys (use quotes!)')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const checker = new checker_1.Checker()
-        .on('checking', ({ keys, sources }) => console.error(`Checking ${keys.length} keys in ${sources.length} files...`))
-        .on('checked', ({ unused }) => console.error(`Found ${unused.length} unused keys`))
-        .on('used', ({ key, source }) => console.error(`${key} is used by ${source.path}`))
-        .on('unused', ({ key }) => console.error(`${key} is unused`));
-    const command = new check_command_1.CheckCommand(checker);
-    yield command.run(process.stdout, args.sources, args.translations);
-}));
-core_1.program
-    .command('clean', 'Removes unused items from translation files')
-    .help('Always double check your unused keys before running the command.')
-    .argument('<translations>', 'Glob of the translation files (use quotes!)')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const cleaner = new cleaner_1.Cleaner()
-        .on('cleaning', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
-        .on('removed', ({ key, file }) => console.error(`Removed "${key}" from "${file.path}".`))
-        .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
-    const command = new clean_command_1.CleanCommand(cleaner);
-    yield command.run(process.stdin, args.translations);
-}));
-core_1.program
-    .command('compare', 'Compare files with a reference file')
-    .argument('<reference>', 'Path to the reference file')
-    .argument('<translations>', 'Glob of the translation files to compare (use quotes!)')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const comparer = new comparer_1.Comparer()
-        .on('comparing', ({ reference, translations }) => console.error(`Comparing ${reference.path} with ${translations.length} files...`))
-        .on('diff', ({ file }) => console.error(`${file.path} +${file.additions.length} -${file.substractions.length}`));
-    const command = new compare_command_1.CompareCommand(comparer);
-    yield command.run(process.stdout, args.reference, args.translations);
-}));
-core_1.program.command('complete', 'Completes missing keys from a reference file').action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const completer = new completer_1.Completer(translator_factory_1.createTranslator())
-        .on('completing', ({ reference, translations }) => console.error(`Completing ${translations.length} files with values of ${reference.path}...`))
-        .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
-        .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
-    const command = new complete_command_1.CompleteCommand(completer);
-    yield command.run(process.stdin);
-}));
-core_1.program
-    .command('config', 'Get or set a config value')
-    .argument('<key>', 'The config key to get or set')
-    .argument('[value]', 'The config value to set')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        yield new config_command_1.ConfigCommand().run(process.stdout, args.key, args.value);
-    }
-    catch (error) {
-        console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
-    }
-}));
-core_1.program
-    .command('format', 'Sort keys and format of your JSON translation files')
-    .argument('<translations>', 'Glob of the translation files to compare (use quotes!)')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const command = new format_command_1.FormatCommand();
-    yield command.run(args.translations);
-}));
-core_1.program
-    .command('pick', 'Finds key values in all translation files')
-    .argument('<translations>', 'Glob of the translation files to compare (use quotes!)')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const command = new pick_command_1.PickCommand();
-    yield command.run(process.stdin, process.stdout, args.translations);
-}));
-core_1.program
-    .command('translate', 'Translate a source file into a new language')
-    .argument('<source>', 'Path to the source file')
-    .argument('<locale>', 'Locale of the target language')
-    .action(({ args }) => __awaiter(void 0, void 0, void 0, function* () {
-    const command = new translate_command_1.TranslateCommand(translator_factory_1.createTranslator());
-    yield command.run(args.source, args.locale);
-}));
-core_1.program.run();
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-module.exports = require("@caporal/core");
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CheckCommand = void 0;
-const files_1 = __webpack_require__(6);
-const keys_1 = __webpack_require__(5);
-const stream_1 = __webpack_require__(2);
-const translations_1 = __webpack_require__(0);
-class CheckCommand {
-    constructor(checker) {
-        this.checker = checker;
-    }
-    run(output, sourcesGlob, translationsGlob) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const sources = yield files_1.loadFiles(sourcesGlob);
-            const translations = yield translations_1.loadTranslations(translationsGlob);
-            const unused = yield this.checker.check(translations, sources);
-            yield stream_1.write(output, keys_1.serializeKeys(unused));
-        });
-    }
-}
-exports.CheckCommand = CheckCommand;
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports) {
-
-module.exports = require("glob");
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Checker = void 0;
-const events_1 = __webpack_require__(4);
-class Checker extends events_1.EventEmitter {
-    check(translations, sources) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const unused = [];
-            const keys = getAllKeys(translations);
-            this.emit('checking', { keys, sources, translations });
-            for (const key of keys) {
-                const source = findUsage(key, sources);
-                if (source) {
-                    this.emit('used', { key, source });
-                }
-                else {
-                    unused.push(key);
-                    this.emit('unused', { key, sources });
-                }
-            }
-            this.emit('checked', { unused });
-            return unused;
-        });
-    }
-}
-exports.Checker = Checker;
-function getAllKeys(translations) {
-    return [...new Set(translations.map(t => t.keys).flat(1))];
-}
-function findUsage(key, sources) {
-    return sources.find(file => file.content.match(new RegExp(key)));
-}
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CleanCommand = void 0;
-const keys_1 = __webpack_require__(5);
-const stream_1 = __webpack_require__(2);
-const translations_1 = __webpack_require__(0);
-class CleanCommand {
-    constructor(cleaner) {
-        this.cleaner = cleaner;
-    }
-    run(input, translationsGlob) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const keys = keys_1.deserializeKeys(yield stream_1.read(input));
-            const translations = yield translations_1.loadTranslations(translationsGlob);
-            const cleaned = yield this.cleaner.clean(keys, translations);
-            yield Promise.all(cleaned.map(file => translations_1.saveTranslation(file)));
-        });
-    }
-}
-exports.CleanCommand = CleanCommand;
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Cleaner = void 0;
-const events_1 = __webpack_require__(4);
-class Cleaner extends events_1.EventEmitter {
-    clean(keys, translations) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.emit('cleaning', { keys, translations });
-            for (const file of translations) {
-                for (const key of keys) {
-                    if (file.delete(key)) {
-                        this.emit('removed', { key, file });
-                    }
-                    else {
-                        this.emit('passed', { key, file });
-                    }
-                }
-            }
-            this.emit('cleaned', { keys, translations });
-            return translations;
-        });
-    }
-}
-exports.Cleaner = Cleaner;
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CompareCommand = void 0;
-const stream_1 = __webpack_require__(2);
-const translations_1 = __webpack_require__(0);
-class CompareCommand {
-    constructor(comparer) {
-        this.comparer = comparer;
-    }
-    run(output, referencePath, translationsGlob) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const reference = yield translations_1.loadTranslation(referencePath);
-            const translations = yield translations_1.loadTranslations(translationsGlob);
-            const compared = yield this.comparer.compare(reference, translations);
-            yield stream_1.write(output, translations_1.serializeComparedTranslation(compared));
-        });
-    }
-}
-exports.CompareCommand = CompareCommand;
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Comparer = void 0;
-const events_1 = __webpack_require__(4);
-const translations_1 = __webpack_require__(0);
-class Comparer extends events_1.EventEmitter {
-    compare(reference, translations) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const compared = [];
-            this.emit('comparing', { reference, translations });
-            for (const file of translations) {
-                const diffed = translations_1.compareTranslation(reference, file);
-                compared.push(diffed);
-                this.emit('diff', { file: diffed });
-            }
-            this.emit('compared', { reference, translations: compared });
-            return compared;
-        });
-    }
-}
-exports.Comparer = Comparer;
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CompleteCommand = void 0;
-const stream_1 = __webpack_require__(2);
-const translations_1 = __webpack_require__(0);
-class CompleteCommand {
-    constructor(completer) {
-        this.completer = completer;
-    }
-    run(input) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const diff = yield translations_1.deserializeComparedTranslations(yield stream_1.read(input));
-            const completed = yield this.completer.complete(diff);
-        });
-    }
-}
-exports.CompleteCommand = CompleteCommand;
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Completer = void 0;
-const events_1 = __webpack_require__(4);
-class Completer extends events_1.EventEmitter {
-    constructor(translator) {
-        super();
-        this.translator = translator;
-    }
-    complete(translations) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (translations.length === 0) {
-                return translations;
-            }
-            this.emit('completing', { reference: translations[0].reference, translations });
-            for (const file of translations) {
-                if (file.reference.path === file.path) {
-                    continue;
-                }
-                const originals = file.substractions.map(key => file.reference.get(key));
-                const translations = yield this.translator.translate(file.reference.locale, file.locale, originals);
-                for (const i in file.substractions) {
-                    const key = file.substractions[i];
-                    const original = originals[i];
-                    const translated = translations[i];
-                    if (file.add(key, translated)) {
-                        this.emit('added', { file, key, original, translated });
-                    }
-                    else {
-                        this.emit('passed', { file, key, original, translated });
-                    }
-                }
-            }
-            yield Promise.all(translations.map(file => file.save()));
-            this.emit('completed', { reference: translations[0].reference, translations });
-            return translations;
-        });
-    }
-}
-exports.Completer = Completer;
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConfigCommand = void 0;
-const _1 = __webpack_require__(8);
-const stream_1 = __webpack_require__(2);
-class ConfigCommand {
-    run(output, key, value) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (value) {
-                _1.config.set(key, value);
-                _1.config.save();
-                return;
-            }
-            value = _1.config.get(key);
-            if (!value || typeof value === 'object') {
-                return;
-            }
-            yield stream_1.write(output, `${value}\n`);
-        });
-    }
-}
-exports.ConfigCommand = ConfigCommand;
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Config = void 0;
-const merge = __webpack_require__(23);
-const fs_extra_1 = __webpack_require__(1);
-const objects_1 = __webpack_require__(7);
-class Config {
-    constructor(path, defaults) {
-        this.path = path;
-        this.defaults = defaults;
-        this.load();
-        this.save();
+  // src/config/config.ts
+  const deepmerge = __toModule(require("deepmerge"));
+  const fs_extra3 = __toModule(require("fs-extra"));
+  class Config {
+    constructor(path5, defaults) {
+      this.path = path5;
+      this.defaults = defaults;
+      this.load();
+      this.save();
     }
     get(key) {
-        if (!this.hasKey(key)) {
-            throw new Error(`Key "${key}" doesn't exist`);
-        }
-        return key.split('.').reduce((data, key) => data && data[key], this.data);
+      if (!this.hasKey(key)) {
+        throw new Error(`Key "${key}" doesn't exist`);
+      }
+      return key.split(".").reduce((data, key2) => data && data[key2], this.data);
     }
     set(key, value) {
-        if (!this.hasKey(key)) {
-            throw new Error(`Key "${key}" doesn't exist`);
-        }
-        const keys = key.split('.');
-        const last = keys.pop();
-        const next = {};
-        const parent = keys.reduce((data, key) => data[key] || (data[key] = {}), next);
-        parent[last] = value;
-        this.data = merge(this.data, next);
+      if (!this.hasKey(key)) {
+        throw new Error(`Key "${key}" doesn't exist`);
+      }
+      const keys4 = key.split(".");
+      const last = keys4.pop();
+      const next = {};
+      const parent = keys4.reduce((data, key2) => data[key2] || (data[key2] = {}), next);
+      parent[last] = value;
+      this.data = deepmerge.default(this.data, next);
     }
     keys() {
-        return objects_1.getKeys(this.data);
+      return getKeys(this.data);
     }
     has(key) {
-        return !!this.get(key);
+      return !!this.get(key);
     }
     hasKey(key) {
-        return this.keys().includes(key);
+      return this.keys().includes(key);
     }
     save() {
-        fs_extra_1.outputJsonSync(this.path, this.data, { spaces: 2 });
+      fs_extra3.outputJsonSync(this.path, this.data, {spaces: 2});
     }
     load() {
-        if (!fs_extra_1.existsSync(this.path)) {
-            this.data = this.defaults;
-            return;
-        }
-        this.data = merge(this.defaults, fs_extra_1.readJsonSync(this.path));
+      if (!fs_extra3.existsSync(this.path)) {
+        this.data = this.defaults;
+        return;
+      }
+      this.data = deepmerge.default(this.defaults, fs_extra3.readJsonSync(this.path));
     }
-}
-exports.Config = Config;
+  }
 
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports) {
-
-module.exports = require("deepmerge");
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FormatCommand = void 0;
-const translations_1 = __webpack_require__(0);
-class FormatCommand {
-    run(translationsGlob) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield translations_1.saveTranslations(yield translations_1.loadTranslations(translationsGlob));
-        });
+  // src/config/index.ts
+  const HOME_DIR = process.platform === "win32" ? process.env.USERPROFILE : process.env.HOME;
+  const PATH = path2.join(HOME_DIR, ".lukos", "config.json");
+  const DEFAULTS = {
+    translate: {
+      google: {
+        serviceAccount: null
+      }
     }
-}
-exports.FormatCommand = FormatCommand;
+  };
+  const config2 = new Config(PATH, DEFAULTS);
 
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PickCommand = void 0;
-const keys_1 = __webpack_require__(5);
-const stream_1 = __webpack_require__(2);
-const translations_1 = __webpack_require__(0);
-const pick_1 = __webpack_require__(26);
-class PickCommand {
-    run(input, output, translationsGlob) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const keys = keys_1.deserializeKeys(yield stream_1.read(input));
-            const translations = yield translations_1.loadTranslations(translationsGlob);
-            const picked = pick_1.pick(keys, translations);
-            yield stream_1.write(output, JSON.stringify(picked, null, 2));
-        });
+  // src/config/config.command.ts
+  class ConfigCommand {
+    async run(output, key, value) {
+      if (value) {
+        config2.set(key, value);
+        config2.save();
+        return;
+      }
+      value = config2.get(key);
+      if (!value || typeof value === "object") {
+        return;
+      }
+      await write(output, `${value}
+`);
     }
-}
-exports.PickCommand = PickCommand;
+  }
 
+  // src/format/format.command.ts
+  class FormatCommand {
+    async run(translationsGlob) {
+      await saveTranslations(await loadTranslations(translationsGlob));
+    }
+  }
 
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.pick = void 0;
-function pick(keys, translations) {
+  // src/pick/pick.ts
+  function pick(keys4, translations9) {
     const picked = {};
-    keys.forEach(key => {
-        picked[key] = {};
-        translations.forEach(translation => {
-            picked[key][translation.path] = translation.get(key);
-        });
+    keys4.forEach((key) => {
+      picked[key] = {};
+      translations9.forEach((translation) => {
+        picked[key][translation.path] = translation.get(key);
+      });
     });
     return picked;
-}
-exports.pick = pick;
+  }
 
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TranslateCommand = void 0;
-const fs_extra_1 = __webpack_require__(1);
-const path_1 = __webpack_require__(3);
-const translations_1 = __webpack_require__(0);
-const noop_translator_1 = __webpack_require__(9);
-class TranslateCommand {
-    constructor(translator) {
-        this.translator = translator;
+  // src/pick/pick.command.ts
+  class PickCommand {
+    async run(input, output, translationsGlob) {
+      const keys4 = deserializeKeys(await read(input));
+      const translations9 = await loadTranslations(translationsGlob);
+      const picked = pick(keys4, translations9);
+      await write(output, JSON.stringify(picked, null, 2));
     }
-    run(sourcePath, targetLocale) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.translator instanceof noop_translator_1.NoopTranslator) {
-                throw new Error(`The translate command requires a configured translation API.`);
-            }
-            const source = yield translations_1.loadTranslation(sourcePath);
-            if (source.locale === targetLocale) {
-                throw new Error('The source and target locales are the same.');
-            }
-            const targetPath = path_1.join(path_1.dirname(sourcePath), `${targetLocale}.json`);
-            if (fs_extra_1.existsSync(targetPath)) {
-                throw new Error(`The target file "${targetPath}" already exists.`);
-            }
-            const targetFile = new translations_1.TranslationFile(targetPath, {});
-            const originals = source.keys.map(key => source.get(key));
-            const translations = yield this.translator.translate(source.locale, targetLocale, originals);
-            for (const i in source.keys) {
-                const key = source.keys[i];
-                const value = translations[i];
-                targetFile.add(key, value);
-            }
-            targetFile.save();
-        });
-    }
-}
-exports.TranslateCommand = TranslateCommand;
+  }
 
+  // src/translate/translate.command.ts
+  const fs_extra4 = __toModule(require("fs-extra"));
+  const path3 = __toModule(require("path"));
 
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTranslator = void 0;
-const config_1 = __webpack_require__(8);
-const google_translator_1 = __webpack_require__(29);
-const noop_translator_1 = __webpack_require__(9);
-function createTranslator() {
-    const serviceAccount = config_1.config.get('translate.google.serviceAccount');
-    if (serviceAccount) {
-        return new google_translator_1.GoogleTranslator(serviceAccount);
-    }
-    return new noop_translator_1.NoopTranslator();
-}
-exports.createTranslator = createTranslator;
-
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GoogleTranslator = void 0;
-const v3_1 = __webpack_require__(30);
-const fs_extra_1 = __webpack_require__(1);
-class GoogleTranslator {
-    constructor(serviceAccount) {
-        process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount;
-        this.client = new v3_1.TranslationServiceClient();
-    }
+  // src/translate/noop.translator.ts
+  class NoopTranslator {
     translate(source, target, contents) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (source === target) {
-                return contents;
-            }
-            const credentials = yield fs_extra_1.readJson(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-            const request = {
-                contents,
-                sourceLanguageCode: source,
-                targetLanguageCode: target,
-                parent: `projects/${credentials.project_id}`,
-                mimeType: 'text/plain',
-            };
-            const [response] = yield this.client.translateText(request);
-            return response.translations.map(t => t.translatedText);
-        });
+      return Promise.resolve(contents);
     }
-}
-exports.GoogleTranslator = GoogleTranslator;
+  }
 
+  // src/translate/translate.command.ts
+  class TranslateCommand {
+    constructor(translator2) {
+      this.translator = translator2;
+    }
+    async run(sourcePath, targetLocale) {
+      if (this.translator instanceof NoopTranslator) {
+        throw new Error(`The translate command requires a configured translation API.`);
+      }
+      const source = await loadTranslation(sourcePath);
+      if (source.locale === targetLocale) {
+        throw new Error("The source and target locales are the same.");
+      }
+      const targetPath = path3.join(path3.dirname(sourcePath), `${targetLocale}.json`);
+      if (fs_extra4.existsSync(targetPath)) {
+        throw new Error(`The target file "${targetPath}" already exists.`);
+      }
+      const targetFile = new TranslationFile(targetPath, {});
+      const originals = source.keys.map((key) => source.get(key));
+      const translations9 = await this.translator.translate(source.locale, targetLocale, originals);
+      for (const i in source.keys) {
+        const key = source.keys[i];
+        const value = translations9[i];
+        targetFile.add(key, value);
+      }
+      targetFile.save();
+    }
+  }
 
-/***/ }),
-/* 30 */
-/***/ (function(module, exports) {
+  // src/translate/google.translator.ts
+  const v3 = __toModule(require("@google-cloud/translate/build/src/v3"));
+  const fs_extra5 = __toModule(require("fs-extra"));
+  class GoogleTranslator {
+    constructor(serviceAccount) {
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount;
+      this.client = new v3.TranslationServiceClient();
+    }
+    async translate(source, target, contents) {
+      if (source === target) {
+        return contents;
+      }
+      const credentials = await fs_extra5.readJson(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+      const request = {
+        contents,
+        sourceLanguageCode: source,
+        targetLanguageCode: target,
+        parent: `projects/${credentials.project_id}`,
+        mimeType: "text/plain"
+      };
+      const [response] = await this.client.translateText(request);
+      return response.translations.map((t) => t.translatedText);
+    }
+  }
 
-module.exports = require("@google-cloud/translate/build/src/v3");
+  // src/translate/translator.factory.ts
+  function createTranslator() {
+    const serviceAccount = config2.get("translate.google.serviceAccount");
+    if (serviceAccount) {
+      return new GoogleTranslator(serviceAccount);
+    }
+    return new NoopTranslator();
+  }
 
-/***/ })
-/******/ ]);
+  // src/cli.ts
+  core.program.version(fs_extra6.readJsonSync(path4.join(__dirname, "..", "package.json")).version);
+  core.program.command("check", "Checks if translations are used and output unused translation keys.").help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.").argument("<translations>", "Glob of the translation files (use quotes!)").argument("<sources>", "Glob of the files where to find translation keys (use quotes!)").action(async ({args}) => {
+    const checker2 = new Checker().on("checking", ({keys: keys4, sources}) => console.error(`Checking ${keys4.length} keys in ${sources.length} files...`)).on("checked", ({unused}) => console.error(`Found ${unused.length} unused keys`)).on("used", ({key, source}) => console.error(`${key} is used by ${source.path}`)).on("unused", ({key}) => console.error(`${key} is unused`));
+    const command = new CheckCommand(checker2);
+    await command.run(process.stdout, args.sources, args.translations);
+  });
+  core.program.command("clean", "Removes unused items from translation files").help("Always double check your unused keys before running the command.").argument("<translations>", "Glob of the translation files (use quotes!)").action(async ({args}) => {
+    const cleaner2 = new Cleaner().on("cleaning", ({keys: keys4, translations: translations9}) => console.error(`Removing ${keys4.length} keys from ${translations9.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
+    const command = new CleanCommand(cleaner2);
+    await command.run(process.stdin, args.translations);
+  });
+  core.program.command("compare", "Compare files with a reference file").argument("<reference>", "Path to the reference file").argument("<translations>", "Glob of the translation files to compare (use quotes!)").action(async ({args}) => {
+    const comparer2 = new Comparer().on("comparing", ({reference, translations: translations9}) => console.error(`Comparing ${reference.path} with ${translations9.length} files...`)).on("diff", ({file}) => console.error(`${file.path} +${file.additions.length} -${file.substractions.length}`));
+    const command = new CompareCommand(comparer2);
+    await command.run(process.stdout, args.reference, args.translations);
+  });
+  core.program.command("complete", "Completes missing keys from a reference file").action(async ({args}) => {
+    const completer2 = new Completer(createTranslator()).on("completing", ({reference, translations: translations9}) => console.error(`Completing ${translations9.length} files with values of ${reference.path}...`)).on("added", ({file, key}) => console.error(`Added ${key} in ${file.path}`)).on("passed", ({file, key}) => console.error(`Passed ${key} in ${file.path}`));
+    const command = new CompleteCommand(completer2);
+    await command.run(process.stdin);
+  });
+  core.program.command("config", "Get or set a config value").argument("<key>", "The config key to get or set").argument("[value]", "The config value to set").action(async ({args}) => {
+    try {
+      await new ConfigCommand().run(process.stdout, args.key, args.value);
+    } catch (error) {
+      console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
+    }
+  });
+  core.program.command("format", "Sort keys and format of your JSON translation files").argument("<translations>", "Glob of the translation files to compare (use quotes!)").action(async ({args}) => {
+    const command = new FormatCommand();
+    await command.run(args.translations);
+  });
+  core.program.command("pick", "Finds key values in all translation files").argument("<translations>", "Glob of the translation files to compare (use quotes!)").action(async ({args}) => {
+    const command = new PickCommand();
+    await command.run(process.stdin, process.stdout, args.translations);
+  });
+  core.program.command("translate", "Translate a source file into a new language").argument("<source>", "Path to the source file").argument("<locale>", "Locale of the target language").action(async ({args}) => {
+    const command = new TranslateCommand(createTranslator());
+    await command.run(args.source, args.locale);
+  });
+  core.program.run();
+})();

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { program } from '@caporal/core';
 import { readJsonSync } from 'fs-extra';
 import { join } from 'path';

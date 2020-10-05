@@ -1,4 +1,4 @@
-import * as tap from 'tap';
+import tap from 'tap';
 import { loadTranslation, loadTranslations } from '../translations';
 import { Comparer } from './comparer';
 
