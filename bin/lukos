@@ -21,7 +21,7 @@
   };
 
   // src/cli.ts
-  const core = __toModule(require("@caporal/core"));
+  const commander = __toModule(require("commander"));
   const fs_extra6 = __toModule(require("fs-extra"));
   const path4 = __toModule(require("path"));
 
@@ -570,45 +570,63 @@
   }
 
   // src/cli.ts
-  core.program.version(fs_extra6.readJsonSync(path4.join(__dirname, "..", "package.json")).version);
-  core.program.command("check", "Checks if translations are used and output unused translation keys.").help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.").argument("<translations>", "Glob of the translation files (use quotes!)").argument("<sources>", "Glob of the files where to find translation keys (use quotes!)").action(async ({args}) => {
+  commander.program.version(fs_extra6.readJsonSync(path4.join(__dirname, "..", "package.json")).version);
+  commander.program.command("check <translations> <sources>").description("Checks if translations are used and output unused translation keys.", {
+    translations: "Glob of the translation files (use quotes!)",
+    sources: "Glob of the files where to find translation keys (use quotes!)"
+  }).addHelpText("after", "Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.").action(async ({args}) => {
     const checker2 = new Checker().on("checking", ({keys: keys4, sources}) => console.error(`Checking ${keys4.length} keys in ${sources.length} files...`)).on("checked", ({unused}) => console.error(`Found ${unused.length} unused keys`)).on("used", ({key, source}) => console.error(`${key} is used by ${source.path}`)).on("unused", ({key}) => console.error(`${key} is unused`));
     const command = new CheckCommand(checker2);
     await command.run(process.stdout, args.sources, args.translations);
   });
-  core.program.command("clean", "Removes unused items from translation files").help("Always double check your unused keys before running the command.").argument("<translations>", "Glob of the translation files (use quotes!)").action(async ({args}) => {
+  commander.program.command("clean <translations>").description("Removes unused items from translation files", {
+    translations: "Glob of the translation files (use quotes!)"
+  }).addHelpText("after", "Always double check your unused keys before running the command.").action(async ({args}) => {
     const cleaner2 = new Cleaner().on("cleaning", ({keys: keys4, translations: translations9}) => console.error(`Removing ${keys4.length} keys from ${translations9.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(cleaner2);
     await command.run(process.stdin, args.translations);
   });
-  core.program.command("compare", "Compare files with a reference file").argument("<reference>", "Path to the reference file").argument("<translations>", "Glob of the translation files to compare (use quotes!)").action(async ({args}) => {
+  commander.program.command("compare <reference> <translations>").description("Compare files with a reference file", {
+    reference: "Path to the reference file",
+    translations: "Glob of the translation files to compare (use quotes!)"
+  }).action(async ({args}) => {
     const comparer2 = new Comparer().on("comparing", ({reference, translations: translations9}) => console.error(`Comparing ${reference.path} with ${translations9.length} files...`)).on("diff", ({file}) => console.error(`${file.path} +${file.additions.length} -${file.substractions.length}`));
     const command = new CompareCommand(comparer2);
     await command.run(process.stdout, args.reference, args.translations);
   });
-  core.program.command("complete", "Completes missing keys from a reference file").action(async ({args}) => {
+  commander.program.command("complete", "Completes missing keys from a reference file").action(async ({args}) => {
     const completer2 = new Completer(createTranslator()).on("completing", ({reference, translations: translations9}) => console.error(`Completing ${translations9.length} files with values of ${reference.path}...`)).on("added", ({file, key}) => console.error(`Added ${key} in ${file.path}`)).on("passed", ({file, key}) => console.error(`Passed ${key} in ${file.path}`));
     const command = new CompleteCommand(completer2);
     await command.run(process.stdin);
   });
-  core.program.command("config", "Get or set a config value").argument("<key>", "The config key to get or set").argument("[value]", "The config value to set").action(async ({args}) => {
+  commander.program.command("config <key> [value]").description("Get or set a config value", {
+    key: "The config key to get or set",
+    value: "The config value to set"
+  }).action(async ({args}) => {
     try {
       await new ConfigCommand().run(process.stdout, args.key, args.value);
     } catch (error) {
       console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
     }
   });
-  core.program.command("format", "Sort keys and format of your JSON translation files").argument("<translations>", "Glob of the translation files to compare (use quotes!)").action(async ({args}) => {
+  commander.program.command("format <translations>").description("Sort keys and format of your JSON translation files", {
+    translations: "Glob of the translation files to compare (use quotes!)"
+  }).action(async ({args}) => {
     const command = new FormatCommand();
     await command.run(args.translations);
   });
-  core.program.command("pick", "Finds key values in all translation files").argument("<translations>", "Glob of the translation files to compare (use quotes!)").action(async ({args}) => {
+  commander.program.command("pick <translations>").description("Finds key values in all translation files", {
+    translations: "Glob of the translation files to compare (use quotes!)"
+  }).action(async ({args}) => {
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, args.translations);
   });
-  core.program.command("translate", "Translate a source file into a new language").argument("<source>", "Path to the source file").argument("<locale>", "Locale of the target language").action(async ({args}) => {
+  commander.program.command("translate <source> <locale>").description("Translate a source file into a new language", {
+    source: "Path to the source file",
+    locale: "Locale of the target language"
+  }).action(async ({args}) => {
     const command = new TranslateCommand(createTranslator());
     await command.run(args.source, args.locale);
   });
-  core.program.run();
+  commander.program.parseAsync();
 })();

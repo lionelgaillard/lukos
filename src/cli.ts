@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { program } from '@caporal/core';
+import { program } from 'commander';
 import { readJsonSync } from 'fs-extra';
 import { join } from 'path';
 import { CheckCommand } from './check/check.command';
@@ -20,10 +20,12 @@ import { createTranslator } from './translate/translator.factory';
 program.version(readJsonSync(join(__dirname, '..', 'package.json')).version);
 
 program
-  .command('check', 'Checks if translations are used and output unused translation keys.')
-  .help("Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
-  .argument('<translations>', 'Glob of the translation files (use quotes!)')
-  .argument('<sources>', 'Glob of the files where to find translation keys (use quotes!)')
+  .command('check <translations> <sources>')
+  .description('Checks if translations are used and output unused translation keys.', {
+    translations: 'Glob of the translation files (use quotes!)',
+    sources: 'Glob of the files where to find translation keys (use quotes!)',
+  })
+  .addHelpText('after', "Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
   .action(async ({ args }) => {
     const checker = new Checker()
       .on('checking', ({ keys, sources }) => console.error(`Checking ${keys.length} keys in ${sources.length} files...`))
@@ -35,9 +37,11 @@ program
   });
 
 program
-  .command('clean', 'Removes unused items from translation files')
-  .help('Always double check your unused keys before running the command.')
-  .argument('<translations>', 'Glob of the translation files (use quotes!)')
+  .command('clean <translations>')
+  .description('Removes unused items from translation files', {
+    translations: 'Glob of the translation files (use quotes!)',
+  })
+  .addHelpText('after', 'Always double check your unused keys before running the command.')
   .action(async ({ args }) => {
     const cleaner = new Cleaner()
       .on('cleaning', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
@@ -48,9 +52,11 @@ program
   });
 
 program
-  .command('compare', 'Compare files with a reference file')
-  .argument('<reference>', 'Path to the reference file')
-  .argument('<translations>', 'Glob of the translation files to compare (use quotes!)')
+  .command('compare <reference> <translations>')
+  .description('Compare files with a reference file', {
+    reference: 'Path to the reference file',
+    translations: 'Glob of the translation files to compare (use quotes!)',
+  })
   .action(async ({ args }) => {
     const comparer = new Comparer()
       .on('comparing', ({ reference, translations }) => console.error(`Comparing ${reference.path} with ${translations.length} files...`))
@@ -71,9 +77,11 @@ program.command('complete', 'Completes missing keys from a reference file').acti
 });
 
 program
-  .command('config', 'Get or set a config value')
-  .argument('<key>', 'The config key to get or set')
-  .argument('[value]', 'The config value to set')
+  .command('config <key> [value]')
+  .description('Get or set a config value', {
+    key: 'The config key to get or set',
+    value: 'The config value to set',
+  })
   .action(async ({ args }) => {
     try {
       await new ConfigCommand().run(process.stdout, args.key as string, args.value as string);
@@ -83,28 +91,34 @@ program
   });
 
 program
-  .command('format', 'Sort keys and format of your JSON translation files')
-  .argument('<translations>', 'Glob of the translation files to compare (use quotes!)')
+  .command('format <translations>')
+  .description('Sort keys and format of your JSON translation files', {
+    translations: 'Glob of the translation files to compare (use quotes!)',
+  })
   .action(async ({ args }) => {
     const command = new FormatCommand();
     await command.run(args.translations as string);
   });
 
 program
-  .command('pick', 'Finds key values in all translation files')
-  .argument('<translations>', 'Glob of the translation files to compare (use quotes!)')
+  .command('pick <translations>')
+  .description('Finds key values in all translation files', {
+    translations: 'Glob of the translation files to compare (use quotes!)',
+  })
   .action(async ({ args }) => {
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, args.translations as string);
   });
 
 program
-  .command('translate', 'Translate a source file into a new language')
-  .argument('<source>', 'Path to the source file')
-  .argument('<locale>', 'Locale of the target language')
+  .command('translate <source> <locale>')
+  .description('Translate a source file into a new language', {
+    source: 'Path to the source file',
+    locale: 'Locale of the target language',
+  })
   .action(async ({ args }) => {
     const command = new TranslateCommand(createTranslator());
     await command.run(args.source as string, args.locale as string);
   });
 
-program.run();
+program.parseAsync();
