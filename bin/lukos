@@ -236,7 +236,7 @@
     return getKeys(data);
   }
   function getLocale(path5) {
-    return path.basename(path5, ".json");
+    return path.basename(path5).substr(0, 2);
   }
 
   // src/check/check.command.ts

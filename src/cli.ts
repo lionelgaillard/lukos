@@ -21,7 +21,7 @@ program.version(readJsonSync(join(__dirname, '..', 'package.json')).version);
 
 program
   .command('check', 'Checks if translations are used and output unused translation keys.')
-  .help("Note that will it only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
+  .help("Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
   .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .argument('<sources>', 'Glob of the files where to find translation keys (use quotes!)')
   .action(async ({ args }) => {

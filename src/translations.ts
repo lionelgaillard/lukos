@@ -185,5 +185,5 @@ function getTranslationKeys(data: any) {
 }
 
 function getLocale(path: string) {
-  return basename(path, '.json');
+  return basename(path).substr(0, 2);
 }
