@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2016",
+    "esModuleInterop": true,
+    "isolatedModules": true,
     "lib": ["es2019"],
-    "esModuleInterop": true
+    "module": "commonjs",
+		"moduleResolution": "node",
+    "target": "es2016"
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "**/node_modules/*"]

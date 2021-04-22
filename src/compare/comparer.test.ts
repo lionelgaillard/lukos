@@ -1,8 +1,9 @@
-import tap from 'tap';
+import test from 'ava';
+import { fixtures } from '../tests';
 import { loadTranslation, loadTranslations } from '../translations';
 import { Comparer } from './comparer';
 
-const dir = tap.testdir({
+const dir = fixtures({
   'en.json': JSON.stringify({
     firstLevelUsedKey: 'Used',
     firstLevelUnusedKey: 'Unused',
@@ -32,39 +33,39 @@ const dir = tap.testdir({
   }),
 });
 
-tap.test('comparer', async t => {
+test('comparer', async t => {
   const comparer = new Comparer();
 
-  t.emits(comparer, 'comparing', 'should emit comparing event');
-  t.emits(comparer, 'compared', 'should emit compared event');
-  t.emits(comparer, 'diff', 'should emit diff event');
+  t.plan(17);
+
+  comparer.once('comparing', () => t.pass('should emit comparing event'));
+  comparer.once('compared', () => t.pass('should emit compared event'));
+  comparer.once('diff', () => t.pass('should emit diff event'));
 
   const reference = await loadTranslation(`${dir}/en.json`);
   const translations = await loadTranslations(`${dir}/??.json`);
   const compared = await comparer.compare(reference, translations);
 
-  t.ok(compared, 'should return compared files');
-  t.equal(compared.length, 3, 'should have 3 files');
+  t.truthy(compared, 'should return compared files');
+  t.is(compared.length, 3, 'should have 3 files');
 
   const en = compared.find(f => f.path.endsWith('en.json'));
-  t.ok(en, 'should have compared en.json');
+  t.truthy(en, 'should have compared en.json');
 
-  t.ok(en.additions, 'reference should have additions array');
-  t.equal(en.additions.length, 0, 'reference file should have no additions');
+  t.truthy(en.additions, 'reference should have additions array');
+  t.is(en.additions.length, 0, 'reference file should have no additions');
 
-  t.ok(en.substractions, 'reference should have substractions array');
-  t.equal(en.substractions.length, 0, 'reference file should have no substractions');
+  t.truthy(en.substractions, 'reference should have substractions array');
+  t.is(en.substractions.length, 0, 'reference file should have no substractions');
 
   const fr = compared.find(f => f.path.endsWith('fr.json'));
-  t.ok(fr, 'should have compared fr.json');
+  t.truthy(fr, 'should have compared fr.json');
 
-  t.ok(fr.additions, 'should have additions array');
-  t.equal(fr.additions.length, 1, 'should have 1 addition');
-  t.ok(fr.additions.includes('firstLevelAnotherUnusedKey'), 'should found "firstLevelAnotherUnusedKey" as additional key');
+  t.truthy(fr.additions, 'should have additions array');
+  t.is(fr.additions.length, 1, 'should have 1 addition');
+  t.truthy(fr.additions.includes('firstLevelAnotherUnusedKey'), 'should found "firstLevelAnotherUnusedKey" as additional key');
 
-  t.ok(fr.substractions, 'should have substractions array');
-  t.equal(fr.substractions.length, 1, 'should have 1 substraction');
-  t.ok(fr.substractions.includes('firstLevelSomeKey'), 'should found "firstLevelSomeKey" as missing key');
-
-  t.end();
+  t.truthy(fr.substractions, 'should have substractions array');
+  t.is(fr.substractions.length, 1, 'should have 1 substraction');
+  t.truthy(fr.substractions.includes('firstLevelSomeKey'), 'should found "firstLevelSomeKey" as missing key');
 });

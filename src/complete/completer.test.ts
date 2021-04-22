@@ -1,10 +1,11 @@
+import test from 'ava';
 import { readFile } from 'fs-extra';
-import tap from 'tap';
+import { fixtures } from '../tests';
 import { NoopTranslator } from '../translate/noop.translator';
 import { deserializeComparedTranslations } from '../translations';
 import { Completer } from './completer';
 
-const dir = tap.testdir({
+const dir = fixtures({
   'en.json': JSON.stringify({
     a: 'en/a',
     b: 'en/b',
@@ -26,9 +27,9 @@ const dir = tap.testdir({
     },
   }),
   'compared.txt': [
-    `### ${tap.testdirName}/en.json`,
-    `@@@ ${tap.testdirName}/en.json`,
-    `@@@ ${tap.testdirName}/fr.json`,
+    `### %dir%/en.json`,
+    `@@@ %dir%/en.json`,
+    `@@@ %dir%/fr.json`,
     '+++ d',
     '--- a',
     '--- b',
@@ -37,28 +38,28 @@ const dir = tap.testdir({
   ].join('\n'),
 });
 
-tap.test('completer', async t => {
+test('completer', async t => {
   const completer = new Completer(new NoopTranslator());
 
-  t.emits(completer, 'completing', 'should emit completing event');
-  t.emits(completer, 'completed', 'should emit completed event');
-  t.emits(completer, 'added', 'should emit added event');
-  t.emits(completer, 'passed', 'should emit passed event');
+  t.plan(11);
+
+  completer.once('completing', () => t.pass('should emit completing event'));
+  completer.once('completed', () => t.pass('should emit completed event'));
+  completer.once('added', () => t.pass('should emit added event'));
+  completer.once('passed', () => t.pass('should emit passed event'));
 
   const diff = await deserializeComparedTranslations(await readFile(`${dir}/compared.txt`, 'utf8'));
   const completed = await completer.complete(diff);
 
   const fr = completed.find(file => file.path.endsWith('fr.json')).data;
 
-  t.equal(fr.a, 'en/a', 'fr should have "a" key');
-  t.equal(fr.b, 'fr/b', 'fr should keep "b" key');
+  t.is(fr.a, 'en/a', 'fr should have "a" key');
+  t.is(fr.b, 'fr/b', 'fr should keep "b" key');
 
-  t.ok(fr.groupA, 'fr should have "groupA" group');
-  t.equal(fr.groupA.a, 'en/groupA/a', 'fr should have "groupA.a" key');
+  t.truthy(fr.groupA, 'fr should have "groupA" group');
+  t.is(fr.groupA.a, 'en/groupA/a', 'fr should have "groupA.a" key');
 
-  t.ok(fr.groupB, 'fr should have "groupB" group');
-  t.equal(fr.groupB.a, 'en/groupB/a', 'fr should have "groupB.a" key');
-  t.equal(fr.groupB.b, 'fr/groupB/b', 'fr should heep "groupB.b" key');
-
-  t.end();
+  t.truthy(fr.groupB, 'fr should have "groupB" group');
+  t.is(fr.groupB.a, 'en/groupB/a', 'fr should have "groupB.a" key');
+  t.is(fr.groupB.b, 'fr/groupB/b', 'fr should heep "groupB.b" key');
 });

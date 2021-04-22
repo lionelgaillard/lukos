@@ -1,87 +1,86 @@
 #!/usr/bin/env node
 (() => {
-  var __defineProperty = Object.defineProperty;
-  var __hasOwnProperty = Object.prototype.hasOwnProperty;
-  var __markAsModule = (target) => {
-    return __defineProperty(target, "__esModule", {value: true});
-  };
-  var __exportStar = (target, module) => {
-    __markAsModule(target);
-    if (typeof module === "object" || typeof module === "function") {
-      for (let key in module)
-        if (!__hasOwnProperty.call(target, key) && key !== "default")
-          __defineProperty(target, key, {get: () => module[key], enumerable: true});
+  var __create = Object.create;
+  var __defProp = Object.defineProperty;
+  var __getProtoOf = Object.getPrototypeOf;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+  var __reExport = (target, module, desc) => {
+    if (module && typeof module === "object" || typeof module === "function") {
+      for (let key of __getOwnPropNames(module))
+        if (!__hasOwnProp.call(target, key) && key !== "default")
+          __defProp(target, key, {get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable});
     }
     return target;
   };
   var __toModule = (module) => {
-    if (module && module.__esModule)
-      return module;
-    return __exportStar(__defineProperty({}, "default", {value: module, enumerable: true}), module);
+    return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? {get: () => module.default, enumerable: true} : {value: module, enumerable: true})), module);
   };
 
   // src/cli.ts
-  const commander = __toModule(require("commander"));
-  const fs_extra6 = __toModule(require("fs-extra"));
-  const path4 = __toModule(require("path"));
+  var import_commander = __toModule(require("commander"));
+  var import_fs_extra6 = __toModule(require("fs-extra"));
+  var import_path4 = __toModule(require("path"));
 
   // src/files.ts
-  const fs_extra = __toModule(require("fs-extra"));
-  const glob = __toModule(require("glob"));
+  var import_fs_extra = __toModule(require("fs-extra"));
+  var import_glob = __toModule(require("glob"));
   function resolvePattern(pattern) {
-    return new Promise((resolve, reject) => glob.default(pattern, (error, matches) => error ? reject(error) : resolve(matches)));
+    return new Promise((resolve, reject) => (0, import_glob.default)(pattern, (error, matches) => error ? reject(error) : resolve(matches)));
   }
-  async function loadFile(path5) {
+  async function loadFile(path) {
     return {
-      path: path5,
-      content: await fs_extra.readFile(path5, "utf8")
+      path,
+      content: await (0, import_fs_extra.readFile)(path, "utf8")
     };
   }
   async function loadFiles(pattern) {
     const paths = await resolvePattern(pattern);
-    return Promise.all(paths.map((path5) => loadFile(path5)));
+    return Promise.all(paths.map((path) => loadFile(path)));
   }
 
   // src/keys.ts
-  function serializeKeys(keys4) {
-    return keys4.join("\n") + "\n";
+  function serializeKeys(keys) {
+    return keys.join("\n") + "\n";
   }
   function deserializeKeys(content) {
     return content.split("\n").map((k) => k.trim()).filter(Boolean);
   }
 
   // src/stream.ts
-  async function read(stream7) {
+  async function read(stream) {
     const chunks = [];
-    for await (const chunk of stream7) {
+    for await (const chunk of stream) {
       chunks.push(chunk);
     }
     return Buffer.concat(chunks).toString("utf8");
   }
-  function write(stream7, data) {
-    return new Promise((resolve) => stream7.write(data, "utf8", () => resolve()));
+  function write(stream, data) {
+    return new Promise((resolve) => stream.write(data, "utf8", () => resolve()));
   }
 
   // src/translations.ts
-  const fs_extra2 = __toModule(require("fs-extra"));
-  const path = __toModule(require("path"));
+  var import_fs_extra2 = __toModule(require("fs-extra"));
+  var import_path = __toModule(require("path"));
 
   // src/objects.ts
   function getKeys(data, prefix = "") {
-    return Object.keys(data).reduce((keys4, key) => {
+    return Object.keys(data).reduce((keys, key) => {
       if (!data[key] || typeof data[key] === "string") {
-        keys4.push(prefix + key);
+        keys.push(prefix + key);
       } else {
-        keys4 = [...keys4, ...getKeys(data[key], prefix + key + ".")];
+        keys = [...keys, ...getKeys(data[key], prefix + key + ".")];
       }
-      return keys4;
+      return keys;
     }, []);
   }
 
   // src/translations.ts
-  class TranslationFile {
-    constructor(path5, data) {
-      this.path = path5;
+  var TranslationFile = class {
+    constructor(path, data) {
+      this.path = path;
       this.data = data;
       this._keys = null;
     }
@@ -112,35 +111,35 @@
     save() {
       return saveTranslation(this);
     }
-  }
-  class ComparedTranslationFile extends TranslationFile {
+  };
+  var ComparedTranslationFile = class extends TranslationFile {
     constructor() {
       super(...arguments);
       this.additions = [];
       this.substractions = [];
     }
-  }
+  };
   async function saveTranslation(file) {
-    await fs_extra2.writeJson(file.path, sortTranslation(file.data), {spaces: 2});
+    await (0, import_fs_extra2.writeJson)(file.path, sortTranslation(file.data), {spaces: 2});
   }
-  async function saveTranslations(files3) {
-    await Promise.all(files3.map((t) => saveTranslation(t)));
+  async function saveTranslations(files) {
+    await Promise.all(files.map((t) => saveTranslation(t)));
   }
-  async function loadTranslation(path5) {
-    const data = await fs_extra2.readJson(path5);
-    return new TranslationFile(path5, data);
+  async function loadTranslation(path) {
+    const data = await (0, import_fs_extra2.readJson)(path);
+    return new TranslationFile(path, data);
   }
   async function loadTranslations(pattern) {
     const paths = await resolvePattern(pattern);
-    return Promise.all(paths.map((path5) => loadTranslation(path5)));
+    return Promise.all(paths.map((path) => loadTranslation(path)));
   }
-  function serializeComparedTranslation(files3) {
-    if (files3.length === 0) {
+  function serializeComparedTranslation(files) {
+    if (files.length === 0) {
       return "";
     }
-    let output = `### ${files3[0].reference.path}
+    let output = `### ${files[0].reference.path}
 `;
-    for (const file of files3) {
+    for (const file of files) {
       output += `@@@ ${file.path}
 `;
       for (const key of file.additions) {
@@ -166,7 +165,7 @@
           reference = await loadTranslation(value);
           break;
         case "@@@":
-          const data = await fs_extra2.readJson(value);
+          const data = await (0, import_fs_extra2.readJson)(value);
           current = new ComparedTranslationFile(value, data);
           current.reference = reference;
           compared.push(current);
@@ -219,8 +218,8 @@
     const [firstkey, ...otherKeys] = key.split(".");
     return deleteTranslationKey(data[firstkey], otherKeys.join("."));
   }
-  function getTranslationValue(data, path5) {
-    return path5.split(".").reduce((data2, key) => data2 && data2[key] || null, data);
+  function getTranslationValue(data, path) {
+    return path.split(".").reduce((data2, key) => data2 && data2[key] || null, data);
   }
   function sortTranslation(data) {
     return Object.keys(data).sort().reduce((sorted, key) => {
@@ -235,31 +234,31 @@
   function getTranslationKeys(data) {
     return getKeys(data);
   }
-  function getLocale(path5) {
-    return path.basename(path5).substr(0, 2);
+  function getLocale(path) {
+    return (0, import_path.basename)(path).substr(0, 2);
   }
 
   // src/check/check.command.ts
-  class CheckCommand {
-    constructor(checker2) {
-      this.checker = checker2;
+  var CheckCommand = class {
+    constructor(checker) {
+      this.checker = checker;
     }
     async run(output, sourcesGlob, translationsGlob) {
       const sources = await loadFiles(sourcesGlob);
-      const translations9 = await loadTranslations(translationsGlob);
-      const unused = await this.checker.check(translations9, sources);
+      const translations = await loadTranslations(translationsGlob);
+      const unused = await this.checker.check(translations, sources);
       await write(output, serializeKeys(unused));
     }
-  }
+  };
 
   // src/check/checker.ts
-  const events = __toModule(require("events"));
-  class Checker extends events.EventEmitter {
-    async check(translations9, sources) {
+  var import_events = __toModule(require("events"));
+  var Checker = class extends import_events.EventEmitter {
+    async check(translations, sources) {
       const unused = [];
-      const keys4 = getAllKeys(translations9);
-      this.emit("checking", {keys: keys4, sources, translations: translations9});
-      for (const key of keys4) {
+      const keys = getAllKeys(translations);
+      this.emit("checking", {keys, sources, translations});
+      for (const key of keys) {
         const source = findUsage(key, sources);
         if (source) {
           this.emit("used", {key, source});
@@ -271,34 +270,34 @@
       this.emit("checked", {unused});
       return unused;
     }
-  }
-  function getAllKeys(translations9) {
-    return [...new Set(translations9.map((t) => t.keys).flat(1))];
+  };
+  function getAllKeys(translations) {
+    return [...new Set(translations.map((t) => t.keys).flat(1))];
   }
   function findUsage(key, sources) {
     return sources.find((file) => file.content.match(new RegExp(key)));
   }
 
   // src/clean/clean.command.ts
-  class CleanCommand {
-    constructor(cleaner2) {
-      this.cleaner = cleaner2;
+  var CleanCommand = class {
+    constructor(cleaner) {
+      this.cleaner = cleaner;
     }
     async run(input, translationsGlob) {
-      const keys4 = deserializeKeys(await read(input));
-      const translations9 = await loadTranslations(translationsGlob);
-      const cleaned = await this.cleaner.clean(keys4, translations9);
+      const keys = deserializeKeys(await read(input));
+      const translations = await loadTranslations(translationsGlob);
+      const cleaned = await this.cleaner.clean(keys, translations);
       await Promise.all(cleaned.map((file) => saveTranslation(file)));
     }
-  }
+  };
 
   // src/clean/cleaner.ts
-  const events2 = __toModule(require("events"));
-  class Cleaner extends events2.EventEmitter {
-    async clean(keys4, translations9) {
-      this.emit("cleaning", {keys: keys4, translations: translations9});
-      for (const file of translations9) {
-        for (const key of keys4) {
+  var import_events2 = __toModule(require("events"));
+  var Cleaner = class extends import_events2.EventEmitter {
+    async clean(keys, translations) {
+      this.emit("cleaning", {keys, translations});
+      for (const file of translations) {
+        for (const key of keys) {
           if (file.delete(key)) {
             this.emit("removed", {key, file});
           } else {
@@ -306,31 +305,31 @@
           }
         }
       }
-      this.emit("cleaned", {keys: keys4, translations: translations9});
-      return translations9;
+      this.emit("cleaned", {keys, translations});
+      return translations;
     }
-  }
+  };
 
   // src/compare/compare.command.ts
-  class CompareCommand {
-    constructor(comparer2) {
-      this.comparer = comparer2;
+  var CompareCommand = class {
+    constructor(comparer) {
+      this.comparer = comparer;
     }
     async run(output, referencePath, translationsGlob) {
       const reference = await loadTranslation(referencePath);
-      const translations9 = await loadTranslations(translationsGlob);
-      const compared = await this.comparer.compare(reference, translations9);
+      const translations = await loadTranslations(translationsGlob);
+      const compared = await this.comparer.compare(reference, translations);
       await write(output, serializeComparedTranslation(compared));
     }
-  }
+  };
 
   // src/compare/comparer.ts
-  const events3 = __toModule(require("events"));
-  class Comparer extends events3.EventEmitter {
-    async compare(reference, translations9) {
+  var import_events3 = __toModule(require("events"));
+  var Comparer = class extends import_events3.EventEmitter {
+    async compare(reference, translations) {
       const compared = [];
-      this.emit("comparing", {reference, translations: translations9});
-      for (const file of translations9) {
+      this.emit("comparing", {reference, translations});
+      for (const file of translations) {
         const diffed = compareTranslation(reference, file);
         compared.push(diffed);
         this.emit("diff", {file: diffed});
@@ -338,41 +337,41 @@
       this.emit("compared", {reference, translations: compared});
       return compared;
     }
-  }
+  };
 
   // src/complete/complete.command.ts
-  class CompleteCommand {
-    constructor(completer2) {
-      this.completer = completer2;
+  var CompleteCommand = class {
+    constructor(completer) {
+      this.completer = completer;
     }
     async run(input) {
       const diff = await deserializeComparedTranslations(await read(input));
       const completed = await this.completer.complete(diff);
     }
-  }
+  };
 
   // src/complete/completer.ts
-  const events4 = __toModule(require("events"));
-  class Completer extends events4.EventEmitter {
-    constructor(translator2) {
+  var import_events4 = __toModule(require("events"));
+  var Completer = class extends import_events4.EventEmitter {
+    constructor(translator) {
       super();
-      this.translator = translator2;
+      this.translator = translator;
     }
-    async complete(translations9) {
-      if (translations9.length === 0) {
-        return translations9;
+    async complete(translations) {
+      if (translations.length === 0) {
+        return translations;
       }
-      this.emit("completing", {reference: translations9[0].reference, translations: translations9});
-      for (const file of translations9) {
+      this.emit("completing", {reference: translations[0].reference, translations});
+      for (const file of translations) {
         if (file.reference.path === file.path) {
           continue;
         }
         const originals = file.substractions.map((key) => file.reference.get(key));
-        const translations10 = await this.translator.translate(file.reference.locale, file.locale, originals);
+        const translations2 = await this.translator.translate(file.reference.locale, file.locale, originals);
         for (const i in file.substractions) {
           const key = file.substractions[i];
           const original = originals[i];
-          const translated = translations10[i];
+          const translated = translations2[i];
           if (file.add(key, translated)) {
             this.emit("added", {file, key, original, translated});
           } else {
@@ -380,21 +379,21 @@
           }
         }
       }
-      await Promise.all(translations9.map((file) => file.save()));
-      this.emit("completed", {reference: translations9[0].reference, translations: translations9});
-      return translations9;
+      await Promise.all(translations.map((file) => file.save()));
+      this.emit("completed", {reference: translations[0].reference, translations});
+      return translations;
     }
-  }
+  };
 
   // src/config/index.ts
-  const path2 = __toModule(require("path"));
+  var import_path2 = __toModule(require("path"));
 
   // src/config/config.ts
-  const deepmerge = __toModule(require("deepmerge"));
-  const fs_extra3 = __toModule(require("fs-extra"));
-  class Config {
-    constructor(path5, defaults) {
-      this.path = path5;
+  var import_deepmerge = __toModule(require("deepmerge"));
+  var import_fs_extra3 = __toModule(require("fs-extra"));
+  var Config = class {
+    constructor(path, defaults) {
+      this.path = path;
       this.defaults = defaults;
       this.load();
       this.save();
@@ -409,12 +408,12 @@
       if (!this.hasKey(key)) {
         throw new Error(`Key "${key}" doesn't exist`);
       }
-      const keys4 = key.split(".");
-      const last = keys4.pop();
+      const keys = key.split(".");
+      const last = keys.pop();
       const next = {};
-      const parent = keys4.reduce((data, key2) => data[key2] || (data[key2] = {}), next);
+      const parent = keys.reduce((data, key2) => data[key2] || (data[key2] = {}), next);
       parent[last] = value;
-      this.data = deepmerge.default(this.data, next);
+      this.data = (0, import_deepmerge.default)(this.data, next);
     }
     keys() {
       return getKeys(this.data);
@@ -426,59 +425,59 @@
       return this.keys().includes(key);
     }
     save() {
-      fs_extra3.outputJsonSync(this.path, this.data, {spaces: 2});
+      (0, import_fs_extra3.outputJsonSync)(this.path, this.data, {spaces: 2});
     }
     load() {
-      if (!fs_extra3.existsSync(this.path)) {
+      if (!(0, import_fs_extra3.existsSync)(this.path)) {
         this.data = this.defaults;
         return;
       }
-      this.data = deepmerge.default(this.defaults, fs_extra3.readJsonSync(this.path));
+      this.data = (0, import_deepmerge.default)(this.defaults, (0, import_fs_extra3.readJsonSync)(this.path));
     }
-  }
+  };
 
   // src/config/index.ts
-  const HOME_DIR = process.platform === "win32" ? process.env.USERPROFILE : process.env.HOME;
-  const PATH = path2.join(HOME_DIR, ".lukos", "config.json");
-  const DEFAULTS = {
+  var HOME_DIR = process.platform === "win32" ? process.env.USERPROFILE : process.env.HOME;
+  var PATH = (0, import_path2.join)(HOME_DIR, ".lukos", "config.json");
+  var DEFAULTS = {
     translate: {
       google: {
         serviceAccount: null
       }
     }
   };
-  const config2 = new Config(PATH, DEFAULTS);
+  var config = new Config(PATH, DEFAULTS);
 
   // src/config/config.command.ts
-  class ConfigCommand {
+  var ConfigCommand = class {
     async run(output, key, value) {
       if (value) {
-        config2.set(key, value);
-        config2.save();
+        config.set(key, value);
+        config.save();
         return;
       }
-      value = config2.get(key);
+      value = config.get(key);
       if (!value || typeof value === "object") {
         return;
       }
       await write(output, `${value}
 `);
     }
-  }
+  };
 
   // src/format/format.command.ts
-  class FormatCommand {
+  var FormatCommand = class {
     async run(translationsGlob) {
       await saveTranslations(await loadTranslations(translationsGlob));
     }
-  }
+  };
 
   // src/pick/pick.ts
-  function pick(keys4, translations9) {
+  function pick(keys, translations) {
     const picked = {};
-    keys4.forEach((key) => {
+    keys.forEach((key) => {
       picked[key] = {};
-      translations9.forEach((translation) => {
+      translations.forEach((translation) => {
         picked[key][translation.path] = translation.get(key);
       });
     });
@@ -486,30 +485,30 @@
   }
 
   // src/pick/pick.command.ts
-  class PickCommand {
+  var PickCommand = class {
     async run(input, output, translationsGlob) {
-      const keys4 = deserializeKeys(await read(input));
-      const translations9 = await loadTranslations(translationsGlob);
-      const picked = pick(keys4, translations9);
+      const keys = deserializeKeys(await read(input));
+      const translations = await loadTranslations(translationsGlob);
+      const picked = pick(keys, translations);
       await write(output, JSON.stringify(picked, null, 2));
     }
-  }
+  };
 
   // src/translate/translate.command.ts
-  const fs_extra4 = __toModule(require("fs-extra"));
-  const path3 = __toModule(require("path"));
+  var import_fs_extra4 = __toModule(require("fs-extra"));
+  var import_path3 = __toModule(require("path"));
 
   // src/translate/noop.translator.ts
-  class NoopTranslator {
+  var NoopTranslator = class {
     translate(source, target, contents) {
       return Promise.resolve(contents);
     }
-  }
+  };
 
   // src/translate/translate.command.ts
-  class TranslateCommand {
-    constructor(translator2) {
-      this.translator = translator2;
+  var TranslateCommand = class {
+    constructor(translator) {
+      this.translator = translator;
     }
     async run(sourcePath, targetLocale) {
       if (this.translator instanceof NoopTranslator) {
@@ -519,35 +518,35 @@
       if (source.locale === targetLocale) {
         throw new Error("The source and target locales are the same.");
       }
-      const targetPath = path3.join(path3.dirname(sourcePath), `${targetLocale}.json`);
-      if (fs_extra4.existsSync(targetPath)) {
+      const targetPath = (0, import_path3.join)((0, import_path3.dirname)(sourcePath), `${targetLocale}.json`);
+      if ((0, import_fs_extra4.existsSync)(targetPath)) {
         throw new Error(`The target file "${targetPath}" already exists.`);
       }
       const targetFile = new TranslationFile(targetPath, {});
       const originals = source.keys.map((key) => source.get(key));
-      const translations9 = await this.translator.translate(source.locale, targetLocale, originals);
+      const translations = await this.translator.translate(source.locale, targetLocale, originals);
       for (const i in source.keys) {
         const key = source.keys[i];
-        const value = translations9[i];
+        const value = translations[i];
         targetFile.add(key, value);
       }
       targetFile.save();
     }
-  }
+  };
 
   // src/translate/google.translator.ts
-  const v3 = __toModule(require("@google-cloud/translate/build/src/v3"));
-  const fs_extra5 = __toModule(require("fs-extra"));
-  class GoogleTranslator {
+  var import_v3 = __toModule(require("@google-cloud/translate/build/src/v3"));
+  var import_fs_extra5 = __toModule(require("fs-extra"));
+  var GoogleTranslator = class {
     constructor(serviceAccount) {
       process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount;
-      this.client = new v3.TranslationServiceClient();
+      this.client = new import_v3.TranslationServiceClient();
     }
     async translate(source, target, contents) {
       if (source === target) {
         return contents;
       }
-      const credentials = await fs_extra5.readJson(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+      const credentials = await (0, import_fs_extra5.readJson)(process.env.GOOGLE_APPLICATION_CREDENTIALS);
       const request = {
         contents,
         sourceLanguageCode: source,
@@ -558,11 +557,11 @@
       const [response] = await this.client.translateText(request);
       return response.translations.map((t) => t.translatedText);
     }
-  }
+  };
 
   // src/translate/translator.factory.ts
   function createTranslator() {
-    const serviceAccount = config2.get("translate.google.serviceAccount");
+    const serviceAccount = config.get("translate.google.serviceAccount");
     if (serviceAccount) {
       return new GoogleTranslator(serviceAccount);
     }
@@ -570,36 +569,36 @@
   }
 
   // src/cli.ts
-  commander.program.version(fs_extra6.readJsonSync(path4.join(__dirname, "..", "package.json")).version);
-  commander.program.command("check <translations> <sources>").description("Checks if translations are used and output unused translation keys.", {
+  import_commander.program.version((0, import_fs_extra6.readJsonSync)((0, import_path4.join)(__dirname, "..", "package.json")).version);
+  import_commander.program.command("check <translations> <sources>").description("Checks if translations are used and output unused translation keys.", {
     translations: "Glob of the translation files (use quotes!)",
     sources: "Glob of the files where to find translation keys (use quotes!)"
   }).addHelpText("after", "Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.").action(async ({args}) => {
-    const checker2 = new Checker().on("checking", ({keys: keys4, sources}) => console.error(`Checking ${keys4.length} keys in ${sources.length} files...`)).on("checked", ({unused}) => console.error(`Found ${unused.length} unused keys`)).on("used", ({key, source}) => console.error(`${key} is used by ${source.path}`)).on("unused", ({key}) => console.error(`${key} is unused`));
-    const command = new CheckCommand(checker2);
+    const checker = new Checker().on("checking", ({keys, sources}) => console.error(`Checking ${keys.length} keys in ${sources.length} files...`)).on("checked", ({unused}) => console.error(`Found ${unused.length} unused keys`)).on("used", ({key, source}) => console.error(`${key} is used by ${source.path}`)).on("unused", ({key}) => console.error(`${key} is unused`));
+    const command = new CheckCommand(checker);
     await command.run(process.stdout, args.sources, args.translations);
   });
-  commander.program.command("clean <translations>").description("Removes unused items from translation files", {
+  import_commander.program.command("clean <translations>").description("Removes unused items from translation files", {
     translations: "Glob of the translation files (use quotes!)"
   }).addHelpText("after", "Always double check your unused keys before running the command.").action(async ({args}) => {
-    const cleaner2 = new Cleaner().on("cleaning", ({keys: keys4, translations: translations9}) => console.error(`Removing ${keys4.length} keys from ${translations9.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
-    const command = new CleanCommand(cleaner2);
+    const cleaner = new Cleaner().on("cleaning", ({keys, translations}) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
+    const command = new CleanCommand(cleaner);
     await command.run(process.stdin, args.translations);
   });
-  commander.program.command("compare <reference> <translations>").description("Compare files with a reference file", {
+  import_commander.program.command("compare <reference> <translations>").description("Compare files with a reference file", {
     reference: "Path to the reference file",
     translations: "Glob of the translation files to compare (use quotes!)"
   }).action(async ({args}) => {
-    const comparer2 = new Comparer().on("comparing", ({reference, translations: translations9}) => console.error(`Comparing ${reference.path} with ${translations9.length} files...`)).on("diff", ({file}) => console.error(`${file.path} +${file.additions.length} -${file.substractions.length}`));
-    const command = new CompareCommand(comparer2);
+    const comparer = new Comparer().on("comparing", ({reference, translations}) => console.error(`Comparing ${reference.path} with ${translations.length} files...`)).on("diff", ({file}) => console.error(`${file.path} +${file.additions.length} -${file.substractions.length}`));
+    const command = new CompareCommand(comparer);
     await command.run(process.stdout, args.reference, args.translations);
   });
-  commander.program.command("complete", "Completes missing keys from a reference file").action(async ({args}) => {
-    const completer2 = new Completer(createTranslator()).on("completing", ({reference, translations: translations9}) => console.error(`Completing ${translations9.length} files with values of ${reference.path}...`)).on("added", ({file, key}) => console.error(`Added ${key} in ${file.path}`)).on("passed", ({file, key}) => console.error(`Passed ${key} in ${file.path}`));
-    const command = new CompleteCommand(completer2);
+  import_commander.program.command("complete", "Completes missing keys from a reference file").action(async ({args}) => {
+    const completer = new Completer(createTranslator()).on("completing", ({reference, translations}) => console.error(`Completing ${translations.length} files with values of ${reference.path}...`)).on("added", ({file, key}) => console.error(`Added ${key} in ${file.path}`)).on("passed", ({file, key}) => console.error(`Passed ${key} in ${file.path}`));
+    const command = new CompleteCommand(completer);
     await command.run(process.stdin);
   });
-  commander.program.command("config <key> [value]").description("Get or set a config value", {
+  import_commander.program.command("config <key> [value]").description("Get or set a config value", {
     key: "The config key to get or set",
     value: "The config value to set"
   }).action(async ({args}) => {
@@ -609,24 +608,24 @@
       console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
     }
   });
-  commander.program.command("format <translations>").description("Sort keys and format of your JSON translation files", {
+  import_commander.program.command("format <translations>").description("Sort keys and format of your JSON translation files", {
     translations: "Glob of the translation files to compare (use quotes!)"
   }).action(async ({args}) => {
     const command = new FormatCommand();
     await command.run(args.translations);
   });
-  commander.program.command("pick <translations>").description("Finds key values in all translation files", {
+  import_commander.program.command("pick <translations>").description("Finds key values in all translation files", {
     translations: "Glob of the translation files to compare (use quotes!)"
   }).action(async ({args}) => {
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, args.translations);
   });
-  commander.program.command("translate <source> <locale>").description("Translate a source file into a new language", {
+  import_commander.program.command("translate <source> <locale>").description("Translate a source file into a new language", {
     source: "Path to the source file",
     locale: "Locale of the target language"
   }).action(async ({args}) => {
     const command = new TranslateCommand(createTranslator());
     await command.run(args.source, args.locale);
   });
-  commander.program.parseAsync();
+  import_commander.program.parseAsync();
 })();
