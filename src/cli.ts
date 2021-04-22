@@ -26,14 +26,14 @@ program
     sources: 'Glob of the files where to find translation keys (use quotes!)',
   })
   .addHelpText('after', "Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
-  .action(async ({ args }) => {
+  .action(async (translations: string, sources: string) => {
     const checker = new Checker()
       .on('checking', ({ keys, sources }) => console.error(`Checking ${keys.length} keys in ${sources.length} files...`))
       .on('checked', ({ unused }) => console.error(`Found ${unused.length} unused keys`))
       .on('used', ({ key, source }) => console.error(`${key} is used by ${source.path}`))
       .on('unused', ({ key }) => console.error(`${key} is unused`));
     const command = new CheckCommand(checker);
-    await command.run(process.stdout, args.sources as string, args.translations as string);
+    await command.run(process.stdout, sources, translations);
   });
 
 program
@@ -42,13 +42,13 @@ program
     translations: 'Glob of the translation files (use quotes!)',
   })
   .addHelpText('after', 'Always double check your unused keys before running the command.')
-  .action(async ({ args }) => {
+  .action(async (translations: string) => {
     const cleaner = new Cleaner()
       .on('cleaning', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
       .on('removed', ({ key, file }) => console.error(`Removed "${key}" from "${file.path}".`))
       .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(cleaner);
-    await command.run(process.stdin, args.translations as string);
+    await command.run(process.stdin, translations);
   });
 
 program
@@ -57,24 +57,27 @@ program
     reference: 'Path to the reference file',
     translations: 'Glob of the translation files to compare (use quotes!)',
   })
-  .action(async ({ args }) => {
+  .action(async (reference: string, translations: string) => {
     const comparer = new Comparer()
       .on('comparing', ({ reference, translations }) => console.error(`Comparing ${reference.path} with ${translations.length} files...`))
       .on('diff', ({ file }) => console.error(`${file.path} +${file.additions.length} -${file.substractions.length}`));
     const command = new CompareCommand(comparer);
-    await command.run(process.stdout, args.reference as string, args.translations as string);
+    await command.run(process.stdout, reference, translations);
   });
 
-program.command('complete', 'Completes missing keys from a reference file').action(async ({ args }) => {
-  const completer = new Completer(createTranslator())
-    .on('completing', ({ reference, translations }) =>
-      console.error(`Completing ${translations.length} files with values of ${reference.path}...`)
-    )
-    .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
-    .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
-  const command = new CompleteCommand(completer);
-  await command.run(process.stdin);
-});
+program
+  .command('complete')
+  .description('Completes missing keys from a reference file')
+  .action(async ({ args }) => {
+    const completer = new Completer(createTranslator())
+      .on('completing', ({ reference, translations }) =>
+        console.error(`Completing ${translations.length} files with values of ${reference.path}...`)
+      )
+      .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
+      .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
+    const command = new CompleteCommand(completer);
+    await command.run(process.stdin);
+  });
 
 program
   .command('config <key> [value]')
@@ -82,9 +85,9 @@ program
     key: 'The config key to get or set',
     value: 'The config value to set',
   })
-  .action(async ({ args }) => {
+  .action(async (key: string, value: string) => {
     try {
-      await new ConfigCommand().run(process.stdout, args.key as string, args.value as string);
+      await new ConfigCommand().run(process.stdout, key, value);
     } catch (error) {
       console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
     }
@@ -95,9 +98,9 @@ program
   .description('Sort keys and format of your JSON translation files', {
     translations: 'Glob of the translation files to compare (use quotes!)',
   })
-  .action(async ({ args }) => {
+  .action(async (translations: string) => {
     const command = new FormatCommand();
-    await command.run(args.translations as string);
+    await command.run(translations);
   });
 
 program
@@ -105,9 +108,9 @@ program
   .description('Finds key values in all translation files', {
     translations: 'Glob of the translation files to compare (use quotes!)',
   })
-  .action(async ({ args }) => {
+  .action(async (translations: string) => {
     const command = new PickCommand();
-    await command.run(process.stdin, process.stdout, args.translations as string);
+    await command.run(process.stdin, process.stdout, translations);
   });
 
 program
@@ -116,9 +119,9 @@ program
     source: 'Path to the source file',
     locale: 'Locale of the target language',
   })
-  .action(async ({ args }) => {
+  .action(async (source: string, locale: string) => {
     const command = new TranslateCommand(createTranslator());
-    await command.run(args.source as string, args.locale as string);
+    await command.run(source, locale);
   });
 
 program.parseAsync();

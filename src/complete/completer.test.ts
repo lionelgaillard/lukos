@@ -27,9 +27,9 @@ const dir = fixtures({
     },
   }),
   'compared.txt': [
-    `### %dir%/en.json`,
-    `@@@ %dir%/en.json`,
-    `@@@ %dir%/fr.json`,
+    `### ${fixtures.dir}/en.json`,
+    `@@@ ${fixtures.dir}/en.json`,
+    `@@@ ${fixtures.dir}/fr.json`,
     '+++ d',
     '--- a',
     '--- b',

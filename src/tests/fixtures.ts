@@ -1,16 +1,14 @@
 import test from 'ava';
 import { ensureDirSync, rmdirSync, writeFileSync } from 'fs-extra';
 
-/**
- * Use `%dir%` as placeholder for test directory.
- */
-export function fixtures(files: { [name: string]: string }) {
-  const dir = `_test_${Math.random().toString(36).substr(0, 8)}_`;
+export function fixtures(files: { [name: string]: string }): string {
+  const dir = fixtures.dir;
+  fixtures.dir = nextDir();
 
   test.before(() => {
     ensureDirSync(dir);
     for (const name in files) {
-      const content = files[name].replace(/%dir%/g, dir);
+      const content = files[name];
       writeFileSync(`${dir}/${name}`, content, 'utf8');
     }
   });
@@ -20,4 +18,10 @@ export function fixtures(files: { [name: string]: string }) {
   });
 
   return dir;
+}
+
+fixtures.dir = nextDir();
+
+function nextDir(): string {
+  return `_test_${Math.random().toString(36).substr(2, 8)}_`;
 }
