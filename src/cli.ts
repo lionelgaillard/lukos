@@ -12,9 +12,9 @@ import { Comparer } from './compare/comparer';
 import { CompleteCommand } from './complete/complete.command';
 import { Completer } from './complete/completer';
 import { ConfigCommand } from './config/config.command';
+import { CopyCommand } from './copy/copy.command';
 import { FormatCommand } from './format/format.command';
 import { PickCommand } from './pick/pick.command';
-import { RenameCommand } from './rename/rename.command';
 import { TranslateCommand } from './translate/translate.command';
 import { createTranslator } from './translate/translator.factory';
 
@@ -115,15 +115,15 @@ program
   });
 
 program
-  .command('rename <from> <to> <translations>')
+  .command('copy <source> <target> <translations>')
   .description('Finds key values in all translation files', {
-    from: 'Old key',
-    to: 'New key',
-    translations: 'Glob of the translation files to apply renaming (use quotes!)',
+    source: 'Old key',
+    target: 'New key',
+    translations: 'Glob of the translation files (use quotes!)',
   })
-  .action(async (from, to, translations: string) => {
-    const command = new RenameCommand();
-    await command.run(from, to, translations);
+  .action(async (source, target, translations: string) => {
+    const command = new CopyCommand();
+    await command.run(source, target, translations);
   });
 
 program

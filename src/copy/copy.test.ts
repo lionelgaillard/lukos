@@ -1,7 +1,7 @@
 import test from 'ava';
 import { fixtures } from '../tests';
 import { loadTranslation, loadTranslations, saveTranslations } from '../translations';
-import { rename } from './rename';
+import { copy } from './copy';
 
 const dir = fixtures({
   'de.json': JSON.stringify({
@@ -32,7 +32,7 @@ const dir = fixtures({
 
 test('rename command', async t => {
   const translations = await loadTranslations(`${dir}/??.json`);
-  await rename('b', 'c.z', translations);
+  await copy('b', 'c.z', translations);
   await saveTranslations(translations);
 
   const de = await loadTranslation(`${dir}/de.json`);

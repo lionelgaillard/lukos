@@ -193,27 +193,27 @@ Glob of the translation files from which extract values (use quotes!).
 
 ---
 
-### `rename`
+### `copy`
 
-Rename a key.
+Copy a key.
 
 #### Usage
 
-    $ lukos rename my.old.key my.new.key "assets/i18n/??.json"
+    $ lukos copy my.source.key my.target.key "assets/i18n/??.json"
 
 #### Arguments
 
-##### `<from>`
+##### `<source>`
 
-Old key,
+Source key,
 
-##### `<to>`
+##### `<target>`
 
-New key,
+Target key,
 
 ##### `<translations>`
 
-Glob of the translation files where to apply renaming.
+Glob of the translation files.
 
 ### `translate`
 

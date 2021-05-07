@@ -1,10 +1,10 @@
 import { loadTranslations, saveTranslations } from '../translations';
-import { rename } from './rename';
+import { copy } from './copy';
 
-export class RenameCommand {
-  public async run(from: string, to: string, translationsGlob: string) {
+export class CopyCommand {
+  public async run(source: string, target: string, translationsGlob: string) {
     const translations = await loadTranslations(translationsGlob);
-    await rename(from, to, translations);
+    await copy(source, target, translations);
     await saveTranslations(translations);
   }
 }

@@ -468,6 +468,28 @@
     }
   };
 
+  // src/copy/copy.ts
+  function copy(source, target, translations) {
+    for (const translation of translations) {
+      const value = translation.get(source);
+      if (value) {
+        if (translation.has(target)) {
+          translation.delete(target);
+        }
+        translation.add(target, value);
+      }
+    }
+  }
+
+  // src/copy/copy.command.ts
+  var CopyCommand = class {
+    async run(source, target, translationsGlob) {
+      const translations = await loadTranslations(translationsGlob);
+      await copy(source, target, translations);
+      await saveTranslations(translations);
+    }
+  };
+
   // src/format/format.command.ts
   var FormatCommand = class {
     async run(translationsGlob) {
@@ -494,29 +516,6 @@
       const translations = await loadTranslations(translationsGlob);
       const picked = pick(keys, translations);
       await write(output, JSON.stringify(picked, null, 2));
-    }
-  };
-
-  // src/rename/rename.ts
-  function rename(from, to, translations) {
-    for (const translation of translations) {
-      const value = translation.get(from);
-      if (value) {
-        if (translation.has(to)) {
-          translation.delete(to);
-        }
-        translation.add(to, value);
-      }
-      translation.delete(from);
-    }
-  }
-
-  // src/rename/rename.command.ts
-  var RenameCommand = class {
-    async run(from, to, translationsGlob) {
-      const translations = await loadTranslations(translationsGlob);
-      await rename(from, to, translations);
-      await saveTranslations(translations);
     }
   };
 
@@ -646,13 +645,13 @@
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, translations);
   });
-  import_commander.program.command("rename <from> <to> <translations>").description("Finds key values in all translation files", {
-    from: "Old key",
-    to: "New key",
-    translations: "Glob of the translation files to apply renaming (use quotes!)"
-  }).action(async (from, to, translations) => {
-    const command = new RenameCommand();
-    await command.run(from, to, translations);
+  import_commander.program.command("copy <source> <target> <translations>").description("Finds key values in all translation files", {
+    source: "Old key",
+    target: "New key",
+    translations: "Glob of the translation files (use quotes!)"
+  }).action(async (source, target, translations) => {
+    const command = new CopyCommand();
+    await command.run(source, target, translations);
   });
   import_commander.program.command("translate <source> <locale>").description("Translate a source file into a new language", {
     source: "Path to the source file",
