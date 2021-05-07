@@ -516,9 +516,7 @@
     async run(from, to, translationsGlob) {
       const translations = await loadTranslations(translationsGlob);
       await rename(from, to, translations);
-      for (const translation of translations) {
-        await translation.save();
-      }
+      await saveTranslations(translations);
     }
   };
 
