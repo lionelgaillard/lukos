@@ -32,6 +32,7 @@ To enable automatic translation you need:
 - [`config`](#config)
 - [`format`](#format)
 - [`pick`](#pick)
+- [`rename`](#rename)
 - [`translate`](#translate)
 
 ---
@@ -191,6 +192,28 @@ A list of keys (one key per line).
 Glob of the translation files from which extract values (use quotes!).
 
 ---
+
+### `rename`
+
+Rename a key.
+
+#### Usage
+
+    $ lukos rename my.old.key my.new.key "assets/i18n/??.json"
+
+#### Arguments
+
+##### `<from>`
+
+Old key,
+
+##### `<to>`
+
+New key,
+
+##### `<translations>`
+
+Glob of the translation files where to apply renaming.
 
 ### `translate`
 

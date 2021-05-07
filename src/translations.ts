@@ -18,6 +18,10 @@ export class TranslationFile {
     return this._keys;
   }
 
+  public has(key: string) {
+    return this.keys.includes(key);
+  }
+
   public get(key: string) {
     return getTranslationValue(this.data, key);
   }

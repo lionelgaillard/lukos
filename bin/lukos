@@ -93,6 +93,9 @@
       }
       return this._keys;
     }
+    has(key) {
+      return this.keys.includes(key);
+    }
     get(key) {
       return getTranslationValue(this.data, key);
     }
@@ -494,6 +497,31 @@
     }
   };
 
+  // src/rename/rename.ts
+  function rename(from, to, translations) {
+    for (const translation of translations) {
+      const value = translation.get(from);
+      if (value) {
+        if (translation.has(to)) {
+          translation.delete(to);
+        }
+        translation.add(to, value);
+      }
+      translation.delete(from);
+    }
+  }
+
+  // src/rename/rename.command.ts
+  var RenameCommand = class {
+    async run(from, to, translationsGlob) {
+      const translations = await loadTranslations(translationsGlob);
+      await rename(from, to, translations);
+      for (const translation of translations) {
+        await translation.save();
+      }
+    }
+  };
+
   // src/translate/translate.command.ts
   var import_fs_extra4 = __toModule(require("fs-extra"));
   var import_path3 = __toModule(require("path"));
@@ -619,6 +647,14 @@
   }).action(async (translations) => {
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, translations);
+  });
+  import_commander.program.command("rename <from> <to> <translations>").description("Finds key values in all translation files", {
+    from: "Old key",
+    to: "New key",
+    translations: "Glob of the translation files to apply renaming (use quotes!)"
+  }).action(async (from, to, translations) => {
+    const command = new RenameCommand();
+    await command.run(from, to, translations);
   });
   import_commander.program.command("translate <source> <locale>").description("Translate a source file into a new language", {
     source: "Path to the source file",
