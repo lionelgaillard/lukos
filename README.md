@@ -30,9 +30,9 @@ To enable automatic translation you need:
 - [`compare`](#compare)
 - [`complete`](#complete)
 - [`config`](#config)
+- [`copy`](#copy)
 - [`format`](#format)
 - [`pick`](#pick)
-- [`rename`](#rename)
 - [`translate`](#translate)
 
 ---
@@ -157,6 +157,30 @@ The config value to set.
 
 ---
 
+### `copy`
+
+Copy a key.
+
+#### Usage
+
+    $ lukos copy my.source.key my.target.key "assets/i18n/??.json"
+
+#### Arguments
+
+##### `<source>`
+
+Source key,
+
+##### `<target>`
+
+Target key,
+
+##### `<translations>`
+
+Glob of the translation files.
+
+---
+
 ### `format`
 
 Sort keys and format of your JSON translation files.
@@ -192,28 +216,6 @@ A list of keys (one key per line).
 Glob of the translation files from which extract values (use quotes!).
 
 ---
-
-### `copy`
-
-Copy a key.
-
-#### Usage
-
-    $ lukos copy my.source.key my.target.key "assets/i18n/??.json"
-
-#### Arguments
-
-##### `<source>`
-
-Source key,
-
-##### `<target>`
-
-Target key,
-
-##### `<translations>`
-
-Glob of the translation files.
 
 ### `translate`
 
