@@ -1,6 +1,6 @@
 {
   "name": "lukos",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "A command line utility program to manage translation files",
   "main": "./bin/lukos",
   "bin": {
