@@ -11,6 +11,7 @@ import { CompleteCommand } from './complete/complete.command';
 import { Completer } from './complete/completer';
 import { ConfigCommand } from './config/config.command';
 import { CopyCommand } from './copy/copy.command';
+import { ExportCommand } from './export/export.command';
 import { FormatCommand } from './format/format.command';
 import { KeysCommand } from './keys/keys.command';
 import { PickCommand } from './pick/pick.command';
@@ -84,16 +85,27 @@ program
   })
   .action(async (key: string, value: string) => {
     try {
-      await new ConfigCommand().run(process.stdout, key, value);
+      const command = new ConfigCommand();
+      await command.run(process.stdout, key, value);
     } catch (error) {
       console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
     }
   });
 
 program
+  .command('export <translations>')
+  .description('Export key/values as CSV', {
+    translations: 'Glob of the translation files (use quotes!)',
+  })
+  .action(async (translations: string) => {
+    const command = new ExportCommand();
+    await command.run(process.stdout, translations);
+  });
+
+program
   .command('format <translations>')
   .description('Sort keys and format of your JSON translation files', {
-    translations: 'Glob of the translation files to compare (use quotes!)',
+    translations: 'Glob of the translation files (use quotes!)',
   })
   .action(async (translations: string) => {
     const command = new FormatCommand();
@@ -103,7 +115,7 @@ program
 program
   .command('keys <translations>')
   .description('Print keys of all translation files', {
-    translations: 'Glob of the translation files',
+    translations: 'Glob of the translation files (use quotes!)',
   })
   .action(async (translations: string) => {
     const command = new KeysCommand();
@@ -113,7 +125,7 @@ program
 program
   .command('pick <translations>')
   .description('Finds key values in all translation files', {
-    translations: 'Glob of the translation files to compare (use quotes!)',
+    translations: 'Glob of the translation files (use quotes!)',
   })
   .action(async (translations: string) => {
     const command = new PickCommand();

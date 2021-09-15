@@ -51,6 +51,8 @@ export class ComparedTranslationFile extends TranslationFile {
   substractions: string[] = [];
 }
 
+export type TranslationValues = { [key: string]: { [locale: string]: string | null } };
+
 export async function saveTranslation(file: TranslationFile): Promise<void> {
   await writeJson(file.path, sortTranslation(file.data), { spaces: 2 });
 }
@@ -190,4 +192,33 @@ function getTranslationKeys(data: any) {
 
 function getLocale(path: string) {
   return basename(path).substr(0, 2);
+}
+
+export function extractKeys(translations: TranslationFile[]): string[] {
+  const keys = new Set<string>();
+
+  for (let translation of translations) {
+    for (let key of translation.keys) {
+      keys.add(key);
+    }
+  }
+
+  return Array.from(keys.values());
+}
+
+export function extractValues(translations: TranslationFile[]): TranslationValues {
+  const values = {};
+  const keys = extractKeys(translations);
+
+  for (let key of keys) {
+    if (!values[key]) {
+      values[key] = {};
+    }
+
+    for (let translation of translations) {
+      values[key][translation.locale] = translation.get(key);
+    }
+  }
+
+  return values;
 }
