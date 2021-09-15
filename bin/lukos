@@ -465,6 +465,23 @@
     }
   };
 
+  // src/keys/keys.command.ts
+  var KeysCommand = class {
+    async run(output, translationsGlob) {
+      const translations = await loadTranslations(translationsGlob);
+      const keys = new Set();
+      for (let translation of translations) {
+        for (let key of translation.keys) {
+          keys.add(key);
+        }
+      }
+      for (let key of keys) {
+        output.write(`${key}
+`);
+      }
+    }
+  };
+
   // src/pick/pick.ts
   function pick(keys, translations) {
     const picked = {};
@@ -603,11 +620,11 @@
     const command = new CheckCommand(checker);
     await command.run(process.stdout, sources, translations);
   });
-  import_commander.program.command("clean <translations>").description("Removes unused items from translation files", {
+  import_commander.program.command("remove <translations>").alias("clean").description("Removes unused items from translation files", {
     translations: "Glob of the translation files (use quotes!)"
   }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (translations) => {
-    const cleaner = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
-    const command = new CleanCommand(cleaner);
+    const remover = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
+    const command = new CleanCommand(remover);
     await command.run(process.stdin, translations);
   });
   import_commander.program.command("compare <reference> <translations>").description("Compare files with a reference file", {
@@ -638,6 +655,12 @@
   }).action(async (translations) => {
     const command = new FormatCommand();
     await command.run(translations);
+  });
+  import_commander.program.command("keys <translations>").description("Print keys of all translation files", {
+    translations: "Glob of the translation files"
+  }).action(async (translations) => {
+    const command = new KeysCommand();
+    await command.run(process.stdout, translations);
   });
   import_commander.program.command("pick <translations>").description("Finds key values in all translation files", {
     translations: "Glob of the translation files to compare (use quotes!)"

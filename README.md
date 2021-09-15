@@ -26,13 +26,13 @@ To enable automatic translation you need:
 
 - [`help`](#help)
 - [`check`](#check)
-- [`remove`](#remove)
 - [`compare`](#compare)
 - [`complete`](#complete)
-- [`config`](#config)
 - [`copy`](#copy)
+- [`config`](#config)
 - [`format`](#format)
 - [`pick`](#pick)
+- [`remove/clean`](#remove)
 - [`translate`](#translate)
 
 ---

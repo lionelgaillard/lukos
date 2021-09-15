@@ -12,6 +12,7 @@ import { Completer } from './complete/completer';
 import { ConfigCommand } from './config/config.command';
 import { CopyCommand } from './copy/copy.command';
 import { FormatCommand } from './format/format.command';
+import { KeysCommand } from './keys/keys.command';
 import { PickCommand } from './pick/pick.command';
 import { CleanCommand } from './remove/remove.command';
 import { Remover } from './remove/remover';
@@ -35,22 +36,6 @@ program
       .on('unused', ({ key }) => console.error(`${key} is unused`));
     const command = new CheckCommand(checker);
     await command.run(process.stdout, sources, translations);
-  });
-
-program
-  .command('remove <translations>')
-  .alias('clean')
-  .description('Removes unused items from translation files', {
-    translations: 'Glob of the translation files (use quotes!)',
-  })
-  .addHelpText('after', 'Always double check your unused keys before running the command.')
-  .action(async (translations: string) => {
-    const remover = new Remover()
-      .on('remove.pre', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
-      .on('removed', ({ key, file }) => console.error(`Removed "${key}" from "${file.path}".`))
-      .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
-    const command = new CleanCommand(remover);
-    await command.run(process.stdin, translations);
   });
 
 program
@@ -80,6 +65,18 @@ program
   });
 
 program
+  .command('copy <source> <target> <translations>')
+  .description('Finds key values in all translation files', {
+    source: 'Old key',
+    target: 'New key',
+    translations: 'Glob of the translation files (use quotes!)',
+  })
+  .action(async (source, target, translations: string) => {
+    const command = new CopyCommand();
+    await command.run(source, target, translations);
+  });
+
+program
   .command('config <key> [value]')
   .description('Get or set a config value', {
     key: 'The config key to get or set',
@@ -104,6 +101,16 @@ program
   });
 
 program
+  .command('keys <translations>')
+  .description('Print keys of all translation files', {
+    translations: 'Glob of the translation files',
+  })
+  .action(async (translations: string) => {
+    const command = new KeysCommand();
+    await command.run(process.stdout, translations);
+  });
+
+program
   .command('pick <translations>')
   .description('Finds key values in all translation files', {
     translations: 'Glob of the translation files to compare (use quotes!)',
@@ -114,15 +121,19 @@ program
   });
 
 program
-  .command('copy <source> <target> <translations>')
-  .description('Finds key values in all translation files', {
-    source: 'Old key',
-    target: 'New key',
+  .command('remove <translations>')
+  .alias('clean')
+  .description('Removes unused items from translation files', {
     translations: 'Glob of the translation files (use quotes!)',
   })
-  .action(async (source, target, translations: string) => {
-    const command = new CopyCommand();
-    await command.run(source, target, translations);
+  .addHelpText('after', 'Always double check your unused keys before running the command.')
+  .action(async (translations: string) => {
+    const remover = new Remover()
+      .on('remove.pre', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
+      .on('removed', ({ key, file }) => console.error(`Removed "${key}" from "${file.path}".`))
+      .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
+    const command = new CleanCommand(remover);
+    await command.run(process.stdin, translations);
   });
 
 program
