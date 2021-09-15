@@ -1,7 +1,4 @@
-import { extractValues, TranslationFile, TranslationValues } from '../translations';
-
-const VALUE_SEPARATOR = ';';
-const LINE_SEPARATOR = '\n';
+import { extractValues, TranslationFile, TranslationValues } from './translations';
 
 export function toCsv(files: TranslationFile[]): string {
   const translations = extractValues(files);
@@ -22,9 +19,13 @@ function makeRows(translations: TranslationValues): string {
 }
 
 function formatRow(values: string[]) {
-  return values.map(formatCell).join(VALUE_SEPARATOR) + LINE_SEPARATOR;
+  return values.map(formatCell).join(';') + '\n';
 }
 
 function formatCell(value: string) {
-  return `"${value || ''}"`;
+  return `"${escape(value || '')}"`;
+}
+
+function escape(value: string) {
+  return value.replace(/\n/g, '\\n');
 }

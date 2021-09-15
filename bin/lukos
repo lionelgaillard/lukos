@@ -480,9 +480,7 @@
     }
   };
 
-  // src/export/csv.ts
-  var VALUE_SEPARATOR = ";";
-  var LINE_SEPARATOR = "\n";
+  // src/csv.ts
   function toCsv(files) {
     const translations = extractValues(files);
     return makeHeaders(translations) + makeRows(translations);
@@ -499,17 +497,20 @@
     }, "");
   }
   function formatRow(values) {
-    return values.map(formatCell).join(VALUE_SEPARATOR) + LINE_SEPARATOR;
+    return values.map(formatCell).join(";") + "\n";
   }
   function formatCell(value) {
-    return `"${value || ""}"`;
+    return `"${escape(value || "")}"`;
+  }
+  function escape(value) {
+    return value.replace(/\n/g, "\\n");
   }
 
   // src/export/export.command.ts
   var ExportCommand = class {
     async run(output, translationsGlob) {
       const files = await loadTranslations(translationsGlob);
-      output.write(toCsv(files));
+      output.write(toCsv(files), "utf8");
     }
   };
 
