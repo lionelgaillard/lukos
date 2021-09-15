@@ -2,10 +2,10 @@ import { Readable } from 'stream';
 import { deserializeKeys } from '../keys';
 import { read } from '../stream';
 import { loadTranslations, saveTranslation } from '../translations';
-import { Cleaner } from './cleaner';
+import { Remover } from './remover';
 
 export class CleanCommand {
-  constructor(private readonly cleaner: Cleaner) {}
+  constructor(private readonly cleaner: Remover) {}
 
   public async run(input: Readable, translationsGlob: string) {
     const keys = deserializeKeys(await read(input));

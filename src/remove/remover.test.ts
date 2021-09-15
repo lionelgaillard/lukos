@@ -3,7 +3,7 @@ import { readFile } from 'fs-extra';
 import { deserializeKeys } from '../keys';
 import { fixtures } from '../tests';
 import { loadTranslations } from '../translations';
-import { Cleaner } from './cleaner';
+import { Remover } from './remover';
 
 const translation = JSON.stringify({
   firstLevelUsed: 'Lorem',
@@ -17,24 +17,16 @@ const translation = JSON.stringify({
 const dir = fixtures({
   'en.json': translation,
   'fr.json': translation,
-  'unused.txt': [
-    '# firstLevelUsed',
-    'firstLevelUnused',
-    'firstLevelGroup.secondLevelUnused',
-    ' ',
-    'notExists',
-    'notExists.neither',
-    '',
-  ].join('\n'),
+  'unused.txt': ['# firstLevelUsed', 'firstLevelUnused', 'firstLevelGroup.secondLevelUnused', ' ', 'notExists', 'notExists.neither', ''].join('\n'),
 });
 
 test('cleaner', async t => {
-  const cleaner = new Cleaner();
+  const cleaner = new Remover();
 
   t.plan(9);
 
-  cleaner.once('cleaning', () => t.pass('should emit cleaning event'));
-  cleaner.once('cleaned', () => t.pass('should emit cleaned event'));
+  cleaner.once('remove.pre', () => t.pass('should emit remove.pre event'));
+  cleaner.once('remove.post', () => t.pass('should emit remove.post event'));
   cleaner.once('removed', () => t.pass('should emit removed event'));
   cleaner.once('passed', () => t.pass('should emit passed event'));
 

@@ -5,8 +5,6 @@ import { readJsonSync } from 'fs-extra';
 import { join } from 'path';
 import { CheckCommand } from './check/check.command';
 import { Checker } from './check/checker';
-import { CleanCommand } from './clean/clean.command';
-import { Cleaner } from './clean/cleaner';
 import { CompareCommand } from './compare/compare.command';
 import { Comparer } from './compare/comparer';
 import { CompleteCommand } from './complete/complete.command';
@@ -15,6 +13,8 @@ import { ConfigCommand } from './config/config.command';
 import { CopyCommand } from './copy/copy.command';
 import { FormatCommand } from './format/format.command';
 import { PickCommand } from './pick/pick.command';
+import { CleanCommand } from './remove/remove.command';
+import { Remover } from './remove/remover';
 import { TranslateCommand } from './translate/translate.command';
 import { createTranslator } from './translate/translator.factory';
 
@@ -38,17 +38,18 @@ program
   });
 
 program
-  .command('clean <translations>')
+  .command('remove <translations>')
+  .alias('clean')
   .description('Removes unused items from translation files', {
     translations: 'Glob of the translation files (use quotes!)',
   })
   .addHelpText('after', 'Always double check your unused keys before running the command.')
   .action(async (translations: string) => {
-    const cleaner = new Cleaner()
-      .on('cleaning', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
+    const remover = new Remover()
+      .on('remove.pre', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
       .on('removed', ({ key, file }) => console.error(`Removed "${key}" from "${file.path}".`))
       .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
-    const command = new CleanCommand(cleaner);
+    const command = new CleanCommand(remover);
     await command.run(process.stdin, translations);
   });
 
@@ -71,9 +72,7 @@ program
   .description('Completes missing keys from a reference file')
   .action(async ({ args }) => {
     const completer = new Completer(createTranslator())
-      .on('completing', ({ reference, translations }) =>
-        console.error(`Completing ${translations.length} files with values of ${reference.path}...`)
-      )
+      .on('completing', ({ reference, translations }) => console.error(`Completing ${translations.length} files with values of ${reference.path}...`))
       .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
       .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
     const command = new CompleteCommand(completer);

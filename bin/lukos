@@ -281,38 +281,6 @@
     return sources.find((file) => file.content.match(new RegExp(key)));
   }
 
-  // src/clean/clean.command.ts
-  var CleanCommand = class {
-    constructor(cleaner) {
-      this.cleaner = cleaner;
-    }
-    async run(input, translationsGlob) {
-      const keys = deserializeKeys(await read(input));
-      const translations = await loadTranslations(translationsGlob);
-      const cleaned = await this.cleaner.clean(keys, translations);
-      await Promise.all(cleaned.map((file) => saveTranslation(file)));
-    }
-  };
-
-  // src/clean/cleaner.ts
-  var import_events2 = __toModule(require("events"));
-  var Cleaner = class extends import_events2.EventEmitter {
-    async clean(keys, translations) {
-      this.emit("cleaning", {keys, translations});
-      for (const file of translations) {
-        for (const key of keys) {
-          if (file.delete(key)) {
-            this.emit("removed", {key, file});
-          } else {
-            this.emit("passed", {key, file});
-          }
-        }
-      }
-      this.emit("cleaned", {keys, translations});
-      return translations;
-    }
-  };
-
   // src/compare/compare.command.ts
   var CompareCommand = class {
     constructor(comparer) {
@@ -327,8 +295,8 @@
   };
 
   // src/compare/comparer.ts
-  var import_events3 = __toModule(require("events"));
-  var Comparer = class extends import_events3.EventEmitter {
+  var import_events2 = __toModule(require("events"));
+  var Comparer = class extends import_events2.EventEmitter {
     async compare(reference, translations) {
       const compared = [];
       this.emit("comparing", {reference, translations});
@@ -354,8 +322,8 @@
   };
 
   // src/complete/completer.ts
-  var import_events4 = __toModule(require("events"));
-  var Completer = class extends import_events4.EventEmitter {
+  var import_events3 = __toModule(require("events"));
+  var Completer = class extends import_events3.EventEmitter {
     constructor(translator) {
       super();
       this.translator = translator;
@@ -519,6 +487,38 @@
     }
   };
 
+  // src/remove/remove.command.ts
+  var CleanCommand = class {
+    constructor(cleaner) {
+      this.cleaner = cleaner;
+    }
+    async run(input, translationsGlob) {
+      const keys = deserializeKeys(await read(input));
+      const translations = await loadTranslations(translationsGlob);
+      const cleaned = await this.cleaner.clean(keys, translations);
+      await Promise.all(cleaned.map((file) => saveTranslation(file)));
+    }
+  };
+
+  // src/remove/remover.ts
+  var import_events4 = __toModule(require("events"));
+  var Remover = class extends import_events4.EventEmitter {
+    async clean(keys, translations) {
+      this.emit("remove.pre", {keys, translations});
+      for (const file of translations) {
+        for (const key of keys) {
+          if (file.delete(key)) {
+            this.emit("removed", {key, file});
+          } else {
+            this.emit("passed", {key, file});
+          }
+        }
+      }
+      this.emit("remove.post", {keys, translations});
+      return translations;
+    }
+  };
+
   // src/translate/translate.command.ts
   var import_fs_extra4 = __toModule(require("fs-extra"));
   var import_path3 = __toModule(require("path"));
@@ -606,7 +606,7 @@
   import_commander.program.command("clean <translations>").description("Removes unused items from translation files", {
     translations: "Glob of the translation files (use quotes!)"
   }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (translations) => {
-    const cleaner = new Cleaner().on("cleaning", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
+    const cleaner = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(cleaner);
     await command.run(process.stdin, translations);
   });

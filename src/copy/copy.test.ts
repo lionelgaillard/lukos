@@ -39,11 +39,11 @@ test('rename command', async t => {
   const en = await loadTranslation(`${dir}/en.json`);
   const fr = await loadTranslation(`${dir}/fr.json`);
 
-  t.false(de.has('b'), 'Old key has been removed');
+  t.true(de.has('b'), 'Old key has not been removed');
   t.true(de.has('c.z'), 'New key has been added');
   t.true(de.get('c.z') === 'b', 'Value has been moved');
 
-  t.false(en.has('b'), 'Old key has been removed');
+  t.true(en.has('b'), 'Old key has not been removed');
   t.true(en.has('c.z'), 'New key has been added');
   t.true(en.get('c.z') === 'b', 'Value has been replaced');
 
