@@ -303,6 +303,19 @@
     return sources.find((file) => file.content.match(new RegExp(key)));
   }
 
+  // src/clean/clean.command.ts
+  var CleanCommand = class {
+    constructor(remover) {
+      this.remover = remover;
+    }
+    async run(input, translationsGlob) {
+      const keys = deserializeKeys(await read(input));
+      const translations = await loadTranslations(translationsGlob);
+      this.remover.remove(keys, translations);
+      await Promise.all(translations.map((file) => saveTranslation(file)));
+    }
+  };
+
   // src/compare/compare.command.ts
   var CompareCommand = class {
     constructor(comparer) {
@@ -570,12 +583,11 @@
   };
 
   // src/remove/remove.command.ts
-  var CleanCommand = class {
+  var RemoveCommand = class {
     constructor(remover) {
       this.remover = remover;
     }
-    async run(input, translationsGlob) {
-      const keys = deserializeKeys(await read(input));
+    async run(keys, translationsGlob) {
       const translations = await loadTranslations(translationsGlob);
       this.remover.remove(keys, translations);
       await Promise.all(translations.map((file) => saveTranslation(file)));
@@ -736,7 +748,7 @@
     target: "New key",
     translations: "Glob of the translation files (use quotes!)"
   }).action(async (source, target, translations) => {
-    const copier = new Copier();
+    const copier = new Copier().on("coyp.pre", ({source: source2, target: target2, translations: translations2}) => console.error(`Copying "${source2}" as "${target2}" from ${translations2.length} files...`)).on("copied", ({source: source2, target: target2, translation}) => console.error(`Copied "${source2}" as "${target2}" from "${translation.path}".`)).on("passed", ({source: source2, target: target2, translation}) => console.error(`Passed "${source2}" in "${translation.path}".`));
     const command = new CopyCommand(copier);
     await command.run(source, target, translations);
   });
@@ -775,12 +787,20 @@
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, translations);
   });
-  import_commander.program.command("remove <translations>").alias("rm").alias("clean").description("Removes unused items from translation files", {
+  import_commander.program.command("clean <translations>").description("Removes unused items from translation files", {
     translations: "Glob of the translation files (use quotes!)"
   }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (translations) => {
     const remover = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(remover);
     await command.run(process.stdin, translations);
+  });
+  import_commander.program.command("remove <key> <translations>").alias("rm").description("Removes key from translation files", {
+    key: "Key to remove",
+    translations: "Glob of the translation files (use quotes!)"
+  }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (key, translations) => {
+    const remover = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key: key2, file}) => console.error(`Removed "${key2}" from "${file.path}".`)).on("passed", ({key: key2, file}) => console.error(`Passed "${key2}" from "${file.path}".`));
+    const command = new RemoveCommand(remover);
+    await command.run([key], translations);
   });
   import_commander.program.command("rename <source> <target> <translations>").description("Rename keys", {
     source: "Old key",

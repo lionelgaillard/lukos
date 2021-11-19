@@ -6,39 +6,29 @@ import { fixtures } from '../tests';
 
 const exec = promisify(_exec);
 
-const translation = JSON.stringify({
-  firstLevelUsed: 'Lorem',
-  firstLevelUnused: 'ipsum',
-  firstLevelGroup: {
-    secondLevelUsed: 'dolor',
-    secondLevelUnused: 'sit amet',
-  },
-});
-
 const dir = fixtures({
-  'en.json': translation,
-  'fr.json': translation,
-  'unused.txt': [
-    '# firstLevelUsed',
-    'firstLevelUnused',
-    'firstLevelGroup.secondLevelUnused',
-    ' ',
-    'notExists',
-    'notExists.neither',
-    '',
-  ].join('\n'),
+  'en.json': JSON.stringify({
+    a: 'a',
+    b: {
+      ba: 'b.a',
+    },
+  }),
+  'fr.json': JSON.stringify({
+    a: 'a',
+  }),
 });
 
 test('remove command', async t => {
-  t.plan(5);
+  t.plan(4);
 
-  await exec(`cat ${dir}/unused.txt | node "${process.cwd()}/bin/lukos" remove "${dir}/??.json"`);
+  await exec(`node ./bin/lukos rm "b" "${dir}/??.json"`);
 
+  const en = readJsonSync(`${dir}/en.json`);
   const fr = readJsonSync(`${dir}/fr.json`);
 
-  t.falsy(fr.firstLevelUnused, 'should remove first level unused key');
-  t.truthy(fr.firstLevelGroup, 'should let first level group');
-  t.falsy(fr.firstLevelGroup.secondLevelUnused, 'should remove second level unused key');
-  t.truthy(fr.firstLevelGroup.secondLevelUsed, 'should let second level used key');
-  t.truthy(fr.firstLevelUsed, 'should let first level used key');
+  t.falsy(en.b, 'b has been removed');
+  t.falsy(fr.b, 'b is still not there');
+
+  t.truthy(en.a, 'a is still there');
+  t.truthy(fr.a, 'a is still there');
 });

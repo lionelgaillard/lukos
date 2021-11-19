@@ -5,6 +5,7 @@ import { readJsonSync } from 'fs-extra';
 import { join } from 'path';
 import { CheckCommand } from './check/check.command';
 import { Checker } from './check/checker';
+import { CleanCommand } from './clean/clean.command';
 import { CompareCommand } from './compare/compare.command';
 import { Comparer } from './compare/comparer';
 import { CompleteCommand } from './complete/complete.command';
@@ -16,7 +17,7 @@ import { ExportCommand } from './export/export.command';
 import { FormatCommand } from './format/format.command';
 import { KeysCommand } from './keys/keys.command';
 import { PickCommand } from './pick/pick.command';
-import { CleanCommand } from './remove/remove.command';
+import { RemoveCommand } from './remove/remove.command';
 import { Remover } from './remove/remover';
 import { RenameCommand } from './rename/rename.command';
 import { Renamer } from './rename/renamer';
@@ -147,9 +148,7 @@ program
   });
 
 program
-  .command('remove <translations>')
-  .alias('rm')
-  .alias('clean')
+  .command('clean <translations>')
   .description('Removes unused items from translation files', {
     translations: 'Glob of the translation files (use quotes!)',
   })
@@ -161,6 +160,23 @@ program
       .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(remover);
     await command.run(process.stdin, translations);
+  });
+
+program
+  .command('remove <key> <translations>')
+  .alias('rm')
+  .description('Removes key from translation files', {
+    key: 'Key to remove',
+    translations: 'Glob of the translation files (use quotes!)',
+  })
+  .addHelpText('after', 'Always double check your unused keys before running the command.')
+  .action(async (key: string, translations: string) => {
+    const remover = new Remover()
+      .on('remove.pre', ({ keys, translations }) => console.error(`Removing ${keys.length} keys from ${translations.length} files...`))
+      .on('removed', ({ key, file }) => console.error(`Removed "${key}" from "${file.path}".`))
+      .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
+    const command = new RemoveCommand(remover);
+    await command.run([key], translations);
   });
 
 program

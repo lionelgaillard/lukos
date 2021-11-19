@@ -26,14 +26,15 @@ To enable automatic translation you need:
 
 - [`help`](#help)
 - [`check`](#check)
+- [`clean`](#clean)
 - [`compare/diff`](#compare)
 - [`complete/patch`](#complete)
-- [`copy/cp`](#copy)
+- [`copy/cp`](#copy/cp)
 - [`config`](#config)
 - [`export`](#export)
 - [`format`](#format)
 - [`pick`](#pick)
-- [`remove/rm/clean`](#remove)
+- [`remove/rm`](#remove)
 - [`rename`](#rename)
 - [`translate`](#translate)
 
@@ -75,13 +76,15 @@ Glob of the files where to find translation keys (use quotes!).
 
 ---
 
-### `remove/rm/clean`
+### `clean`
 
 Removes unused items from translation files.
 
+If you want to pass a key by argument, see the [remove command](#remove)
+
 #### Usage
 
-    $ cat unused.txt | lukos remove "assets/i18n/??.json"
+    $ cat unused.txt | lukos clean "assets/i18n/??.json"
 
 #### Arguments
 
@@ -95,7 +98,9 @@ Glob of the translation files to remove (use quotes!).
 
 ---
 
-### `compare/diff`
+### `compare`
+
+### `diff`
 
 Compare files with a reference file.
 
@@ -115,7 +120,9 @@ Glob of the translation files to compare (use quotes!).
 
 ---
 
-### `complete/patch`
+### `complete`
+
+### `patch`
 
 Completes missing keys from a reference file.
 
@@ -175,7 +182,9 @@ Glob of the translation files.
 
 ---
 
-### `copy/cp`
+### `copy`
+
+### `cp`
 
 Copy a key.
 
@@ -232,6 +241,28 @@ A list of keys (one key per line).
 ##### `<translations>`
 
 Glob of the translation files from which extract values (use quotes!).
+
+---
+
+### `remove/rm`
+
+Removes unused items from translation files.
+
+If you want to pass keys by input, see the [clean command](#clean)
+
+#### Usage
+
+    $ lukos remove my.key "assets/i18n/??.json"
+
+#### Arguments
+
+##### `key`
+
+The key to remove.
+
+##### `<translations>`
+
+Glob of the translation files to remove (use quotes!).
 
 ---
 
