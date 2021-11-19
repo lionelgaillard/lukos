@@ -10,6 +10,7 @@ import { Comparer } from './compare/comparer';
 import { CompleteCommand } from './complete/complete.command';
 import { Completer } from './complete/completer';
 import { ConfigCommand } from './config/config.command';
+import { Copier } from './copy/copier';
 import { CopyCommand } from './copy/copy.command';
 import { ExportCommand } from './export/export.command';
 import { FormatCommand } from './format/format.command';
@@ -17,6 +18,8 @@ import { KeysCommand } from './keys/keys.command';
 import { PickCommand } from './pick/pick.command';
 import { CleanCommand } from './remove/remove.command';
 import { Remover } from './remove/remover';
+import { RenameCommand } from './rename/rename.command';
+import { Renamer } from './rename/renamer';
 import { TranslateCommand } from './translate/translate.command';
 import { createTranslator } from './translate/translator.factory';
 
@@ -78,7 +81,13 @@ program
     translations: 'Glob of the translation files (use quotes!)',
   })
   .action(async (source, target, translations: string) => {
-    const command = new CopyCommand();
+    const copier = new Copier()
+      .on('coyp.pre', ({ source, target, translations }) =>
+        console.error(`Copying "${source}" as "${target}" from ${translations.length} files...`)
+      )
+      .on('copied', ({ source, target, translation }) => console.error(`Copied "${source}" as "${target}" from "${translation.path}".`))
+      .on('passed', ({ source, target, translation }) => console.error(`Passed "${source}" in "${translation.path}".`));
+    const command = new CopyCommand(copier);
     await command.run(source, target, translations);
   });
 
@@ -152,6 +161,25 @@ program
       .on('passed', ({ key, file }) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(remover);
     await command.run(process.stdin, translations);
+  });
+
+program
+  .command('rename <source> <target> <translations>')
+  .description('Rename keys', {
+    source: 'Old key',
+    target: 'New key',
+    translations: 'Glob of the translation files (use quotes!)',
+  })
+  .addHelpText('after', 'Always double check your unused keys before running the command.')
+  .action(async (source, target, translations: string) => {
+    const renamer = new Renamer()
+      .on('rename.pre', ({ source, target, translations }) =>
+        console.error(`Renaming "${source}" as "${target}" from ${translations.length} files...`)
+      )
+      .on('renamed', ({ source, target, translation }) => console.error(`Renamed "${source}" as "${target}" from "${translation.path}".`))
+      .on('passed', ({ source, target, translation }) => console.error(`Passed "${source}" in "${translation.path}".`));
+    const command = new RenameCommand(renamer);
+    await command.run(source, target, translations);
   });
 
 program

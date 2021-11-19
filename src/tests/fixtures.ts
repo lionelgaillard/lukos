@@ -23,5 +23,5 @@ export function fixtures(files: { [name: string]: string }): string {
 fixtures.dir = nextDir();
 
 function nextDir(): string {
-  return `_test_${Math.random().toString(36).substr(2, 8)}_`;
+  return `${process.cwd()}/_test_${Math.random().toString(36).substr(2, 8)}_`;
 }

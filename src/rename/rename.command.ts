@@ -1,12 +1,12 @@
 import { loadTranslations, saveTranslations } from '../translations';
-import { Copier } from './copier';
+import { Renamer } from './renamer';
 
-export class CopyCommand {
-  constructor(private readonly copier: Copier) {}
+export class RenameCommand {
+  constructor(private readonly renamer: Renamer) {}
 
   public async run(source: string, target: string, translationsGlob: string) {
     const translations = await loadTranslations(translationsGlob);
-    this.copier.copy(source, target, translations);
+    this.renamer.rename(source, target, translations);
     await saveTranslations(translations);
   }
 }

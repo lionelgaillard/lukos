@@ -29,10 +29,10 @@ const dir = fixtures({
   ].join('\n'),
 });
 
-test('clean command', async t => {
+test('remove command', async t => {
   t.plan(5);
 
-  await exec(`cat ${dir}/unused.txt | ./bin/lukos clean "${dir}/??.json"`);
+  await exec(`cat ${dir}/unused.txt | node "${process.cwd()}/bin/lukos" remove "${dir}/??.json"`);
 
   const fr = readJsonSync(`${dir}/fr.json`);
 

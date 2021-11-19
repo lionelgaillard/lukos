@@ -458,24 +458,33 @@
     }
   };
 
-  // src/copy/copy.ts
-  function copy(source, target, translations) {
-    for (const translation of translations) {
-      const value = translation.get(source);
-      if (value) {
-        if (translation.has(target)) {
-          translation.delete(target);
+  // src/copy/copier.ts
+  var import_events4 = __toModule(require("events"));
+  var Copier = class extends import_events4.EventEmitter {
+    copy(source, target, translations) {
+      this.emit("copy.pre", {source, target, translations});
+      for (const translation of translations) {
+        const value = translation.get(source);
+        if (value) {
+          if (translation.has(target)) {
+            translation.delete(target);
+          }
+          translation.add(target, value);
+          this.emit("copied", {source, target, translation});
         }
-        translation.add(target, value);
       }
+      this.emit("copy.post", {source, target, translations});
     }
-  }
+  };
 
   // src/copy/copy.command.ts
   var CopyCommand = class {
+    constructor(copier) {
+      this.copier = copier;
+    }
     async run(source, target, translationsGlob) {
       const translations = await loadTranslations(translationsGlob);
-      await copy(source, target, translations);
+      this.copier.copy(source, target, translations);
       await saveTranslations(translations);
     }
   };
@@ -562,21 +571,21 @@
 
   // src/remove/remove.command.ts
   var CleanCommand = class {
-    constructor(cleaner) {
-      this.cleaner = cleaner;
+    constructor(remover) {
+      this.remover = remover;
     }
     async run(input, translationsGlob) {
       const keys = deserializeKeys(await read(input));
       const translations = await loadTranslations(translationsGlob);
-      const cleaned = await this.cleaner.clean(keys, translations);
-      await Promise.all(cleaned.map((file) => saveTranslation(file)));
+      this.remover.remove(keys, translations);
+      await Promise.all(translations.map((file) => saveTranslation(file)));
     }
   };
 
   // src/remove/remover.ts
-  var import_events4 = __toModule(require("events"));
-  var Remover = class extends import_events4.EventEmitter {
-    async clean(keys, translations) {
+  var import_events5 = __toModule(require("events"));
+  var Remover = class extends import_events5.EventEmitter {
+    remove(keys, translations) {
       this.emit("remove.pre", {keys, translations});
       for (const file of translations) {
         for (const key of keys) {
@@ -588,7 +597,40 @@
         }
       }
       this.emit("remove.post", {keys, translations});
-      return translations;
+    }
+  };
+
+  // src/rename/rename.command.ts
+  var RenameCommand = class {
+    constructor(renamer) {
+      this.renamer = renamer;
+    }
+    async run(source, target, translationsGlob) {
+      const translations = await loadTranslations(translationsGlob);
+      this.renamer.rename(source, target, translations);
+      await saveTranslations(translations);
+    }
+  };
+
+  // src/rename/renamer.ts
+  var import_events6 = __toModule(require("events"));
+  var Renamer = class extends import_events6.EventEmitter {
+    rename(source, target, translations) {
+      this.emit("rename.pre", {source, target, translations});
+      for (const translation of translations) {
+        const value = translation.get(source);
+        if (value) {
+          if (translation.has(target)) {
+            translation.delete(target);
+          }
+          translation.add(target, value);
+          translation.delete(source);
+          this.emit("renamed", {source, target, translation});
+        } else {
+          this.emit("passed", {source, target, translation});
+        }
+      }
+      this.emit("rename.post", {source, target, translations});
     }
   };
 
@@ -676,7 +718,7 @@
     const command = new CheckCommand(checker);
     await command.run(process.stdout, sources, translations);
   });
-  import_commander.program.command("compare <reference> <translations>").description("Compare files with a reference file", {
+  import_commander.program.command("compare <reference> <translations>").alias("diff").description("Compare files with a reference file", {
     reference: "Path to the reference file",
     translations: "Glob of the translation files to compare (use quotes!)"
   }).action(async (reference, translations) => {
@@ -684,17 +726,18 @@
     const command = new CompareCommand(comparer);
     await command.run(process.stdout, reference, translations);
   });
-  import_commander.program.command("complete").description("Completes missing keys from a reference file").action(async ({args}) => {
+  import_commander.program.command("complete").alias("patch").description("Completes missing keys from a reference file").action(async ({args}) => {
     const completer = new Completer(createTranslator()).on("completing", ({reference, translations}) => console.error(`Completing ${translations.length} files with values of ${reference.path}...`)).on("added", ({file, key}) => console.error(`Added ${key} in ${file.path}`)).on("passed", ({file, key}) => console.error(`Passed ${key} in ${file.path}`));
     const command = new CompleteCommand(completer);
     await command.run(process.stdin);
   });
-  import_commander.program.command("copy <source> <target> <translations>").description("Finds key values in all translation files", {
+  import_commander.program.command("copy <source> <target> <translations>").alias("cp").description("Finds key values in all translation files", {
     source: "Old key",
     target: "New key",
     translations: "Glob of the translation files (use quotes!)"
   }).action(async (source, target, translations) => {
-    const command = new CopyCommand();
+    const copier = new Copier();
+    const command = new CopyCommand(copier);
     await command.run(source, target, translations);
   });
   import_commander.program.command("config <key> [value]").description("Get or set a config value", {
@@ -732,12 +775,21 @@
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, translations);
   });
-  import_commander.program.command("remove <translations>").alias("clean").description("Removes unused items from translation files", {
+  import_commander.program.command("remove <translations>").alias("rm").alias("clean").description("Removes unused items from translation files", {
     translations: "Glob of the translation files (use quotes!)"
   }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (translations) => {
     const remover = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(remover);
     await command.run(process.stdin, translations);
+  });
+  import_commander.program.command("rename <source> <target> <translations>").description("Rename keys", {
+    source: "Old key",
+    target: "New key",
+    translations: "Glob of the translation files (use quotes!)"
+  }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (source, target, translations) => {
+    const renamer = new Renamer().on("rename.pre", ({source: source2, target: target2, translations: translations2}) => console.error(`Renaming "${source2}" as "${target2}" from ${translations2.length} files...`)).on("renamed", ({source: source2, target: target2, translation}) => console.error(`Renamed "${source2}" as "${target2}" from "${translation.path}".`)).on("passed", ({source: source2, target: target2, translation}) => console.error(`Passed "${source2}" in "${translation.path}".`));
+    const command = new RenameCommand(renamer);
+    await command.run(source, target, translations);
   });
   import_commander.program.command("translate <source> <locale>").description("Translate a source file into a new language", {
     source: "Path to the source file",
