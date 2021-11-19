@@ -33,8 +33,7 @@
       this.content = content;
     }
     static fromPath(path) {
-      const content = (0, import_fs_extra.readFileSync)(path, "utf8");
-      return new File(path, content);
+      return new File(path, (0, import_fs_extra.readFileSync)(path, "utf8"));
     }
     static fromGlob(glob) {
       return (0, import_glob.sync)(glob).map(File.fromPath);
