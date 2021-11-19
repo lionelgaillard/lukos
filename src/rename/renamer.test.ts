@@ -1,6 +1,6 @@
 import test from 'ava';
 import { fixtures } from '../tests';
-import { loadTranslation, loadTranslations, saveTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 import { Renamer } from './renamer';
 
 const dir = fixtures({
@@ -31,20 +31,22 @@ const dir = fixtures({
 });
 
 test('renamer', async t => {
+  t.plan(12);
+
   const renamer = new Renamer();
 
   renamer.once('rename.pre', () => t.pass('should emit rename.pre event'));
   renamer.once('rename.post', () => t.pass('should emit rename.post event'));
-  renamer.once('copied', () => t.pass('should emit copied event'));
+  renamer.once('renamed', () => t.pass('should emit renamed event'));
   renamer.once('passed', () => t.pass('should emit passed event'));
 
-  const translations = await loadTranslations(`${dir}/??.json`);
+  const translations = TranslationFile.fromGlob(`${dir}/??.json`);
   renamer.rename('b', 'c.z', translations);
-  await saveTranslations(translations);
+  translations.map(t => t.save());
 
-  const de = await loadTranslation(`${dir}/de.json`);
-  const en = await loadTranslation(`${dir}/en.json`);
-  const fr = await loadTranslation(`${dir}/fr.json`);
+  const de = TranslationFile.fromPath(`${dir}/de.json`);
+  const en = TranslationFile.fromPath(`${dir}/en.json`);
+  const fr = TranslationFile.fromPath(`${dir}/fr.json`);
 
   t.true(!de.has('b'), 'Old key has been removed');
   t.true(de.has('c.z'), 'New key has been added');

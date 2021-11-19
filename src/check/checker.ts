@@ -3,7 +3,7 @@ import { File } from '../files';
 import { TranslationFile } from '../translations';
 
 export class Checker extends EventEmitter {
-  public async check(translations: TranslationFile[], sources: File[]) {
+  public check(translations: TranslationFile[], sources: File[]): string[] {
     const unused: string[] = [];
     const keys = getAllKeys(translations);
 

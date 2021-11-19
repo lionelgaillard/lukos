@@ -1,10 +1,10 @@
 import { Writable } from 'stream';
 import { toCsv } from '../csv';
-import { loadTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 
 export class ExportCommand {
   public async run(output: Writable, translationsGlob: string) {
-    const files = await loadTranslations(translationsGlob);
-    output.write(toCsv(files), 'utf8');
+    const translations = TranslationFile.fromGlob(translationsGlob);
+    output.write(toCsv(translations), 'utf8');
   }
 }

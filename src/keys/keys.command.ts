@@ -1,9 +1,9 @@
 import { Writable } from 'stream';
-import { loadTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 
 export class KeysCommand {
   public async run(output: Writable, translationsGlob: string) {
-    const translations = await loadTranslations(translationsGlob);
+    const translations = TranslationFile.fromGlob(translationsGlob);
     const keys = new Set();
 
     for (let translation of translations) {

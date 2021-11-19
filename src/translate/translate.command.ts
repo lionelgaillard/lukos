@@ -1,6 +1,6 @@
 import { existsSync } from 'fs-extra';
 import { dirname, join } from 'path';
-import { loadTranslation, TranslationFile } from '../translations';
+import { TranslationFile } from '../translations';
 import { NoopTranslator } from './noop.translator';
 import { Translator } from './translator';
 
@@ -12,7 +12,7 @@ export class TranslateCommand {
       throw new Error(`The translate command requires a configured translation API.`);
     }
 
-    const source = await loadTranslation(sourcePath);
+    const source = TranslationFile.fromPath(sourcePath);
 
     if (source.locale === targetLocale) {
       throw new Error('The source and target locales are the same.');

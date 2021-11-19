@@ -1,7 +1,7 @@
 import test from 'ava';
-import { loadFiles } from '../files';
+import { File } from '../files';
 import { fixtures } from '../tests';
-import { loadTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 import { Checker } from './checker';
 
 const dir = fixtures({
@@ -26,7 +26,7 @@ const dir = fixtures({
   'test.html': "<div>{{ 'firstLevelUsedGroup.secondLevelUsedKey' | translate }}</div>",
 });
 
-test('checker', async t => {
+test('checker', t => {
   const checker = new Checker();
 
   t.plan(12);
@@ -43,9 +43,9 @@ test('checker', async t => {
   checker.once('used', () => t.pass('should emit used event'));
   checker.once('unused', () => t.pass('should emit unused event'));
 
-  const translations = await loadTranslations(`${dir}/??.json`);
-  const sources = await loadFiles(`${dir}/**.@(ts|html)`);
-  const unused = await checker.check(translations, sources);
+  const translations = TranslationFile.fromGlob(`${dir}/??.json`);
+  const sources = File.fromGlob(`${dir}/**.@(ts|html)`);
+  const unused = checker.check(translations, sources);
 
   t.is(unused.length, 3, `should found 3 unused keys`);
   t.true(unused.includes('firstLevelUnusedKey'), 'should found "firstLevelUnusedKey"');

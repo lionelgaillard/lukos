@@ -1,8 +1,8 @@
 import test from 'ava';
-import { readFile } from 'fs-extra';
+import { readFileSync } from 'fs-extra';
 import { deserializeKeys } from '../keys';
 import { fixtures } from '../tests';
-import { loadTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 import { Remover } from './remover';
 
 const translation = JSON.stringify({
@@ -28,7 +28,7 @@ const dir = fixtures({
   ].join('\n'),
 });
 
-test('remover', async t => {
+test('remover', t => {
   const remover = new Remover();
 
   t.plan(9);
@@ -38,8 +38,8 @@ test('remover', async t => {
   remover.once('removed', () => t.pass('should emit removed event'));
   remover.once('passed', () => t.pass('should emit passed event'));
 
-  const unused = deserializeKeys(await readFile(`${dir}/unused.txt`, 'utf8'));
-  const translations = await loadTranslations(`${dir}/??.json`);
+  const unused = deserializeKeys(readFileSync(`${dir}/unused.txt`, 'utf8'));
+  const translations = TranslationFile.fromGlob(`${dir}/??.json`);
   remover.remove(unused, translations);
 
   const fr = translations.find(file => file.path.endsWith('fr.json')).data;

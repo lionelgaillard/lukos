@@ -1,7 +1,7 @@
-import { loadTranslations, saveTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 
 export class FormatCommand {
   public async run(translationsGlob: string) {
-    await saveTranslations(await loadTranslations(translationsGlob));
+    TranslationFile.fromGlob(translationsGlob).map(t => t.save());
   }
 }

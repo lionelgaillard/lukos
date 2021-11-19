@@ -33,7 +33,7 @@ export class Completer extends EventEmitter {
       }
     }
 
-    await Promise.all(translations.map(file => file.save()));
+    translations.map(file => file.save());
 
     this.emit('completed', { reference: translations[0].reference, translations });
 

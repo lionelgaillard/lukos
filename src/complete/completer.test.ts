@@ -1,8 +1,8 @@
 import test from 'ava';
-import { readFile } from 'fs-extra';
+import { readFileSync } from 'fs-extra';
 import { fixtures } from '../tests';
 import { NoopTranslator } from '../translate/noop.translator';
-import { deserializeComparedTranslations } from '../translations';
+import { ComparedTranslationFile } from '../translations';
 import { Completer } from './completer';
 
 const dir = fixtures({
@@ -48,7 +48,7 @@ test('completer', async t => {
   completer.once('added', () => t.pass('should emit added event'));
   completer.once('passed', () => t.pass('should emit passed event'));
 
-  const diff = await deserializeComparedTranslations(await readFile(`${dir}/compared.txt`, 'utf8'));
+  const diff = ComparedTranslationFile.deserialize(readFileSync(`${dir}/compared.txt`, 'utf8'));
   const completed = await completer.complete(diff);
 
   const fr = completed.find(file => file.path.endsWith('fr.json')).data;

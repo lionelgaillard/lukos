@@ -1,6 +1,6 @@
 import test from 'ava';
 import { fixtures } from '../tests';
-import { loadTranslation, loadTranslations, saveTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 import { Copier } from './copier';
 
 const dir = fixtures({
@@ -38,13 +38,13 @@ test('copier', async t => {
   copier.once('copied', () => t.pass('should emit copied event'));
   copier.once('passed', () => t.pass('should emit passed event'));
 
-  const translations = await loadTranslations(`${dir}/??.json`);
+  const translations = TranslationFile.fromGlob(`${dir}/??.json`);
   copier.copy('b', 'c.z', translations);
-  await saveTranslations(translations);
+  translations.map(t => t.save());
 
-  const de = await loadTranslation(`${dir}/de.json`);
-  const en = await loadTranslation(`${dir}/en.json`);
-  const fr = await loadTranslation(`${dir}/fr.json`);
+  const de = TranslationFile.fromPath(`${dir}/de.json`);
+  const en = TranslationFile.fromPath(`${dir}/en.json`);
+  const fr = TranslationFile.fromPath(`${dir}/fr.json`);
 
   t.true(de.has('b'), 'Old key has not been removed');
   t.true(de.has('c.z'), 'New key has been added');

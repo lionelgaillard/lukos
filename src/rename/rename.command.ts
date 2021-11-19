@@ -1,12 +1,12 @@
-import { loadTranslations, saveTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 import { Renamer } from './renamer';
 
 export class RenameCommand {
   constructor(private readonly renamer: Renamer) {}
 
   public async run(source: string, target: string, translationsGlob: string) {
-    const translations = await loadTranslations(translationsGlob);
+    const translations = TranslationFile.fromGlob(translationsGlob);
     this.renamer.rename(source, target, translations);
-    await saveTranslations(translations);
+    translations.map(t => t.save());
   }
 }

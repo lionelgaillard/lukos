@@ -1,16 +1,16 @@
 import { EventEmitter } from 'events';
-import { ComparedTranslationFile, compareTranslation, TranslationFile } from '../translations';
+import { ComparedTranslationFile, TranslationFile } from '../translations';
 
 export class Comparer extends EventEmitter {
-  public async compare(reference: TranslationFile, translations: TranslationFile[]) {
+  public compare(reference: TranslationFile, translations: TranslationFile[]): ComparedTranslationFile[] {
     const compared: ComparedTranslationFile[] = [];
 
     this.emit('comparing', { reference, translations });
 
     for (const file of translations) {
-      const diffed = compareTranslation(reference, file);
-      compared.push(diffed);
-      this.emit('diff', { file: diffed });
+      const diff = reference.compare(file);
+      compared.push(diff);
+      this.emit('diff', { file: diff });
     }
 
     this.emit('compared', { reference, translations: compared });

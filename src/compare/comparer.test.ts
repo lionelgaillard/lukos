@@ -1,6 +1,6 @@
 import test from 'ava';
 import { fixtures } from '../tests';
-import { loadTranslation, loadTranslations } from '../translations';
+import { TranslationFile } from '../translations';
 import { Comparer } from './comparer';
 
 const dir = fixtures({
@@ -42,9 +42,9 @@ test('comparer', async t => {
   comparer.once('compared', () => t.pass('should emit compared event'));
   comparer.once('diff', () => t.pass('should emit diff event'));
 
-  const reference = await loadTranslation(`${dir}/en.json`);
-  const translations = await loadTranslations(`${dir}/??.json`);
-  const compared = await comparer.compare(reference, translations);
+  const reference = TranslationFile.fromPath(`${dir}/en.json`);
+  const translations = TranslationFile.fromGlob(`${dir}/??.json`);
+  const compared = comparer.compare(reference, translations);
 
   t.truthy(compared, 'should return compared files');
   t.is(compared.length, 3, 'should have 3 files');

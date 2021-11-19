@@ -1,7 +1,7 @@
-import { extractValues, TranslationFile, TranslationValues } from './translations';
+import { TranslationFile, TranslationValues } from './translations';
 
 export function toCsv(files: TranslationFile[]): string {
-  const translations = extractValues(files);
+  const translations = TranslationFile.values(files);
   return makeHeaders(translations) + makeRows(translations);
 }
 

@@ -27,19 +27,20 @@
   // src/files.ts
   var import_fs_extra = __toModule(require("fs-extra"));
   var import_glob = __toModule(require("glob"));
-  function resolvePattern(pattern) {
-    return new Promise((resolve, reject) => (0, import_glob.default)(pattern, (error, matches) => error ? reject(error) : resolve(matches)));
-  }
-  async function loadFile(path) {
-    return {
-      path,
-      content: await (0, import_fs_extra.readFile)(path, "utf8")
-    };
-  }
-  async function loadFiles(pattern) {
-    const paths = await resolvePattern(pattern);
-    return Promise.all(paths.map((path) => loadFile(path)));
-  }
+  var File = class {
+    constructor(path, content) {
+      this.path = path;
+      this.content = content;
+    }
+    static fromPath(path) {
+      const content = (0, import_fs_extra.readFileSync)(path, "utf8");
+      return new File(path, content);
+    }
+    static fromGlob(glob) {
+      const paths = (0, import_glob.sync)(glob);
+      return paths.map(File.fromPath);
+    }
+  };
 
   // src/keys.ts
   function serializeKeys(keys) {
@@ -63,6 +64,7 @@
 
   // src/translations.ts
   var import_fs_extra2 = __toModule(require("fs-extra"));
+  var import_glob2 = __toModule(require("glob"));
   var import_path = __toModule(require("path"));
 
   // src/objects.ts
@@ -84,12 +86,32 @@
       this.data = data;
       this._keys = null;
     }
+    static fromPath(path) {
+      return new TranslationFile(path, (0, import_fs_extra2.readJsonSync)(path));
+    }
+    static fromGlob(glob) {
+      const paths = (0, import_glob2.sync)(glob);
+      return paths.map((path) => TranslationFile.fromPath(path));
+    }
+    static values(translations) {
+      const values = {};
+      const keys = extractKeys(translations);
+      for (let key of keys) {
+        if (!values[key]) {
+          values[key] = {};
+        }
+        for (let translation of translations) {
+          values[key][translation.locale] = translation.get(key);
+        }
+      }
+      return values;
+    }
     get locale() {
-      return getLocale(this.path);
+      return (0, import_path.basename)(this.path).substr(0, 2);
     }
     get keys() {
       if (this._keys === null) {
-        this._keys = getTranslationKeys(this.data);
+        this._keys = getKeys(this.data);
       }
       return this._keys;
     }
@@ -97,7 +119,7 @@
       return this.keys.includes(key);
     }
     get(key) {
-      return getTranslationValue(this.data, key);
+      return key.split(".").reduce((data, key2) => data && data[key2] || null, this.data);
     }
     add(key, value) {
       if (this._keys) {
@@ -112,7 +134,14 @@
       return deleteTranslationKey(this.data, key);
     }
     save() {
-      return saveTranslation(this);
+      return (0, import_fs_extra2.writeJsonSync)(this.path, sortTranslation(this.data), {spaces: 2});
+    }
+    compare(other) {
+      const compared = new ComparedTranslationFile(other.path, other.data);
+      compared.reference = this;
+      compared.additions = other.keys.filter((key) => !this.keys.includes(key));
+      compared.substractions = this.keys.filter((key) => !other.keys.includes(key));
+      return compared;
     }
   };
   var ComparedTranslationFile = class extends TranslationFile {
@@ -121,75 +150,54 @@
       this.additions = [];
       this.substractions = [];
     }
+    static serialize(files) {
+      if (files.length === 0) {
+        return "";
+      }
+      let output = `### ${files[0].reference.path}
+`;
+      for (const file of files) {
+        output += `@@@ ${file.path}
+`;
+        for (const key of file.additions) {
+          output += `+++ ${key}
+`;
+        }
+        for (const key of file.substractions) {
+          output += `--- ${key}
+`;
+        }
+      }
+      return output;
+    }
+    static deserialize(input) {
+      const compared = [];
+      let reference = null;
+      let current = null;
+      for (const line of input.split("\n")) {
+        const prefix = line.substr(0, 3);
+        const value = line.substr(4);
+        switch (prefix) {
+          case "###":
+            reference = TranslationFile.fromPath(value);
+            break;
+          case "@@@":
+            const data = (0, import_fs_extra2.readJsonSync)(value);
+            current = new ComparedTranslationFile(value, data);
+            current.reference = reference;
+            compared.push(current);
+            break;
+          case "+++":
+            current.additions.push(value);
+            break;
+          case "---":
+            current.substractions.push(value);
+            break;
+        }
+      }
+      return compared;
+    }
   };
-  async function saveTranslation(file) {
-    await (0, import_fs_extra2.writeJson)(file.path, sortTranslation(file.data), {spaces: 2});
-  }
-  async function saveTranslations(files) {
-    await Promise.all(files.map((t) => saveTranslation(t)));
-  }
-  async function loadTranslation(path) {
-    const data = await (0, import_fs_extra2.readJson)(path);
-    return new TranslationFile(path, data);
-  }
-  async function loadTranslations(pattern) {
-    const paths = await resolvePattern(pattern);
-    return Promise.all(paths.map((path) => loadTranslation(path)));
-  }
-  function serializeComparedTranslation(files) {
-    if (files.length === 0) {
-      return "";
-    }
-    let output = `### ${files[0].reference.path}
-`;
-    for (const file of files) {
-      output += `@@@ ${file.path}
-`;
-      for (const key of file.additions) {
-        output += `+++ ${key}
-`;
-      }
-      for (const key of file.substractions) {
-        output += `--- ${key}
-`;
-      }
-    }
-    return output;
-  }
-  async function deserializeComparedTranslations(input) {
-    const compared = [];
-    let reference = null;
-    let current = null;
-    for (const line of input.split("\n")) {
-      const prefix = line.substr(0, 3);
-      const value = line.substr(4);
-      switch (prefix) {
-        case "###":
-          reference = await loadTranslation(value);
-          break;
-        case "@@@":
-          const data = await (0, import_fs_extra2.readJson)(value);
-          current = new ComparedTranslationFile(value, data);
-          current.reference = reference;
-          compared.push(current);
-          break;
-        case "+++":
-          current.additions.push(value);
-          break;
-        case "---":
-          current.substractions.push(value);
-          break;
-      }
-    }
-    return compared;
-  }
-  function compareTranslation(reference, file) {
-    const compared = new ComparedTranslationFile(file.path, file.data);
-    compared.reference = reference;
-    compared.additions = file.keys.filter((key) => !reference.keys.includes(key));
-    compared.substractions = reference.keys.filter((key) => !file.keys.includes(key));
-    return compared;
-  }
   function addTranslationKey(data, key, value) {
     if (!data) {
       return false;
@@ -221,9 +229,6 @@
     const [firstkey, ...otherKeys] = key.split(".");
     return deleteTranslationKey(data[firstkey], otherKeys.join("."));
   }
-  function getTranslationValue(data, path) {
-    return path.split(".").reduce((data2, key) => data2 && data2[key] || null, data);
-  }
   function sortTranslation(data) {
     return Object.keys(data).sort().reduce((sorted, key) => {
       if (typeof data[key] === "string") {
@@ -234,12 +239,6 @@
       return sorted;
     }, {});
   }
-  function getTranslationKeys(data) {
-    return getKeys(data);
-  }
-  function getLocale(path) {
-    return (0, import_path.basename)(path).substr(0, 2);
-  }
   function extractKeys(translations) {
     const keys = new Set();
     for (let translation of translations) {
@@ -249,19 +248,6 @@
     }
     return Array.from(keys.values());
   }
-  function extractValues(translations) {
-    const values = {};
-    const keys = extractKeys(translations);
-    for (let key of keys) {
-      if (!values[key]) {
-        values[key] = {};
-      }
-      for (let translation of translations) {
-        values[key][translation.locale] = translation.get(key);
-      }
-    }
-    return values;
-  }
 
   // src/check/check.command.ts
   var CheckCommand = class {
@@ -269,9 +255,9 @@
       this.checker = checker;
     }
     async run(output, sourcesGlob, translationsGlob) {
-      const sources = await loadFiles(sourcesGlob);
-      const translations = await loadTranslations(translationsGlob);
-      const unused = await this.checker.check(translations, sources);
+      const sources = File.fromGlob(sourcesGlob);
+      const translations = TranslationFile.fromGlob(translationsGlob);
+      const unused = this.checker.check(translations, sources);
       await write(output, serializeKeys(unused));
     }
   };
@@ -279,7 +265,7 @@
   // src/check/checker.ts
   var import_events = __toModule(require("events"));
   var Checker = class extends import_events.EventEmitter {
-    async check(translations, sources) {
+    check(translations, sources) {
       const unused = [];
       const keys = getAllKeys(translations);
       this.emit("checking", {keys, sources, translations});
@@ -310,9 +296,9 @@
     }
     async run(input, translationsGlob) {
       const keys = deserializeKeys(await read(input));
-      const translations = await loadTranslations(translationsGlob);
+      const translations = TranslationFile.fromGlob(translationsGlob);
       this.remover.remove(keys, translations);
-      await Promise.all(translations.map((file) => saveTranslation(file)));
+      translations.map((file) => file.save());
     }
   };
 
@@ -322,23 +308,23 @@
       this.comparer = comparer;
     }
     async run(output, referencePath, translationsGlob) {
-      const reference = await loadTranslation(referencePath);
-      const translations = await loadTranslations(translationsGlob);
-      const compared = await this.comparer.compare(reference, translations);
-      await write(output, serializeComparedTranslation(compared));
+      const reference = TranslationFile.fromPath(referencePath);
+      const translations = TranslationFile.fromGlob(translationsGlob);
+      const compared = this.comparer.compare(reference, translations);
+      await write(output, ComparedTranslationFile.serialize(compared));
     }
   };
 
   // src/compare/comparer.ts
   var import_events2 = __toModule(require("events"));
   var Comparer = class extends import_events2.EventEmitter {
-    async compare(reference, translations) {
+    compare(reference, translations) {
       const compared = [];
       this.emit("comparing", {reference, translations});
       for (const file of translations) {
-        const diffed = compareTranslation(reference, file);
-        compared.push(diffed);
-        this.emit("diff", {file: diffed});
+        const diff = reference.compare(file);
+        compared.push(diff);
+        this.emit("diff", {file: diff});
       }
       this.emit("compared", {reference, translations: compared});
       return compared;
@@ -351,7 +337,7 @@
       this.completer = completer;
     }
     async run(input) {
-      const diff = await deserializeComparedTranslations(await read(input));
+      const diff = ComparedTranslationFile.deserialize(await read(input));
       const completed = await this.completer.complete(diff);
     }
   };
@@ -385,7 +371,7 @@
           }
         }
       }
-      await Promise.all(translations.map((file) => file.save()));
+      translations.map((file) => file.save());
       this.emit("completed", {reference: translations[0].reference, translations});
       return translations;
     }
@@ -496,15 +482,15 @@
       this.copier = copier;
     }
     async run(source, target, translationsGlob) {
-      const translations = await loadTranslations(translationsGlob);
+      const translations = TranslationFile.fromGlob(translationsGlob);
       this.copier.copy(source, target, translations);
-      await saveTranslations(translations);
+      translations.map((t) => t.save());
     }
   };
 
   // src/csv.ts
   function toCsv(files) {
-    const translations = extractValues(files);
+    const translations = TranslationFile.values(files);
     return makeHeaders(translations) + makeRows(translations);
   }
   function makeHeaders(translations) {
@@ -531,22 +517,22 @@
   // src/export/export.command.ts
   var ExportCommand = class {
     async run(output, translationsGlob) {
-      const files = await loadTranslations(translationsGlob);
-      output.write(toCsv(files), "utf8");
+      const translations = TranslationFile.fromGlob(translationsGlob);
+      output.write(toCsv(translations), "utf8");
     }
   };
 
   // src/format/format.command.ts
   var FormatCommand = class {
     async run(translationsGlob) {
-      await saveTranslations(await loadTranslations(translationsGlob));
+      TranslationFile.fromGlob(translationsGlob).map((t) => t.save());
     }
   };
 
   // src/keys/keys.command.ts
   var KeysCommand = class {
     async run(output, translationsGlob) {
-      const translations = await loadTranslations(translationsGlob);
+      const translations = TranslationFile.fromGlob(translationsGlob);
       const keys = new Set();
       for (let translation of translations) {
         for (let key of translation.keys) {
@@ -576,7 +562,7 @@
   var PickCommand = class {
     async run(input, output, translationsGlob) {
       const keys = deserializeKeys(await read(input));
-      const translations = await loadTranslations(translationsGlob);
+      const translations = TranslationFile.fromGlob(translationsGlob);
       const picked = pick(keys, translations);
       await write(output, JSON.stringify(picked, null, 2));
     }
@@ -588,9 +574,9 @@
       this.remover = remover;
     }
     async run(keys, translationsGlob) {
-      const translations = await loadTranslations(translationsGlob);
+      const translations = TranslationFile.fromGlob(translationsGlob);
       this.remover.remove(keys, translations);
-      await Promise.all(translations.map((file) => saveTranslation(file)));
+      translations.map((file) => file.save());
     }
   };
 
@@ -618,9 +604,9 @@
       this.renamer = renamer;
     }
     async run(source, target, translationsGlob) {
-      const translations = await loadTranslations(translationsGlob);
+      const translations = TranslationFile.fromGlob(translationsGlob);
       this.renamer.rename(source, target, translations);
-      await saveTranslations(translations);
+      translations.map((t) => t.save());
     }
   };
 
@@ -666,7 +652,7 @@
       if (this.translator instanceof NoopTranslator) {
         throw new Error(`The translate command requires a configured translation API.`);
       }
-      const source = await loadTranslation(sourcePath);
+      const source = TranslationFile.fromPath(sourcePath);
       if (source.locale === targetLocale) {
         throw new Error("The source and target locales are the same.");
       }

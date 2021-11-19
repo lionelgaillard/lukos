@@ -1,12 +1,12 @@
-import { loadTranslations, saveTranslation } from '../translations';
+import { TranslationFile } from '../translations';
 import { Remover } from './remover';
 
 export class RemoveCommand {
   constructor(private readonly remover: Remover) {}
 
   public async run(keys: string[], translationsGlob: string) {
-    const translations = await loadTranslations(translationsGlob);
+    const translations = TranslationFile.fromGlob(translationsGlob);
     this.remover.remove(keys, translations);
-    await Promise.all(translations.map(file => saveTranslation(file)));
+    translations.map(file => file.save());
   }
 }
