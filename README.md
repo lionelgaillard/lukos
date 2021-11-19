@@ -26,13 +26,13 @@ To enable automatic translation you need:
 
 - [`help`](#help)
 - [`check`](#check)
-- [`compare`](#compare)
-- [`complete`](#complete)
-- [`copy`](#copy)
+- [`compare/diff`](#compare)
+- [`complete/patch`](#complete)
+- [`copy/cp`](#copy)
 - [`config`](#config)
 - [`format`](#format)
 - [`pick`](#pick)
-- [`remove/clean`](#remove)
+- [`remove/rm/clean`](#remove)
 - [`translate`](#translate)
 
 ---
@@ -73,7 +73,7 @@ Glob of the files where to find translation keys (use quotes!).
 
 ---
 
-### `remove`
+### `remove/rm/clean`
 
 Removes unused items from translation files.
 
@@ -93,13 +93,13 @@ Glob of the translation files to remove (use quotes!).
 
 ---
 
-### `compare`
+### `compare/diff`
 
 Compare files with a reference file.
 
 #### Usage
 
-    $ lukos compare assets/i18n/en.json "assets/i18n/??.json" > diff.txt
+    $ lukos diff assets/i18n/en.json "assets/i18n/??.json" > diff.txt
 
 #### Arguments
 
@@ -113,7 +113,7 @@ Glob of the translation files to compare (use quotes!).
 
 ---
 
-### `complete`
+### `complete/patch`
 
 Completes missing keys from a reference file.
 
@@ -121,7 +121,7 @@ Completes missing keys from a reference file.
 
 #### Usage
 
-    $ cat diff.txt | lukos complete
+    $ cat diff.txt | lukos patch
 
 #### Arguments
 
@@ -157,7 +157,7 @@ The config value to set.
 
 ---
 
-### `copy`
+### `copy/cp`
 
 Copy a key.
 

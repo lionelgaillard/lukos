@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { TranslationFile } from '../translations';
 
 export class Remover extends EventEmitter {
-  public async clean(keys: string[], translations: TranslationFile[]) {
+  public remove(keys: string[], translations: TranslationFile[]): void {
     this.emit('remove.pre', { keys, translations });
 
     for (const file of translations) {
@@ -16,7 +16,5 @@ export class Remover extends EventEmitter {
     }
 
     this.emit('remove.post', { keys, translations });
-
-    return translations;
   }
 }

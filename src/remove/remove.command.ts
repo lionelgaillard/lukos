@@ -5,12 +5,12 @@ import { loadTranslations, saveTranslation } from '../translations';
 import { Remover } from './remover';
 
 export class CleanCommand {
-  constructor(private readonly cleaner: Remover) {}
+  constructor(private readonly remover: Remover) {}
 
   public async run(input: Readable, translationsGlob: string) {
     const keys = deserializeKeys(await read(input));
     const translations = await loadTranslations(translationsGlob);
-    const cleaned = await this.cleaner.clean(keys, translations);
-    await Promise.all(cleaned.map(file => saveTranslation(file)));
+    this.remover.remove(keys, translations);
+    await Promise.all(translations.map(file => saveTranslation(file)));
   }
 }

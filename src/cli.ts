@@ -41,6 +41,7 @@ program
 
 program
   .command('compare <reference> <translations>')
+  .alias('diff')
   .description('Compare files with a reference file', {
     reference: 'Path to the reference file',
     translations: 'Glob of the translation files to compare (use quotes!)',
@@ -55,10 +56,13 @@ program
 
 program
   .command('complete')
+  .alias('patch')
   .description('Completes missing keys from a reference file')
   .action(async ({ args }) => {
     const completer = new Completer(createTranslator())
-      .on('completing', ({ reference, translations }) => console.error(`Completing ${translations.length} files with values of ${reference.path}...`))
+      .on('completing', ({ reference, translations }) =>
+        console.error(`Completing ${translations.length} files with values of ${reference.path}...`)
+      )
       .on('added', ({ file, key }) => console.error(`Added ${key} in ${file.path}`))
       .on('passed', ({ file, key }) => console.error(`Passed ${key} in ${file.path}`));
     const command = new CompleteCommand(completer);
@@ -67,6 +71,7 @@ program
 
 program
   .command('copy <source> <target> <translations>')
+  .alias('cp')
   .description('Finds key values in all translation files', {
     source: 'Old key',
     target: 'New key',
@@ -134,6 +139,7 @@ program
 
 program
   .command('remove <translations>')
+  .alias('rm')
   .alias('clean')
   .description('Removes unused items from translation files', {
     translations: 'Glob of the translation files (use quotes!)',

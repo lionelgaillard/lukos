@@ -17,24 +17,32 @@ const translation = JSON.stringify({
 const dir = fixtures({
   'en.json': translation,
   'fr.json': translation,
-  'unused.txt': ['# firstLevelUsed', 'firstLevelUnused', 'firstLevelGroup.secondLevelUnused', ' ', 'notExists', 'notExists.neither', ''].join('\n'),
+  'unused.txt': [
+    '# firstLevelUsed',
+    'firstLevelUnused',
+    'firstLevelGroup.secondLevelUnused',
+    ' ',
+    'notExists',
+    'notExists.neither',
+    '',
+  ].join('\n'),
 });
 
-test('cleaner', async t => {
-  const cleaner = new Remover();
+test('remover', async t => {
+  const remover = new Remover();
 
   t.plan(9);
 
-  cleaner.once('remove.pre', () => t.pass('should emit remove.pre event'));
-  cleaner.once('remove.post', () => t.pass('should emit remove.post event'));
-  cleaner.once('removed', () => t.pass('should emit removed event'));
-  cleaner.once('passed', () => t.pass('should emit passed event'));
+  remover.once('remove.pre', () => t.pass('should emit remove.pre event'));
+  remover.once('remove.post', () => t.pass('should emit remove.post event'));
+  remover.once('removed', () => t.pass('should emit removed event'));
+  remover.once('passed', () => t.pass('should emit passed event'));
 
   const unused = deserializeKeys(await readFile(`${dir}/unused.txt`, 'utf8'));
   const translations = await loadTranslations(`${dir}/??.json`);
-  const cleaned = await cleaner.clean(unused, translations);
+  remover.remove(unused, translations);
 
-  const fr = cleaned.find(file => file.path.endsWith('fr.json')).data;
+  const fr = translations.find(file => file.path.endsWith('fr.json')).data;
 
   t.falsy(fr.firstLevelUnused, 'should remove first level unused key');
   t.truthy(fr.firstLevelGroup, 'should let first level group');
