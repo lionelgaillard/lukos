@@ -3,13 +3,11 @@ import { sync } from 'glob';
 
 export class File {
   public static fromPath(path: string): File {
-    const content = readFileSync(path, 'utf8');
-    return new File(path, content);
+    return new File(path, readFileSync(path, 'utf8'));
   }
 
   public static fromGlob(glob: string) {
-    const paths = sync(glob);
-    return paths.map(File.fromPath);
+    return sync(glob).map(File.fromPath);
   }
 
   constructor(public readonly path: string, public content: string) {}

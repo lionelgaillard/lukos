@@ -9,8 +9,7 @@ export class TranslationFile {
   }
 
   public static fromGlob(glob: string): TranslationFile[] {
-    const paths = sync(glob);
-    return paths.map(path => TranslationFile.fromPath(path));
+    return sync(glob).map(TranslationFile.fromPath);
   }
 
   public static values(translations: TranslationFile[]): TranslationValues {

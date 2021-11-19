@@ -37,8 +37,7 @@
       return new File(path, content);
     }
     static fromGlob(glob) {
-      const paths = (0, import_glob.sync)(glob);
-      return paths.map(File.fromPath);
+      return (0, import_glob.sync)(glob).map(File.fromPath);
     }
   };
 
@@ -90,8 +89,7 @@
       return new TranslationFile(path, (0, import_fs_extra2.readJsonSync)(path));
     }
     static fromGlob(glob) {
-      const paths = (0, import_glob2.sync)(glob);
-      return paths.map((path) => TranslationFile.fromPath(path));
+      return (0, import_glob2.sync)(glob).map(TranslationFile.fromPath);
     }
     static values(translations) {
       const values = {};
