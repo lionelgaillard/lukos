@@ -30,6 +30,7 @@ To enable automatic translation you need:
 - [`complete/patch`](#complete)
 - [`copy/cp`](#copy)
 - [`config`](#config)
+- [`export`](#export)
 - [`format`](#format)
 - [`pick`](#pick)
 - [`remove/rm/clean`](#remove)
@@ -155,6 +156,22 @@ The config key to get or set.
 ##### `[value]`
 
 The config value to set.
+
+---
+
+### `export`
+
+Export files as CSV.
+
+#### Usage
+
+    $ lukos export "assets/i18n/??.json" > translations.csv
+
+#### Arguments
+
+##### `<translations>`
+
+Glob of the translation files.
 
 ---
 
