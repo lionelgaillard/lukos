@@ -1,31 +1,34 @@
-import { TranslationFile, TranslationValues } from './translations';
+import { parse } from 'csv-parse/sync';
+import { stringify } from 'csv-stringify/sync';
+import { TranslationValues } from './translations';
 
-export function toCsv(files: TranslationFile[]): string {
-  const translations = TranslationFile.values(files);
-  return makeHeaders(translations) + makeRows(translations);
+export function toCsv(values: TranslationValues): string {
+  const keys = Object.keys(values);
+  const first = values[keys[0]];
+  const locales = Object.keys(first);
+  const data = keys.map(key => ({ key, ...values[key] }));
+
+  return stringify(data, {
+    delimiter: ',',
+    columns: ['Key', ...locales],
+  });
 }
 
-function makeHeaders(translations: TranslationValues) {
-  const first = Object.values(translations)[0];
-  const locales = Object.keys(first).map(key => key.toUpperCase());
-  return formatRow(['Key', ...locales]);
-}
+export function fromCsv(input: string): TranslationValues {
+  const data = parse(input, { delimiter: ',', columns: true }) as any[];
 
-function makeRows(translations: TranslationValues): string {
-  return Object.keys(translations).reduce((rows, key) => {
-    const values = Object.values(translations[key]);
-    return rows + formatRow([key, ...values]);
-  }, '');
-}
+  return data.reduce((values, row) => {
+    const key = row['Key'];
+    const locales = Object.keys(row).filter(p => p.length === 2);
 
-function formatRow(values: string[]) {
-  return values.map(formatCell).join(';') + '\n';
-}
+    if (!values[key]) {
+      values[key] = {};
+    }
 
-function formatCell(value: string) {
-  return `"${escape(value || '')}"`;
-}
+    for (const locale of locales) {
+      values[key][locale] = row[locale];
+    }
 
-function escape(value: string) {
-  return value.replace(/\n/g, '\\n');
+    return values;
+  }, {});
 }

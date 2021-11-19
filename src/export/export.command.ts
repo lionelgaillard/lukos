@@ -4,7 +4,8 @@ import { TranslationFile } from '../translations';
 
 export class ExportCommand {
   public async run(output: Writable, translationsGlob: string) {
-    const translations = TranslationFile.fromGlob(translationsGlob);
-    output.write(toCsv(translations), 'utf8');
+    const files = TranslationFile.fromGlob(translationsGlob);
+    const values = TranslationFile.toValues(files);
+    output.write(toCsv(values), 'utf8');
   }
 }

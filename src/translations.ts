@@ -12,7 +12,7 @@ export class TranslationFile {
     return sync(glob).map(TranslationFile.fromPath);
   }
 
-  public static values(translations: TranslationFile[]): TranslationValues {
+  public static toValues(translations: TranslationFile[]): TranslationValues {
     const values = {};
     const keys = extractKeys(translations);
 
@@ -27,6 +27,24 @@ export class TranslationFile {
     }
 
     return values;
+  }
+
+  public static fromValues(values: TranslationValues): TranslationFile[] {
+    const files: { [locale: string]: TranslationFile } = {};
+    const keys = Object.keys(values);
+
+    for (const key of keys) {
+      const locales = Object.keys(values[key]).filter(p => p.length === 2);
+      for (const locale of locales) {
+        if (!files[locale]) {
+          files[locale] = new TranslationFile(`${locale}.json`, {});
+        }
+
+        files[locale].add(key, values[key][locale]);
+      }
+    }
+
+    return Object.values(files);
   }
 
   constructor(public readonly path: string, public data: any) {}
@@ -135,7 +153,11 @@ export class ComparedTranslationFile extends TranslationFile {
   }
 }
 
-export type TranslationValues = { [key: string]: { [locale: string]: string | null } };
+export type TranslationValues = {
+  [key: string]: {
+    [locale: string]: string | null;
+  };
+};
 
 function addTranslationKey(data: any, key: string, value: string): boolean {
   if (!data) {
