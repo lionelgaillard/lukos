@@ -33,6 +33,7 @@ To enable automatic translation you need:
 - [`config`](docs/config/README.md)
 - [`export`](docs/export/README.md)
 - [`format`](docs/format/README.md)
+- [`import`](docs/import/README.md)
 - [`pick`](docs/pick/README.md)
 - [`remove/rm`](docs/remove/README.md)
 - [`rename`](docs/rename/README.md)

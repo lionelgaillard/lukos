@@ -90,7 +90,7 @@
     static fromGlob(glob) {
       return (0, import_glob2.sync)(glob).map(TranslationFile.fromPath);
     }
-    static values(translations) {
+    static toValues(translations) {
       const values = {};
       const keys = extractKeys(translations);
       for (let key of keys) {
@@ -102,6 +102,20 @@
         }
       }
       return values;
+    }
+    static fromValues(values) {
+      const files = {};
+      const keys = Object.keys(values);
+      for (const key of keys) {
+        const locales = Object.keys(values[key]).filter((p) => p.length === 2);
+        for (const locale of locales) {
+          if (!files[locale]) {
+            files[locale] = new TranslationFile(`${locale}.json`, {});
+          }
+          files[locale].add(key, values[key][locale]);
+        }
+      }
+      return Object.values(files);
     }
     get locale() {
       return (0, import_path.basename)(this.path).substr(0, 2);
@@ -485,37 +499,53 @@
     }
   };
 
-  // src/csv.ts
-  function toCsv(files) {
-    const translations = TranslationFile.values(files);
-    return makeHeaders(translations) + makeRows(translations);
-  }
-  function makeHeaders(translations) {
-    const first = Object.values(translations)[0];
-    const locales = Object.keys(first).map((key) => key.toUpperCase());
-    return formatRow(["Key", ...locales]);
-  }
-  function makeRows(translations) {
-    return Object.keys(translations).reduce((rows, key) => {
-      const values = Object.values(translations[key]);
-      return rows + formatRow([key, ...values]);
-    }, "");
-  }
-  function formatRow(values) {
-    return values.map(formatCell).join(";") + "\n";
-  }
-  function formatCell(value) {
-    return `"${escape(value || "")}"`;
-  }
-  function escape(value) {
-    return value.replace(/\n/g, "\\n");
-  }
-
   // src/export/export.command.ts
   var ExportCommand = class {
+    constructor(exporter) {
+      this.exporter = exporter;
+    }
     async run(output, translationsGlob) {
-      const translations = TranslationFile.fromGlob(translationsGlob);
-      output.write(toCsv(translations), "utf8");
+      const files = TranslationFile.fromGlob(translationsGlob);
+      const content = this.exporter.export(files);
+      output.write(content, "utf8");
+    }
+  };
+
+  // src/csv.ts
+  var import_sync = __toModule(require("csv-parse/sync"));
+  var import_sync2 = __toModule(require("csv-stringify/sync"));
+  function toCsv(values) {
+    const keys = Object.keys(values);
+    const first = values[keys[0]];
+    const locales = Object.keys(first);
+    const data = keys.map((key) => ({key, ...values[key]}));
+    return (0, import_sync2.stringify)(data, {
+      delimiter: ",",
+      header: true,
+      columns: ["key", ...locales]
+    });
+  }
+  function fromCsv(input) {
+    const data = (0, import_sync.parse)(input, {delimiter: ",", columns: true});
+    return data.reduce((values, row) => {
+      const key = row["key"];
+      const locales = Object.keys(row).filter((p) => p.length === 2);
+      if (!values[key]) {
+        values[key] = {};
+      }
+      for (const locale of locales) {
+        values[key][locale] = row[locale];
+      }
+      return values;
+    }, {});
+  }
+
+  // src/export/exporter.ts
+  var Exporter = class {
+    export(files) {
+      const values = TranslationFile.toValues(files);
+      const content = toCsv(values);
+      return content;
     }
   };
 
@@ -523,6 +553,27 @@
   var FormatCommand = class {
     async run(translationsGlob) {
       TranslationFile.fromGlob(translationsGlob).map((t) => t.save());
+    }
+  };
+
+  // src/import/import.command.ts
+  var ImportCommand = class {
+    constructor(importer) {
+      this.importer = importer;
+    }
+    async run(input) {
+      const content = await read(input);
+      const files = this.importer.import(content);
+      files.forEach((file) => file.save());
+    }
+  };
+
+  // src/import/importer.ts
+  var Importer = class {
+    import(content) {
+      const values = fromCsv(content);
+      const files = TranslationFile.fromValues(values);
+      return files;
     }
   };
 
@@ -705,18 +756,12 @@
 
   // src/cli.ts
   import_commander.program.version((0, import_fs_extra6.readJsonSync)((0, import_path4.join)(__dirname, "..", "package.json")).version);
-  import_commander.program.command("check <translations> <sources>").description("Checks if translations are used and output unused translation keys.", {
-    translations: "Glob of the translation files (use quotes!)",
-    sources: "Glob of the files where to find translation keys (use quotes!)"
-  }).addHelpText("after", "Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.").action(async (translations, sources) => {
+  import_commander.program.command("check").description("Checks if translations are used and output unused translation keys.").argument("<translations>", "Glob of the translation files (use quotes!)").argument("<sources>", "Glob of the files where to find translation keys (use quotes!)").addHelpText("after", "Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.").action(async (translations, sources) => {
     const checker = new Checker().on("checking", ({keys, sources: sources2}) => console.error(`Checking ${keys.length} keys in ${sources2.length} files...`)).on("checked", ({unused}) => console.error(`Found ${unused.length} unused keys`)).on("used", ({key, source}) => console.error(`${key} is used by ${source.path}`)).on("unused", ({key}) => console.error(`${key} is unused`));
     const command = new CheckCommand(checker);
     await command.run(process.stdout, sources, translations);
   });
-  import_commander.program.command("compare <reference> <translations>").alias("diff").description("Compare files with a reference file", {
-    reference: "Path to the reference file",
-    translations: "Glob of the translation files to compare (use quotes!)"
-  }).action(async (reference, translations) => {
+  import_commander.program.command("compare").alias("diff").description("Compare files with a reference file").argument("<reference>", "Path to the reference file").argument("<translations>", "Glob of the translation files to compare (use quotes!)").action(async (reference, translations) => {
     const comparer = new Comparer().on("comparing", ({reference: reference2, translations: translations2}) => console.error(`Comparing ${reference2.path} with ${translations2.length} files...`)).on("diff", ({file}) => console.error(`${file.path} +${file.additions.length} -${file.substractions.length}`));
     const command = new CompareCommand(comparer);
     await command.run(process.stdout, reference, translations);
@@ -726,19 +771,12 @@
     const command = new CompleteCommand(completer);
     await command.run(process.stdin);
   });
-  import_commander.program.command("copy <source> <target> <translations>").alias("cp").description("Finds key values in all translation files", {
-    source: "Old key",
-    target: "New key",
-    translations: "Glob of the translation files (use quotes!)"
-  }).action(async (source, target, translations) => {
+  import_commander.program.command("copy").alias("cp").description("Finds key values in all translation files").argument("<source>", "Old key").argument("<target>", "New key").argument("<translations>", "Glob of the translation files (use quotes!)").action(async (source, target, translations) => {
     const copier = new Copier().on("coyp.pre", ({source: source2, target: target2, translations: translations2}) => console.error(`Copying "${source2}" as "${target2}" from ${translations2.length} files...`)).on("copied", ({source: source2, target: target2, translation}) => console.error(`Copied "${source2}" as "${target2}" from "${translation.path}".`)).on("passed", ({source: source2, target: target2, translation}) => console.error(`Passed "${source2}" in "${translation.path}".`));
     const command = new CopyCommand(copier);
     await command.run(source, target, translations);
   });
-  import_commander.program.command("config <key> [value]").description("Get or set a config value", {
-    key: "The config key to get or set",
-    value: "The config value to set"
-  }).action(async (key, value) => {
+  import_commander.program.command("config").description("Get or set a config value").argument("<key>", "The config key to get or set").argument("[value]", "The config value to set").action(async (key, value) => {
     try {
       const command = new ConfigCommand();
       await command.run(process.stdout, key, value);
@@ -746,58 +784,44 @@
       console.error(`Error: ${error.message} in ${error.fileName} at ${error.lineNumber}`, error.stack);
     }
   });
-  import_commander.program.command("export <translations>").description("Export key/values as CSV", {
-    translations: "Glob of the translation files (use quotes!)"
-  }).action(async (translations) => {
-    const command = new ExportCommand();
+  import_commander.program.command("export").description("Export key/values as CSV").argument("<translations>", "Glob of the translation files (use quotes!)").action(async (translations) => {
+    const exporter = new Exporter();
+    const command = new ExportCommand(exporter);
     await command.run(process.stdout, translations);
   });
-  import_commander.program.command("format <translations>").description("Sort keys and format of your JSON translation files", {
-    translations: "Glob of the translation files (use quotes!)"
-  }).action(async (translations) => {
+  import_commander.program.command("format").description("Sort keys and format of your JSON translation files").argument("<translations>", "Glob of the translation files (use quotes!)").action(async (translations) => {
     const command = new FormatCommand();
     await command.run(translations);
   });
-  import_commander.program.command("keys <translations>").description("Print keys of all translation files", {
-    translations: "Glob of the translation files (use quotes!)"
-  }).action(async (translations) => {
+  import_commander.program.command("import").description("import files from CSV").action(async () => {
+    const importer = new Importer();
+    const command = new ImportCommand(importer);
+    await command.run(process.stdin);
+  });
+  import_commander.program.command("keys").description("Print keys of all translation files").argument("<translations>", "Glob of the translation files (use quotes!)").action(async (translations) => {
     const command = new KeysCommand();
     await command.run(process.stdout, translations);
   });
-  import_commander.program.command("pick <translations>").description("Finds key values in all translation files", {
-    translations: "Glob of the translation files (use quotes!)"
-  }).action(async (translations) => {
+  import_commander.program.command("pick").description("Finds key values in all translation files").argument("<translations>", "Glob of the translation files (use quotes!)").action(async (translations) => {
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, translations);
   });
-  import_commander.program.command("clean <translations>").description("Removes unused items from translation files", {
-    translations: "Glob of the translation files (use quotes!)"
-  }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (translations) => {
+  import_commander.program.command("clean").description("Removes unused items from translation files").argument("<translations>", "Glob of the translation files (use quotes!)").addHelpText("after", "Always double check your unused keys before running the command.").action(async (translations) => {
     const remover = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key, file}) => console.error(`Removed "${key}" from "${file.path}".`)).on("passed", ({key, file}) => console.error(`Passed "${key}" from "${file.path}".`));
     const command = new CleanCommand(remover);
     await command.run(process.stdin, translations);
   });
-  import_commander.program.command("remove <key> <translations>").alias("rm").description("Removes key from translation files", {
-    key: "Key to remove",
-    translations: "Glob of the translation files (use quotes!)"
-  }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (key, translations) => {
+  import_commander.program.command("remove").alias("rm").description("Removes key from translation files").argument("<key>", "Key to remove").argument("<translations>", "Glob of the translation files (use quotes!)").addHelpText("after", "Always double check your unused keys before running the command.").action(async (key, translations) => {
     const remover = new Remover().on("remove.pre", ({keys, translations: translations2}) => console.error(`Removing ${keys.length} keys from ${translations2.length} files...`)).on("removed", ({key: key2, file}) => console.error(`Removed "${key2}" from "${file.path}".`)).on("passed", ({key: key2, file}) => console.error(`Passed "${key2}" from "${file.path}".`));
     const command = new RemoveCommand(remover);
     await command.run([key], translations);
   });
-  import_commander.program.command("rename <source> <target> <translations>").description("Rename keys", {
-    source: "Old key",
-    target: "New key",
-    translations: "Glob of the translation files (use quotes!)"
-  }).addHelpText("after", "Always double check your unused keys before running the command.").action(async (source, target, translations) => {
+  import_commander.program.command("rename").description("Rename keys").argument("<source>", "Old key").argument("<target>", "New key").argument("<translations>", "Glob of the translation files (use quotes!)").addHelpText("after", "Always double check your unused keys before running the command.").action(async (source, target, translations) => {
     const renamer = new Renamer().on("rename.pre", ({source: source2, target: target2, translations: translations2}) => console.error(`Renaming "${source2}" as "${target2}" from ${translations2.length} files...`)).on("renamed", ({source: source2, target: target2, translation}) => console.error(`Renamed "${source2}" as "${target2}" from "${translation.path}".`)).on("passed", ({source: source2, target: target2, translation}) => console.error(`Passed "${source2}" in "${translation.path}".`));
     const command = new RenameCommand(renamer);
     await command.run(source, target, translations);
   });
-  import_commander.program.command("translate <source> <locale>").description("Translate a source file into a new language", {
-    source: "Path to the source file",
-    locale: "Locale of the target language"
-  }).action(async (source, locale) => {
+  import_commander.program.command("translate").description("Translate a source file into a new language").argument("<source>", "Path to the source file").argument("<locale>", "Locale of the target language").action(async (source, locale) => {
     const command = new TranslateCommand(createTranslator());
     await command.run(source, locale);
   });

@@ -14,7 +14,10 @@ import { ConfigCommand } from './config/config.command';
 import { Copier } from './copy/copier';
 import { CopyCommand } from './copy/copy.command';
 import { ExportCommand } from './export/export.command';
+import { Exporter } from './export/exporter';
 import { FormatCommand } from './format/format.command';
+import { ImportCommand } from './import/import.command';
+import { Importer } from './import/importer';
 import { KeysCommand } from './keys/keys.command';
 import { PickCommand } from './pick/pick.command';
 import { RemoveCommand } from './remove/remove.command';
@@ -27,11 +30,10 @@ import { createTranslator } from './translate/translator.factory';
 program.version(readJsonSync(join(__dirname, '..', 'package.json')).version);
 
 program
-  .command('check <translations> <sources>')
-  .description('Checks if translations are used and output unused translation keys.', {
-    translations: 'Glob of the translation files (use quotes!)',
-    sources: 'Glob of the files where to find translation keys (use quotes!)',
-  })
+  .command('check')
+  .description('Checks if translations are used and output unused translation keys.')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
+  .argument('<sources>', 'Glob of the files where to find translation keys (use quotes!)')
   .addHelpText('after', "Note that will only search for keys **AS IS**, and it's not able to resolve dynamically created keys.")
   .action(async (translations: string, sources: string) => {
     const checker = new Checker()
@@ -44,12 +46,11 @@ program
   });
 
 program
-  .command('compare <reference> <translations>')
+  .command('compare')
   .alias('diff')
-  .description('Compare files with a reference file', {
-    reference: 'Path to the reference file',
-    translations: 'Glob of the translation files to compare (use quotes!)',
-  })
+  .description('Compare files with a reference file')
+  .argument('<reference>', 'Path to the reference file')
+  .argument('<translations>', 'Glob of the translation files to compare (use quotes!)')
   .action(async (reference: string, translations: string) => {
     const comparer = new Comparer()
       .on('comparing', ({ reference, translations }) => console.error(`Comparing ${reference.path} with ${translations.length} files...`))
@@ -74,13 +75,12 @@ program
   });
 
 program
-  .command('copy <source> <target> <translations>')
+  .command('copy')
   .alias('cp')
-  .description('Finds key values in all translation files', {
-    source: 'Old key',
-    target: 'New key',
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .description('Finds key values in all translation files')
+  .argument('<source>', 'Old key')
+  .argument('<target>', 'New key')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .action(async (source, target, translations: string) => {
     const copier = new Copier()
       .on('coyp.pre', ({ source, target, translations }) =>
@@ -93,11 +93,10 @@ program
   });
 
 program
-  .command('config <key> [value]')
-  .description('Get or set a config value', {
-    key: 'The config key to get or set',
-    value: 'The config value to set',
-  })
+  .command('config')
+  .description('Get or set a config value')
+  .argument('<key>', 'The config key to get or set')
+  .argument('[value]', 'The config value to set')
   .action(async (key: string, value: string) => {
     try {
       const command = new ConfigCommand();
@@ -108,50 +107,55 @@ program
   });
 
 program
-  .command('export <translations>')
-  .description('Export key/values as CSV', {
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .command('export')
+  .description('Export key/values as CSV')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .action(async (translations: string) => {
-    const command = new ExportCommand();
+    const exporter = new Exporter();
+    const command = new ExportCommand(exporter);
     await command.run(process.stdout, translations);
   });
 
 program
-  .command('format <translations>')
-  .description('Sort keys and format of your JSON translation files', {
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .command('format')
+  .description('Sort keys and format of your JSON translation files')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .action(async (translations: string) => {
     const command = new FormatCommand();
     await command.run(translations);
   });
 
 program
-  .command('keys <translations>')
-  .description('Print keys of all translation files', {
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .command('import')
+  .description('import files from CSV')
+  .action(async () => {
+    const importer = new Importer();
+    const command = new ImportCommand(importer);
+    await command.run(process.stdin);
+  });
+
+program
+  .command('keys')
+  .description('Print keys of all translation files')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .action(async (translations: string) => {
     const command = new KeysCommand();
     await command.run(process.stdout, translations);
   });
 
 program
-  .command('pick <translations>')
-  .description('Finds key values in all translation files', {
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .command('pick')
+  .description('Finds key values in all translation files')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .action(async (translations: string) => {
     const command = new PickCommand();
     await command.run(process.stdin, process.stdout, translations);
   });
 
 program
-  .command('clean <translations>')
-  .description('Removes unused items from translation files', {
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .command('clean')
+  .description('Removes unused items from translation files')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .addHelpText('after', 'Always double check your unused keys before running the command.')
   .action(async (translations: string) => {
     const remover = new Remover()
@@ -163,12 +167,11 @@ program
   });
 
 program
-  .command('remove <key> <translations>')
+  .command('remove')
   .alias('rm')
-  .description('Removes key from translation files', {
-    key: 'Key to remove',
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .description('Removes key from translation files')
+  .argument('<key>', 'Key to remove')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .addHelpText('after', 'Always double check your unused keys before running the command.')
   .action(async (key: string, translations: string) => {
     const remover = new Remover()
@@ -180,12 +183,11 @@ program
   });
 
 program
-  .command('rename <source> <target> <translations>')
-  .description('Rename keys', {
-    source: 'Old key',
-    target: 'New key',
-    translations: 'Glob of the translation files (use quotes!)',
-  })
+  .command('rename')
+  .description('Rename keys')
+  .argument('<source>', 'Old key')
+  .argument('<target>', 'New key')
+  .argument('<translations>', 'Glob of the translation files (use quotes!)')
   .addHelpText('after', 'Always double check your unused keys before running the command.')
   .action(async (source, target, translations: string) => {
     const renamer = new Renamer()
@@ -199,11 +201,10 @@ program
   });
 
 program
-  .command('translate <source> <locale>')
-  .description('Translate a source file into a new language', {
-    source: 'Path to the source file',
-    locale: 'Locale of the target language',
-  })
+  .command('translate')
+  .description('Translate a source file into a new language')
+  .argument('<source>', 'Path to the source file')
+  .argument('<locale>', 'Locale of the target language')
   .action(async (source: string, locale: string) => {
     const command = new TranslateCommand(createTranslator());
     await command.run(source, locale);
