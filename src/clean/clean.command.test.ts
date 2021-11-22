@@ -2,7 +2,7 @@ import test from 'ava';
 import { exec as _exec } from 'child_process';
 import { readJsonSync } from 'fs-extra';
 import { promisify } from 'util';
-import { fixtures } from '../tests';
+import { executable, fixtures } from '../tests';
 
 const exec = promisify(_exec);
 
@@ -32,7 +32,7 @@ const dir = fixtures({
 test('clean command', async t => {
   t.plan(5);
 
-  await exec(`cat ${dir}/unused.txt | node ./bin/lukos clean "${dir}/??.json"`);
+  await exec(`cat ${dir}/unused.txt | node ${executable} clean "${dir}/??.json"`);
 
   const fr = readJsonSync(`${dir}/fr.json`);
 

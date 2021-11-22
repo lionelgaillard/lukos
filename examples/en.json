@@ -1,8 +1,8 @@
 {
-  "hello": "Hello",
   "about": "About",
-  "sentence": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  "hello": "Hello",
   "parent": {
     "child": "Nested item"
-  }
+  },
+  "sentence": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 }

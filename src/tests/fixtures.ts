@@ -1,5 +1,8 @@
 import test from 'ava';
 import { ensureDirSync, rmdirSync, writeFileSync } from 'fs-extra';
+import { resolve } from 'path';
+
+export const executable = resolve(__dirname, '..', '..', 'bin', 'lukos');
 
 export function fixtures(files: { [name: string]: string }): string {
   const dir = fixtures.dir;

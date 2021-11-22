@@ -1,7 +1,7 @@
 {
   "hello": "Bonjour",
-  "sentence": "Aenean risus odio, fermentum eu purus a, laoreet interdum nunc.",
   "parent": {
     "child": "Élément imbriqué"
-  }
+  },
+  "sentence": "Aenean risus odio, fermentum eu purus a, laoreet interdum nunc."
 }
