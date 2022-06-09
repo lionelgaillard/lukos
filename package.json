@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "node scripts/build.js",
+    "postinstall": "npm run build",
     "test": "ava"
   },
   "keywords": [],
