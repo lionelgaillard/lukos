@@ -3,7 +3,7 @@ export function getKeys(data: any, prefix: string = '') {
     if (!data[key] || typeof data[key] === 'string') {
       keys.push(prefix + key);
     } else {
-      keys = [...keys, ...getKeys(data[key], prefix + key + '.')];
+      keys = keys.concat(getKeys(data[key], prefix + key + '.'));
     }
     return keys;
   }, []);

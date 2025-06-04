@@ -66,7 +66,10 @@ export class TranslationFile {
   }
 
   public get(key: string) {
-    return key.split('.').reduce((data, key) => (data && data[key]) || null, this.data);
+    return key.split('.').reduce((data, key) => {
+      const value = data ? data[key] : null;
+      return value !== undefined && value !== null ? value : null;
+    }, this.data);
   }
 
   public add(key: string, value: string) {
@@ -187,7 +190,7 @@ function deleteTranslationKey(data: any, key: string): boolean {
   }
 
   if (!key.includes('.')) {
-    if (data[key]) {
+    if (data[key] !== undefined) {
       delete data[key];
       return true;
     }

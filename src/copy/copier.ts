@@ -7,7 +7,7 @@ export class Copier extends EventEmitter {
 
     for (const translation of translations) {
       const value = translation.get(source);
-      if (value) {
+      if (value !== null) {
         if (translation.has(target)) {
           translation.delete(target);
         }
