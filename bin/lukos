@@ -579,7 +579,6 @@
   var Importer = class {
     import(content) {
       const values = fromCsv(content);
-      console.log("values", values);
       const files = TranslationFile.fromValues(values);
       return files;
     }
