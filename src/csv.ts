@@ -19,8 +19,14 @@ export function fromCsv(input: string): TranslationValues {
   const data = parse(input, { delimiter: ',', columns: true }) as any[];
 
   return data.reduce((values, row) => {
-    const key = row['key'];
-    const locales = Object.keys(row).filter(p => p.length === 2);
+    // const key = row['key'];
+    const key = Object.values(row)[0] as string;
+
+    if (!key) {
+      throw new Error('CSV row is missing "key" column');
+    }
+
+    const locales = Object.keys(row).filter(x => x.length === 2);
 
     if (!values[key]) {
       values[key] = {};

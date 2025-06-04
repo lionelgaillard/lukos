@@ -9,5 +9,6 @@ export class ImportCommand {
     const content = await read(input);
     const files = this.importer.import(content);
     files.forEach(file => file.save());
+    console.log(`Imported ${files.length} translation files.`);
   }
 }
